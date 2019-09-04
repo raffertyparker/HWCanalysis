@@ -1,10 +1,17 @@
 ################## TO DO ##################
 
+Section 1.1 (Demand Side Mangement) needs "bigger picture" why peaks matter, costs etc. Include references.
+
+Create methodology - this needs to outline time series theory including our metrics and data cleaning
+
+Preliminary analysis - name of chapter with ccv, acv etc. Include individual houses as well as aggregate. 
+Mention where and why the preliminary analysis links to the methods.
+
+Pick a start date in the data and cut everthing before it. Use Bens analysis to inform.
+
 Check for and remove anomolies with HWC data (all houses)
 
 Look for patents/papers by Iván Castro
-
-Add methodology including a naive model as benchmark
 
 Write theory
 
@@ -29,7 +36,3 @@ so we may use this for our GAM model
 run model with heat pump hot water and compare
 
 Explain/reference frequency analysis/periodogram/stl
-
-Make reproducable (get data straight from source and clean)
-
-Investigate LSTM for electricity data analysis
