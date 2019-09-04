@@ -1,0 +1,21 @@
+This file describes properties of the numbered houses in the dataset that make them unsuitable
+for our analysis, and provides a list of houses that are suitable.
+
+For more information see the Documentation section at https://cfsotago.github.io/GREENGridData/
+
+UPDATED:
+
+Numbers not in dataset: 03 through 05
+Removed immediately as per github instructions : 15, 17, 46
+Data doesn't have seperate hot water metering: 07, 09, 10, 17b, 19, 21, 26, 28, 41, 43, 47
+Hot water is heated with heat pump: 11 
+Household has controlled hot water (home energy management system): 23* 
+
+This leaves suitable houses: 
+
+01, 02, 06, 08, 13, 22, 24*, 25, 27*, 29, 30, 31, 32, 33,
+34**, 35**, 36**, 37, 38, 40, 42**, 44, 45**, 46(**)(***), 
+
+* Household has photovoltaic system
+** Hot water not on ripple control
+*** Hot water has imaginary column

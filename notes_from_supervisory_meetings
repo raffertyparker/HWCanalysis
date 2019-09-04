@@ -1,0 +1,73 @@
+21/09/19
+
+Need to pick a naive model and create a methodology around it
+essentially comparing all other models to this one.
+May be worth checking other forecasting papers to see which
+naive model is commonly chosen.
+
+07/08/19
+
+Deep understanding of theory behind models not necessary
+just need to be able to explain them mathematically, describe what each term
+does and state (not describe) how the model is fitted/optimised
+
+Try construct the narrative of the thesis around key findings
+i.e. increase in accuracy provided by adding non hw electricity
+
+Decouple - thesis from code
+	 - blocks of code from one another
+	 - thesis from reproducible research output 
+
+26/6/19
+
+Need to understand the relationship between markov chains and autoregression
+i.e. properly answer the question "is VAR markovian?"
+
+Overaching idea for thesis: Often electrical signals are discrete, therefore continuous models 
+not good for forecasting. 
+
+
+18/6/19
+
+Master equations 
+-hopping probability from one state to the next
+-simulate this process (2-state)
+-may be difficult to incorporate previous times/periodicity
+-also cross-correlations  
+
+
+7/6/19
+
+Find standard deviation of residual
+can we alter model to fit bimodal frequency distribution?
+how does previous signal determine whether element is on or off in next time interval
+
+
+28/5/19 
+
+Investigate LSTM for electricity data analysis
+if no published work to be found, abandon
+Go through and systematically explain what we are trying to do, 
+difficulties encountered, directions taken, models explored etc.
+
+
+22/5/19 
+
+Current industry standard assumes non-peak HW demand ~200W/house offpeak, ~400W peak
+If our model is 90% accurate, this is much better than that (90% of 2kW >> 200W)
+
+Need to revisit VAR model (write up with plots etc)
+what increase in accuracy can we get from additional houses
+investigate CD_t esp. its dimensions, how it is generated
+How does the model determine where to put weighting (CD_t or A_i?)
+look into code for p (does it change for half-hour?)
+Check A_(t-15) - should be similar to XCF plot at t-15
+Try just AR model - how much does including other household electricity help accuracy
+average out the residual over a day and plot
+Plot the ACF and XCF of the model
+
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    

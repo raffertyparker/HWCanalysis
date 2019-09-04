@@ -1,0 +1,29 @@
+# Modelling 1 minute data as a binary output {#one-min}
+
+```{r include_packages_2, include = FALSE}
+# This chunk ensures that the thesisdown package is
+# installed and loaded. This thesisdown package includes
+# the template files for the thesis and also two functions
+# used for labeling and referencing
+if(!require(devtools))
+  install.packages("devtools", repos = "http://cran.rstudio.com")
+if(!require(dplyr))
+    install.packages("dplyr", repos = "http://cran.rstudio.com")
+if(!require(ggplot2))
+    install.packages("ggplot2", repos = "http://cran.rstudio.com")
+if(!require(ggplot2))
+    install.packages("bookdown", repos = "http://cran.rstudio.com")
+if(!require(thesisdown)){
+  library(devtools)
+  devtools::install_github("ismayc/thesisdown")
+  }
+library(thesisdown)
+```
+
+
+## Logistic Autoregression
+
+Despite the reasonable forecasting accuracy of the vector autoregression method above, the model diverges from physical reality in two crucial ways. First, the model is fitted using ordinary least squares, with no regard for maintaining the forcasted demand to be greater than zero. In addition, vector autoregression assumes continuity of the process. While the half-hour data (being actually 30 minute averages of 1 minute data) appears roughly continuous, the 1 minute data shows the element is essentially a discrete process, with the element either being fully on or fully off.
+
+## Generalised Additive Models with binary response variables
+

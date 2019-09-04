@@ -1,0 +1,154 @@
+# This processes data downloaded from the UK data service
+# into the form needed for our analysis
+
+# Note that preliminary analysis showed a number of households to
+# be unsuitable for this project. For more information see the
+# file "suitable_houses.txt"
+
+# NOTE this process has changed dramatically since using the UKDS dataset.
+
+# BEFORE THIS SCRIPT WILL WORK YOU MUST:
+
+# Download and extract the files
+# Delete houses 15 and 17
+# Impute total electricity from the submeters using `imputeTotalPower.R`
+# Extract total electricity from the imputed output files using 
+# extractCircuitFromCleanGridSpy1min.R, circuit string "mputed"
+# Extract hot water from the imputed files using 
+# extractCircuitFromCleanGridSpy1min.R, circuit string "ater"
+# Delete houses 07, 09, 10, 17b, 19, 21, 26, 28, 41, 43, 46, 47
+# as per suitable_houses.txt
+
+# THIS SCRIPT THEN:
+# Combines hot water elec and total in new datatable
+# Subtracts hot water from total
+
+library(data.table)
+library(lubridate)
+library(dplyr)
+library(plyr)
+
+# Set path to where we are keeping data
+if (!exists("dFile")){
+  dFile <- "~/HWCanalysis/Masters/data/" 
+}
+
+p <- fread(paste0(dFile, "mputed_2010-01-01_2020-01-01_observations.csv.gz"))
+q <- fread(paste0(dFile, "ater_2010-01-01_2020-01-01_observations.csv"))
+
+# remove houses as per suitable_houses.txt
+remove <- c("07", "09", "10", "17b", "19", "21", "26", "28", "41", "43", "46", "47")
+all_elec <- p[!grepl(paste(remove, collapse="|"), p$hhID),] 
+hw_elec <- q[!grepl(paste(remove, collapse="|"), q$hhID),]
+
+DT <- rbind(hw_elec, all_elec)
+DT <- DT[, dateTime_nz := lubridate::as_datetime(r_dateTime, # stored as UTC
+                                                 tz = 'Pacific/Auckland')] # so we can extract within NZ dateTime`
+
+setkey(DT, linkID, dateTime_nz)
+
+# Seperate off hot water electricity from DT
+q <- DT[grepl("ater", DT$circuit)]
+names(q) <- c("linkID","r_dateTime", "circuit", "HWelec","dateTime_nz")
+q[,circuit:=NULL]
+q$powerW
+
+# Seperate off all electricity from DT
+# Note nonHWelec at this stage is actually ALL elec
+p <- DT[grepl("mputed", DT$circuit)]
+names(p) <- c("linkID","r_dateTime","circuit", "nonHWelec","dateTime_nz")
+p[,circuit:=NULL]
+
+# Combine
+DT <- dplyr::left_join(q,p)
+
+# Reorder columns
+setcolorder(DT, neworder = 
+              c("linkID","r_dateTime","dateTime_nz","HWelec","nonHWelec"))
+# Remove HW elec from all elec
+DT$nonHWelec <- DT$nonHWelec - DT$HWelec
+
+DT <- data.table(DT)
+
+save(DT, file = paste0(dFile, "DT.Rda"))
+
+# Note that some rows which had only one observation
+# (i.e a nonHWelec value for a particular time with no
+# corresponding HWelec value for that time) were
+# automatically dropped from DT
+# The following calculates for how many values this ocurred
+
+pc_rm <- (length(p$linkID) - length(q$linkID))/length(DT$linkID)*100
+
+# This shows that less than 1% (~0.7%) of values have been removed
+# by this process - we can live with this.
+
+#load("~/HWC-bookdown/Masters/data/DT.Rda")
+
+# This gives the datetime as the START of each 15 min average
+DT[, qHour := hms::trunc_hms(dateTime_nz, 15*60)]
+
+# This creates the quarter-hour average data.table
+
+DT_qh <- DT %>% 
+  group_by(linkID, qHour) %>% 
+  summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
+
+save(DT_qh, file = paste0(dFile, "DT_qh.Rda"))
+
+# This gives the datetime as the START of each 15 min average
+DT[, hHour := hms::trunc_hms(dateTime_nz, 30*60)]
+
+# Now we create the half-hour average data.table
+
+DT_hh <- DT %>% 
+  group_by(linkID, hHour) %>% 
+  summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
+
+save(DT_hh, file = paste0(dFile, "DT_hh.Rda"))
+
+# This creates a summary of each house
+
+summary_DT <- NULL
+for (i in houses){
+  load(paste0(dFile, i, "_at_1.Rda"))
+  p <- s %>%
+    group_by(circuit, linkID) %>%
+    summarise(meanW = mean(powerW))
+  summary_DT <- bind_rows(summary_DT, p)
+}
+save(summary_DT, file = paste0(dFile, "summary_DT.Rda"))
+
+# This gives all houses with PV
+
+PV_houses <- summaryDT %>%
+  subset(grepl("PV", circuit)) %>%
+  select(linkID)
+PV_houses <- PV_houses$linkID
+save(PV_houses, file = paste0(dFile, "PV_houses.Rda"))
+
+houses <- unique(DT$linkID)
+
+# By manual inspection rf_39 was found to have negative power
+# despite not having generating capabilities
+# We now look for this property in other houses
+
+load(paste0(dFile,"PV_houses.Rda"))
+no_pv <- setdiff(houses, PV_houses)
+
+neg_values <- DT %>%
+  filter(linkID == no_pv & nonHWelec < 0 | HWelec < 0) %>% 
+  group_by(linkID) %>%
+  summarise(no_rows = length(linkID))
+
+# This gives the houses that do not have seperate HW metering
+
+seperate_HW <- summaryDT %>%
+  subset(grepl("ater", circuit))
+
+no_hw_metering <- setdiff(summaryDT$linkID, seperate_HW$linkID)
+save(no_hw_metering, file = paste0(dFile, "no_hw_metering.Rda"))
+
+
+
+

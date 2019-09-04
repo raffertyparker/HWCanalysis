@@ -1,0 +1,168 @@
+<!--
+This is for including Chapter 1.  Notice that it's also good practice to name your chunk.  This will help you debug potential issues as you knit.  The chunk above is called intro and the one below is called chapter1.  Feel free to change the name of the Rmd file as you wish, but don't forget to change it here from chap1.Rmd.
+-->
+
+<!--
+The {#rmd-basics} text after the chapter declaration will allow us to link throughout the document back to the beginning of Chapter 1.  These labels will automatically be generated (if not specified) by changing the spaces to hyphens and capital letters to lowercase.  Look for the reference to this label at the beginning of Chapter 2.
+-->
+
+# Introduction to the dataset {#data-intro}
+<!--
+ does not exist: 01 through 05, 09, 12, 15, 16, 17, 18, 20,
+ no separate hot water metering labelled as such: 07, 10, 19, 21, 26, 28, 39, 41, 43, 47
+ heat pump hot water: 11 
+ only has 30 minute intervals: 14
+ has controlled hot water (HEMS) but may be fine: 23
+ leaving suitable houses: 06, 08, 13, 22, 24*, 25, 27*, 29, 30, 31, 32, 33, 34**,
+  35**, 36**, 37, 38, 40, 42**, 44, 45**, 46**, 
+
+ *has pv (may be ok) 23, 24, 27, 28
+ ** has uncontrolled HW 
+-->
+
+
+```{r load_pkg, include = FALSE}
+# List of packages required for this analysis
+pkg <- c("dplyr", "ggplot2", "knitr", "bookdown", "devtools")
+# Check if packages are not installed and assign the
+# names of the packages not installed to the variable new.pkg
+new.pkg <- pkg[!(pkg %in% installed.packages())]
+# If there are any packages in the list that aren't installed,
+# install them
+if (length(new.pkg))
+  install.packages(new.pkg, repos = "http://cran.rstudio.com")
+# Load packages (thesisdown will load all of the packages as well)
+library(thesisdown)
+```
+
+```{r setup1, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(GREENGridData)
+library(ggplot2)
+library(ggpmisc)
+#library(vars)
+library(dplyr)
+library(TSA)
+library(forecast)
+library(knitr)
+library(scales)
+library(lubridate)
+library(xts)
+```
+
+```{r loadFiles, include=FALSE}
+dFile <- "~/HWCanalysis/Masters/data/"   # Data folder
+pFile <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did not like '~' notation)
+```
+The data used for this analysis was collected from monitoring the electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. It is publically available from the UK Data Service. More information about this dataset, including detailed reports of data issues. the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/.
+
+This project analyses and models the GREEN Grid data in order to determine predictability of hot water electricity use. This would assist in controlling hot water electricity for demand response by reducing negative effects on service. In addition, it may provide the means for hot water cylinders to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted demand. 
+
+Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (15, 17 and 46) due to issues with the data (See https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19). 
+In addition, households 07, 09, 10, 17b, 19, 21, 26, 28, 41, 43, 47 did not have seperate hot water metering, and thus are also unsuitable for this analysis. This left 33 households remaining. See file `suitable_houses.txt` for more information _This should be in the appendix_.
+
+Data files from the remaining households are unzipped and processed using the `GREENGridData` package[cite]. Total electricity is imputed from the submeters using `imputeTotalPower.R`. This is then extracted along with the hot water electricity demand using `extractCircuitFromCleanGridSpy1min.R`. Finally, the hot water electricity is subtracted from total electricity, giving hot water electricity, and other electricity.
+
+
+```{r load1minHouse, include = FALSE}
+# Choose which househould we want to examine
+# Available houses:
+# "06","08","13","22","24","25","27","29","30","31","32",
+# "33","34","35","36","37","38","40","42","44","45"
+
+#house <- "13" 
+mins <- "1"  
+
+# Daily and weekly cycles created from mins
+
+if (as.numeric(mins) == 1) {
+  dayCycle <- 60*24
+  weekCycle <- 60*24*7
+  linearLag <- -30
+  hourCorrection <- 60
+  dtName <- "DT"
+} else if (as.numeric(mins) == 30) {
+  dayCycle <- 2*24
+  weekCycle <- 2*24*7
+  linearLag <- -1
+  hourCorrection <- 2
+  dtName <- "DTqh"
+} else {
+    print("Check minute sample rate (only 1 and 30 currently available)")
+}
+
+load(paste0("~/HWCanalysis/Masters/data/", dtName, ".Rda"))
+```
+
+# Data summary
+First, we select a house and investigate the potential for forecasting hot water electricity demand using historical hot water electricity 
+use patterns and/or other household electricity use. The one minute sample rate is maintained for this analysis.
+_This may be better explained through a broader summary of all houses (as already done under Documentation at https://cfsotago.github.io/GREENGridData/) followed by plots of a few houses showing these key concepts_
+```{r summary1}
+DT %>%
+  group_by(linkID) %>%
+  select(-c(r_dateTime, dateTime_nz)) %>%
+  summarise_each(funs = mean)
+```
+Note that household 24 has a negative mean non-hot water electricity. This is due to the presence of solar PV. 
+A full list of houses that have solar PV is given in `PV_houses.Rda`. It is not known at this stage whether these negative values will effect our analysis, but we do not remove houses with PV at this stage.
+
+## Element power
+
+Initially we estimate the power rating of the hot water cylinder for each household (refer to `/scripts/element_rating.R`). We use the assumption that over a one year period, there is at least one minute where the element is on continuously. This assumption implies that the maximum "average" element wattage over one year of one minute intervals is the element rating. 
+
+
+```{r loadElementData, include=FALSE}
+load(file = paste0(dFile, "element_DF.Rda"))
+knitr::kable(element_DF, caption = "Estimated maximum element output for each house")
+elMin <- min(element_DF$elementMax)
+elMax <- max(element_DF$elementMax)
+elMinHouse <- as.character(element_DF[element_DF$elementMax == min(element_DF$elementMax), "house"])
+elMaxHouse <- as.character(element_DF[element_DF$elementMax == max(element_DF$elementMax), "house"])
+```
+
+It can be seen that the maximum wattage (averaged over 1 minute) of each element ranges between `r elMin`W (household `r elMinHouse`) and `r elMax`W (household `r elMaxHouse`). 
+
+## Autocovariance of hot water use
+
+We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising cyclical behaviour of data, and is defined as
+
+$\gamma_k = E[(x_t - \mu)(x_{t+k} - \mu)]$ 
+
+where $k$ is the lag value and $\mu$ is the mean of both $x_t$ and $x_{t+k}$.
+<!--
+![Autocovariance of all houses.](~/HWCanalysis/Masters/plots/acf_all_houses.png)
+-->
+
+```{r autocovariance, fig.cap="Autocovariance of all households"}
+knitr::include_graphics(paste0(pFile, "acfAllHouses.pdf"))
+```
+
+The results are interpreted by plotting $\gamma_k$ against the lag values. Figure \@ref(autocovariance) indicates that our houses are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals. In addition, some houses display a third daily cycle, or a weekly cycle (peaks increasing again towards the end of the plot). 
+
+While autocovariance plots are valuable for preliminary data analysis, models that incorporate these cycles need more precise numerical values of these cycles. One method of obtaining usable cycle periods is through frequency analysis.
+
+```{r frequencyAnalysis, fig.cap = "Three dominant cycle periods for each household, as determined using frequency analysis"}
+load(file=paste0(dFile, "freq_DF.Rda"))
+knitr::kable(freq_DF, 
+      col.names = c("Household", "Dominance", "Frequency (hours)"))
+```
+
+Frequency analysis offers us the ability to automate the process of determining cycles in our data. Through the TSA package 'periodogram' we can extract the most dominant cycle frequencies within our data. These may then be input into later models that have the option of seasonality.  _Do I need to describe technique this package uses to do this? Should I include the periodogram (plot) itself?_
+
+Table \@ref(frequencyAnalysis) shows that while some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many have more erratic patterns, with some being over a year in duration. This is an interesting insight, however it poses a challenge for building "one size fits all" predictive models for our households.
+
+## Cross covarience of hot water electricity use with non hot water electricity use
+
+In a similar fashion to the autocovariance function, the cross-covariance function of two variables $x, y$ is given by
+
+$\gamma_k(x,y) = \operatorname{E}[(x_{t+k} - \mu_x)(y_t - \mu_y)]$
+
+where variable $x$ lags variable $y$ by lag $k$[@Cowpertwait2009].
+
+Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use at lags of around half an hour.
+
+```{r crosscovariance, fig.cap="Crosscovariance of all households"}
+knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
+```

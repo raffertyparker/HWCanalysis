@@ -1,0 +1,35 @@
+################## TO DO ##################
+
+Check for and remove anomolies with HWC data (all houses)
+
+Look for patents/papers by Iván Castro
+
+Add methodology including a naive model as benchmark
+
+Write theory
+
+Decouple - thesis from code
+	 - blocks of code from one another
+	 - thesis from reproducible research output 
+
+rewrite lit review under context of predictive models, not thermal models
+include electricity forecasting literature in lit review
+
+repeat steps of VAR model with ARIMA model for comparison
+
+Create GAM with 30 minute data
+
+become familiar with Kalman filter, logistic regression in R
+
+double-check average plot (looks 12 hours wrong)
+
+try to plot weighting coefficients and pull out code of how VAR model gets them
+so we may use this for our GAM model
+
+run model with heat pump hot water and compare
+
+Explain/reference frequency analysis/periodogram/stl
+
+Make reproducable (get data straight from source and clean)
+
+Investigate LSTM for electricity data analysis

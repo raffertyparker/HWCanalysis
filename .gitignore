@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+/Masters/data/*
+/Masters/data_old/*
+/Masters/powerData/*
+/Masters/data_new/*
+/Masters/deleted_data/*
+/Masters/_book/*
+/Masters/_bookdown_files/*
+copypasta
+notes_from_supervisory_meetings

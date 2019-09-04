@@ -1,0 +1,399 @@
+# Modelling half-hour electricity demand as a continuous output {#half-hour}
+<!--
+```{r setup2, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, engine.path = list(python = '/anaconda/bin/python'))
+```
+-->
+```{r load30minHouse}
+# Choose which househould we want to examine
+# Available houses:
+# "06","08","13","22","24","25","27","29","30","31","32",
+# "33","34","35","36","37","38","40","42","44","45"
+
+# House 30 has NAs in HW column
+house <- "13"
+
+load(paste0("~/HWCanalysis/Masters/data_old/house_",
+            house, "_at_30.Rda"))
+```
+
+
+```{r NAfix30min}
+dtHWlag <- c(tail(dt$HWelec, length(dt$HWelec) - 48*7),
+             dt$HWelec[1:(48*7)])
+dtNonHWlag <- c(tail(dt$nonHWelec, length(dt$nonHWelec) - 48*7),
+                dt$nonHWelec[1:(48*7)])
+dt$HWelec[is.na(dt$HWelec) == TRUE] <- dtHWlag
+dt$nonHWelec[is.na(dt$nonHWelec) == TRUE] <- dtNonHWlag
+# This seems to work ok - maybe not the most elegant method
+```
+The element within a typical hot water cylinder works is controlled thermostatically by an "on-off" (otherwise known as "bang-bang") controller. This type of controller turns the element fully "on" when the water temperature drops below a certain temperature, and then fully off again once the water reaches another (slightly higher) temperature. _include diagram?_
+On small timescales, the element may then be considered a binary process, impacting our choice of forecasting model. Forecasting a binary output required more sophisticated models than forecasting a "continous" output. 
+While a more sophisticated model that provides a binary output will be considered in Chapter \@ref(one-min), this project hopes to "build up" the sophistication of the modelling from more mathematically simple techniques.
+In our case, this may be obtained through taking the average hot water electricity demand over each half-hour within the data. This smooths the demand data such that it may be considered to be a continuous variable. _Show plots demonstrating this_ 
+Some additional data preperation is then necessary. 
+_Smooth new UKDS datset_
+
+
+<!-- Required to number equations in HTML files -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+## Simple linear model with lagged HW electricity
+
+Linear regression is a common forecasting model prized for its simplicity in interpretation and computation. A linear regression model fits a straight line through each point within the dataset such that the line minimises the sum of the square of each distance between the line and the data points. _show plot to explain?_
+For time-series forecasting, linear regression uses time as the independent (or 'explanatory') variable, with the value to be predicted (such as electricity demand) as the dependent (or 'response') variable.  _show figure demonstrating?_
+While this is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using data that displays cyclic behaviour, such as residential electricity demand.
+Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
+The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance1)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
+
+
+```{r linearRelations, fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity"}
+# Select all except the first value of hot water electricity
+HWminusOne <- tail(dt$HWelec, (length(dt$HWelec) - 1))  
+# This gives the HW electricity half an hour "in advance" 
+# of non hot water electricity
+# Now select all except the last value of non HW electricity
+nonHW <- head(dt$nonHWelec, (length(dt$HWelec) - 1))    
+# Last value removed so it is same dimension as HWminusOne
+linearRelData <- as.data.frame(cbind(HWminusOne,nonHW))
+lmFormula <- HWminusOne ~ nonHW
+
+p <- ggplot(data = linearRelData, aes(x = nonHW, y = HWminusOne)) +
+  geom_point() + geom_smooth(method="lm") +
+  stat_poly_eq(formula = lmFormula, 
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               label.x.npc = "right",
+               rr.digits = 2, parse = TRUE)         
+p + labs(x = "Non hot water electricity", 
+         y = "Following half-hour hot water electricity", title = "")
+```
+
+Figure \@ref(fig:linearRelations) shows a simple linear regression of current non hot water electricity demand with the following half-hour's hot water electricity demand. This is shown to demonstrate the ability to use current electricity demand to predict hot water electricity demand over the next half hour. The low $R^2$ value obtained indicates that this would be an inadequate model for forecasting purposes when considered alone, however it has potential as an input into a model that takes other parameters into consideration. 
+
+
+We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. The ability to examine these  of these has been constructed by taking the maximum cross covarience value for each house, restricted to lag values above 30 minutes, as this is the minimum lag after which these predictions may be useful for participation in demand response markets in New Zealand.
+
+```{r ccvMaxLagTable}
+load(paste0(dFile, "ccv_max.Rda"))
+maxCor <- maxCor[, c(2,1,3)]
+kable(maxCor,
+      col.names =  c("Household", "Lag", "Cross covariance"))
+```
+
+While Table \@ref(fig:ccvMaxLagTable) and Figure \@ref(fig:ccvMaxLagPlot) show that many houses have their maximum values at the boundary (30 minutes), around half have their maximum cross-correlations occurring at longer timescales.
+
+```{r ccvMaxLagPlot, fig.cap="Lag at maximum correllation for each household (bin width 30 minutes)"}
+knitr::include_graphics(paste0(pFile, "maxXcorAllHouses.pdf"))
+```
+
+# Seasonality
+
+One reason why linear prediction models fail with our electricity data is due to the cyclical nature of residential electricity usage (referred to as 'seasonality'). There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using loess', whereby loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
+
+```{r stl, echo=FALSE}
+
+
+#df$times <- as.POSIXct(df$times) # may not be necessary if set up correctly
+
+ts.HW <- ts(dt$HWelec, frequency = 48)
+#ts.HW <- ts(dt$HWelec, frequency = 48*7)
+
+
+decomp.HW <- decompose(ts.HW)
+
+plot(decomp.HW)
+
+```
+
+```{r stl_gg, eval=FALSE}
+
+#df_xts <- as.xts(df) 
+#frequency(dt$HWelec) <- time3[1]
+
+#stat_stl(ts.HW, s.window = "Periodic")
+HWstl <-  stl(ts.HW, s.window = "periodic")
+#plot(HWstl)
+######
+
+s_df <- tsdf(ts.HW)
+ggplot(ap_df, aes(x = x, y = y)) +
+   stat_stl(s.window = 60)
+
+# periodic if fixed seasonality; doesn't work well:
+ggplot(dt, aes(x = datetime, y = HWelec)) +
+   stat_stl(s.window = "Periodic")
+
+################################
+library(ggseas)
+load("~/HWCanalysis/Masters/data_new/rf_13_at_1.Rda")
+s$r_dateTimeNZ <- lubridate::with_tz(s$r_dateTime, tz = "Pacific/Auckland")
+
+
+ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
+      method = "stl", s.window = 7) +
+   geom_line() +
+   labs(x = "   n  ", colour = "") +
+   scale_y_continuous("Power(W)", label = comma) +
+   ggtitle("Seasonal decomposition of electricity demand") +
+   theme(legend.position = c(0.17, 0.92))
+
+   grid.text("Source: Statistics New Zealand, Balance of Payments", 0.7, 0.03,
+          gp = gpar(fontfamily = "myfont", fontface = "italic", cex = 0.7))
+
+```
+
+_This is a great package that seperates out the cycle, trend, and noise, and plots them. The plotting needs some work as you cannot see the cycles very well (need to 'zoom in' on the plot, which isn't working for me right now)._
+
+# Moving average
+
+_ I might as well include a moving average model. It is easy to impliment and would be a good segue into ARIMA_ 
+
+# ARIMA model
+
+Some[@Cui2016] forecasting of electricity hot water use has been done using autoregressive moving average (ARIMA) models. We explore this briefly in order to make comparisons with other techniques.
+
+```{r ARIMA, eval = FALSE}
+AA <- auto.arima(dt$HWelec, max.p = 50)
+
+HWarima <- arima(dt$HWelec, seasonal = time3, method = "CSS")
+
+plot(AA)
+
+```
+_INCOMPLETE_
+
+# Vector Autoregression
+
+We now explore forecasts using a vector autoregression model. 
+The model is of the following form:
+
+
+$\bf{y}_t = A_1 \bf{y}_{t-1} + … + A_p \bf{y}_{t-p} + CD_t + \bf{u}_t$
+
+
+where $\bf{y}_t$ is a $K \times 1$ vector of endogenous variables and $u_t$ assigns a spherical disturbance term of the same dimension. The coefficient matrices $A_1, …, A_p$ are of dimension $K \times K$. 
+
+
+Our model is fitted using the function VAR within the package vars, which estimates the vector autoregression model using ordinary least squares. 
+
+
+The model is constructed using inputs of hot water demand and non hot water demand, along with the integers of time steps that correspond to any cyclical effects (referred to as 'seasonality'), and the number of steps by which to lag the model by.
+
+For our data, we utilise the cyclical values previously determined using frequency analysis as the "seasonal" input.
+ 
+The optimal lag term can be determined using the VARselect function, which optimises lag values by minimising the Bayesian information criterion using the formula
+
+$SC(n) = \ln \det(\tilde{\sum}_u(n)) + \frac{\ln(T)}{T}$
+
+where $\tilde{\sum}_u (n) = T^{-1} \sum_{t=1}^T \bf{\hat{u}}_t \bf{\hat{u}}_t'$ and n assigns the lag order.
+
+A separate analysis on our data was carried out using this function, with the maximum lag to consider set to 200 for computational punctuality. While the optimal lag varied somewhat for each household, a fixed value to input for each household was desired in order to simplify analysis that involved multiple houses. The value was ultimately fixed at 50 as this was the median optimal $SC(n)$ lag for the houses considered. _Note this seems to be a larger value than traditionally used_
+
+```{r VARModelling, message=FALSE}
+#install.packages("remotes")
+#remotes::install_github("DavZim/varsExtra")
+library(varsExtra) # refer to previous two lines for installation
+
+# Note that when built using 1 minute data, this model is only useful
+# for prediction 1 minute into the future. 
+
+# This may be overcome using the forecast() function, however it may not be
+# physically accurate as I don't believe smart meters currently log with this frequency
+dt2 <- dt[ , 2:3]
+var1 <- vars::VAR(dt2, p = 50, season = 24, type = "none") # Create model with cyclical effects determined previously using frequency analysis
+
+#p <- ggfy(var1) # Plot adjusted below
+#p
+#ggsave("sdexample.png")
+
+# NOTE removing the season input from the model often makes it slightly more accurate.
+# this is very strange, investigate further!
+```
+
+
+```{r ggfyPrep}
+vals <- var1$datamat %>%
+  dplyr::as_tibble() %>%
+  dplyr::select(-dplyr::matches("\\.l[0-9]+")) %>%
+  dplyr::mutate(type = "data", t = 1:n()) %>%
+  tidyr::gather(key = "var", value = "value", -type, -t)
+
+ypred <- lapply(1:length(var1$varresult), function(i) {
+  dplyr::tibble(value = as.numeric(fitted(var1$varresult[[i]]))) %>%
+    dplyr::mutate(type = "fitted",
+                  t = 1:n(),
+                  var = names(var1$varresult)[i])
+}) %>% dplyr::bind_rows()
+
+resid <- lapply(1:length(var1$varresult), function(i) {
+  dplyr::tibble(value = as.numeric(resid(var1$varresult[[i]]))) %>%
+    dplyr::mutate(type = "residuals",
+                  t = 1:n(),
+                  var = names(var1$varresult)[i])
+}) %>% dplyr::bind_rows()
+
+vardf <- dplyr::bind_rows(vals, ypred, resid) %>%
+  dplyr::select(var, type, t, value) %>%
+  dplyr::arrange(var, type)
+
+# NOTE: dplyr::filter method of selection was dropping every second variable
+df3 <- vardf[vardf$var == "HWelec", ]
+df3 <- df3[df3$type != "residuals", ]
+
+tv <- as.POSIXct(dt$datetime)
+timeV <- tail(tv,length(tv) - 50)
+
+dfSimp <- cbind(df3, timeV)
+
+dfSimp$datehour <- cut(dfSimp$timeV, breaks="hour") 
+dfSimp$datehour <- gsub(".* ", "", as.character(dfSimp$datehour))
+
+```
+
+```{r zoomedIn, fig.cap="Behaviour of data and VAR model over 48 hours"}
+
+# select bounds of t to "zoom in" on a section of the plot
+p <- dfSimp %>%
+dplyr::filter(t >=24, t < 48*2+24) %>%
+ggplot(aes(x = t, y = value, color = type,
+                             linetype = type)) + geom_line()
+p+labs(x = "Time", y = "Power (W)")
+ scale_x_datetime(labels = time_format("%H:%M"))
+
+# for reference 
+
+#p <- ggplot(data <- avDT, aes(x = hour, y = value, color = variable,
+#                              linetype = variable)) +
+#  geom_line() 
+#p + labs(x = "Hour of day", y = "Average power (W)", colour = "", linetype = "") + 
+#  scale_x_datetime(labels = date_format_tz())
+
+#time_format("%H:%M")
+```
+
+```{r VARACF, fig.cap="Autocovariance of VAR model"}
+
+dfFitted <- vardf %>%
+dplyr::filter(type == "fitted" & var == "HWelec")
+
+
+p <- ggAcf(x = dfFitted$value, lag.max = weekCycle/2, type = "correlation",
+    plot = TRUE, na.action = na.pass)
+p + labs(x = "Lag (half hours)", y = "Autocovariance", title = "")
+
+```
+
+
+
+```{r hourlyAverages, fig.cap="Hourly averages of hot water use"}
+
+library(data.table)
+
+dfSimp <- data.table(dfSimp)
+avData <- dfSimp[type=="data",list(avg=mean(value)),by=datehour]
+colnames(avData) <- c("hour", "data")
+avModel <-dfSimp[type=="fitted",list(avg=mean(value)),by=datehour]
+colnames(avModel) <- c("hour", "model")
+
+avDT <- melt(as.data.table(cbind(avData, avModel$model)))
+avDT$hour <- as.POSIXct(avDT$hour, format= "%H")
+
+avDT <- avDT[order(avDT$hour),,drop=FALSE]
+levels(avDT$variable) <- c('data', 'fitted')
+
+avDT$variable <- as.character(avDT$variable)
+#avDT$variable <- as.factor(avDT$variable)
+
+# work-around to fix time display
+# may not be necessary once my comp time is fixed
+
+# Source: http://stackoverflow.com/a/11002253/496488
+# Put in your local timezone
+#date_format_tz <- function(format = "%H:%M", tz = "UTC") {
+#  function(x) format(x, format, tz=tz)
+#}
+
+#labels = date_format_tz
+
+# Need to fix 
+
+p <- ggplot(data <- avDT, aes(x = hour, y = value, color = variable,
+                              linetype = variable)) +
+  geom_line() 
+p + labs(x = "Hour of day", y = "Average power (W)", colour = "", linetype = "") + 
+  scale_x_datetime(labels = time_format("%H:%M"))
+
+```
+
+```{r frequencyPlot, fig.cap="Frequency of power observations"}
+p <- ggplot(dfSimp, aes(x = value, fill = type)) +
+  geom_histogram(binwidth = 100) +
+  facet_wrap(. ~ type)
+p + labs(y = "Observations",
+       x = "Power (W)") + # use colour-blind friendly palette
+  theme(legend.position = "bottom")
+```
+
+Figure \@ref(fig:frequencyPlot) shows the frequency of observations of power (100W bin width) for both the data and the model.
+It can be seen that the model does not fit the data accurately in this regard. In part this may be due to regular occurrences of the element only needing to reheat the water slightly due to thermal losses from the wall of the tank, or very minor hot water usage events.
+
+
+_not really relevant_
+Bijay Neupane, Torben Bach Pedersen, and Bo Thiesson in their paper "Towards Flexibility Detection in Device-Level Energy Consumption" filter short-lived events from their data in order to increase the accuracy of their statistical analysis.
+
+The difference between the expected value the model predicts and the actual value is known as the residual.
+```{r residualDF}
+#residuals(var1)
+
+HWres <- var1$varresult$HWelec$residuals
+HWresAbs <- abs(HWres)
+meanHWres <- mean(HWres)
+meanHWresAbs <- mean(HWresAbs)
+
+sdRes <- sd(HWres) 
+sdResAbs <- sd(HWresAbs)
+```
+
+```{r residualACF, fig.cap="Autocovariance of the VAR model residual"}
+p <- forecast::ggAcf(HWres, lag.max = weekCycle*2, type = "correlation",
+    plot = TRUE, na.action = na.pass)
+p + labs(x = "Lag", y = "Autocorrelation", title = "")
+```
+
+This plot of the autocorrelation function of the residuals (Fig. \@ref(fig:residualACF) shows that autocorrelation of residuals is negligible, however some cyclical behaviour can be observed. In particular, many houses display a weekly peak (at lag `r weekCycle`). This is perhaps due to the weekly cycle not being taken into consideration with all houses.
+
+The absolute value of the residuals is calculated, and the mean of this is taken to demonstrate the error of this model for the individual house selected.
+
+
+```{r residualsPlot, include=FALSE}
+#hidden for now - doesn't really add anything
+plot(HWres, type = "c")
+```
+
+The mean value and standard deviation of the residual is `r round(meanHWres, 1)`W and `r round(sdRes, 1)` respectively, whereas the mean and standard deviation of the absolute value of the residual is `r round(meanHWresAbs, 1)`W and `r round(sdResAbs, 1)` respectively. This suggests that while the VAR model residual at any one time for an individual house may be too large for accurate forecasting, the addition of more houses may significantly reduce this.
+
+_NOTE: work out error as percent of element power?_
+
+To explore this further we examine a dataframe consisting of the residuals of the various houses (see `scripts/VAR_residual_df.R`). 
+
+
+```{r loadResidualDF}
+load(file = "~/HWCanalysis/Masters/data/resDF.Rda")
+load(file = "~/HWCanalysis/Masters/data/amalgamatedRes.Rda")
+```
+
+The mean residual when all `r length(unique(resDF$house))` houses are considered together is `r round(mean(w[,"HWres"]), 1)`W, whereas the mean of the absolute value of all houses considered together is `r round(mean(w[, "HWresAbs"]), 1)`W.
+
+```{r cyclicalMatrix, include=FALSE}
+#incomplete - an attempt to determine the component of the VAR model responsible for cyclical effects
+#cycle <- var1$varresult$HWelec$qr$qr
+#plot(cycle)
+#acf(cycle)
+```
+The VAR model provides a reasonably accurate means of forecasting. It is be possible to forecast half an hour in advance using minute data but this may not be practically implimentable in reality (smart meters may not store minute data as such).
+
+## Generalised Additive Models with continuous response variable

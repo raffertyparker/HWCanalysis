@@ -1,0 +1,9 @@
+INITIALISE runs all necessary scripts in the correct order, HOWEVER
+imputeTotalPower needs filepaths changed and circuitsToSum file downloaded from GREENGrid github for it will work
+extractCircuitFromCleanGridSpy needs filepaths changed 
+
+
+
+Scripts extractCircuitFromCleanGridSpy and imputeTotalPower are taken from https://github.com/CfSOtago/GREENGridData
+Their original authors are Ben Anderson and Jason Mair (respectively)
+ 
