@@ -16,10 +16,10 @@
 # extractCircuitFromCleanGridSpy1min.R, circuit string "mputed"
 # Extract hot water from the imputed files using 
 # extractCircuitFromCleanGridSpy1min.R, circuit string "ater"
-# Delete houses 07, 09, 10, 17b, 19, 21, 26, 28, 41, 43, 46, 47
-# as per suitable_houses.txt
 
 # THIS SCRIPT THEN:
+# Deletes houses 07, 09, 10, 17b, 19, 21, 23, 26, 28, 41, 43, 46, 47
+# as per suitable_houses.txt
 # Combines hot water elec and total in new datatable
 # Subtracts hot water from total
 
@@ -34,10 +34,10 @@ if (!exists("dFile")){
 }
 
 p <- fread(paste0(dFile, "mputed_2010-01-01_2020-01-01_observations.csv.gz"))
-q <- fread(paste0(dFile, "ater_2010-01-01_2020-01-01_observations.csv"))
+q <- fread(paste0(dFile, "ater_2010-01-01_2020-01-01_observations.csv.gz"))
 
 # remove houses as per suitable_houses.txt
-remove <- c("07", "09", "10", "17b", "19", "21", "26", "28", "41", "43", "46", "47")
+remove <- c("07", "09", "10", "17b", "19", "21", "23", "26", "28", "41", "43", "46", "47")
 all_elec <- p[!grepl(paste(remove, collapse="|"), p$hhID),] 
 hw_elec <- q[!grepl(paste(remove, collapse="|"), q$hhID),]
 
@@ -148,7 +148,3 @@ seperate_HW <- summaryDT %>%
 
 no_hw_metering <- setdiff(summaryDT$linkID, seperate_HW$linkID)
 save(no_hw_metering, file = paste0(dFile, "no_hw_metering.Rda"))
-
-
-
-

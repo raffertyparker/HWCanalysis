@@ -56,7 +56,6 @@ If you receive a duplicate label error after knitting, make sure to delete the i
 knitr::opts_chunk$set(include = TRUE)
 ```
 
-
 <!--
 
 Uncomment the following chunk if and when necessary for debugging purposes

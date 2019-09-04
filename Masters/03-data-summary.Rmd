@@ -38,8 +38,8 @@ The data used for this analysis was collected from monitoring the electrical pow
 
 This project analyses and models the GREEN Grid data in order to determine predictability of hot water electricity use. This would assist in controlling hot water electricity for demand response by reducing negative effects on service. In addition, it may provide the means for hot water cylinders to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted demand. 
 
-Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (15, 17 and 46) due to issues with the data (See https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19). 
-In addition, households 07, 09, 10, 17b, 19, 21, 26, 28, 41, 43, 47 did not have seperate hot water metering, and thus are also unsuitable for this analysis. This left 33 households remaining. See file `suitable_houses.txt` for more information _This should be in the appendix_.
+Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (15, 17 and 46) due to issues with the data _expand upon this - use and reference https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19)_. 
+In addition, households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering, and household `rf_23` had hot water controlled by a home energy management system thus these households are also unsuitable for this analysis and were removed. This left 32 households remaining. These were chosen to have a start date of _XXX_ See file `suitable_houses.txt` for more information.
 
 Data files from the remaining households are unzipped and processed using the `GREENGridData` package[cite]. Total electricity is imputed from the submeters using `imputeTotalPower.R`. This is then extracted along with the hot water electricity demand using `extractCircuitFromCleanGridSpy1min.R`. Finally, the hot water electricity is subtracted from total electricity, giving hot water electricity, and other electricity.
 
@@ -89,7 +89,7 @@ A full list of houses that have solar PV is given in `PV_houses.Rda`. It is not 
 
 ## Element power
 
-Initially we estimate the power rating of the hot water cylinder for each household (refer to `/scripts/element_rating.R`). We use the assumption that over a one year period, there is at least one minute where the element is on continuously. This assumption implies that the maximum "average" element wattage over one year of one minute intervals is the element rating. 
+In order to estimate potential benefits to the grid, as well as to calculate percentage errors of later modelling, we need a reasonable estimate of the power rating of each element. To achieve this, we use the assumption that over a one year period, there is at least one minute where the element is on continuously. This assumption implies that the maximum "average" element wattage over one year of one minute intervals is the element rating. Refer to `/scripts/element_rating.R` for more information.
 
 
 ```{r loadElementData, include=FALSE}
@@ -102,6 +102,9 @@ elMaxHouse <- as.character(element_DF[element_DF$elementMax == max(element_DF$el
 ```
 
 It can be seen that the maximum wattage (averaged over 1 minute) of each element ranges between `r elMin`W (household `r elMinHouse`) and `r elMax`W (household `r elMaxHouse`). 
+
+_Some outliers might need removing before processing the elementMax script_
+_Include the kable of element max_
 
 ## Autocovariance of hot water use
 
