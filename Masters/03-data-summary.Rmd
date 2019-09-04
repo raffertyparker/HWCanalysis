@@ -1,25 +1,4 @@
-<!--
-This is for including Chapter 1.  Notice that it's also good practice to name your chunk.  This will help you debug potential issues as you knit.  The chunk above is called intro and the one below is called chapter1.  Feel free to change the name of the Rmd file as you wish, but don't forget to change it here from chap1.Rmd.
--->
-
-<!--
-The {#rmd-basics} text after the chapter declaration will allow us to link throughout the document back to the beginning of Chapter 1.  These labels will automatically be generated (if not specified) by changing the spaces to hyphens and capital letters to lowercase.  Look for the reference to this label at the beginning of Chapter 2.
--->
-
-# Introduction to the dataset {#data-intro}
-<!--
- does not exist: 01 through 05, 09, 12, 15, 16, 17, 18, 20,
- no separate hot water metering labelled as such: 07, 10, 19, 21, 26, 28, 39, 41, 43, 47
- heat pump hot water: 11 
- only has 30 minute intervals: 14
- has controlled hot water (HEMS) but may be fine: 23
- leaving suitable houses: 06, 08, 13, 22, 24*, 25, 27*, 29, 30, 31, 32, 33, 34**,
-  35**, 36**, 37, 38, 40, 42**, 44, 45**, 46**, 
-
- *has pv (may be ok) 23, 24, 27, 28
- ** has uncontrolled HW 
--->
-
+# Introduction to the data {#data-intro}
 
 ```{r load_pkg, include = FALSE}
 # List of packages required for this analysis

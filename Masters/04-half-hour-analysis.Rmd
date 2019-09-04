@@ -1,4 +1,4 @@
-# Modelling half-hour electricity demand as a continuous output {#half-hour}
+# Modelling half-hour electricity demand {#half-hour}
 <!--
 ```{r setup2, include=FALSE}
 knitr::opts_chunk$set(echo=TRUE, engine.path = list(python = '/anaconda/bin/python'))
