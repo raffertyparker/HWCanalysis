@@ -26,7 +26,7 @@
 library(data.table)
 library(lubridate)
 library(dplyr)
-library(plyr)
+#library(plyr)
 
 # Set path to where we are keeping data
 if (!exists("dFile")){
@@ -41,49 +41,49 @@ remove <- c("07", "09", "10", "17b", "19", "21", "23", "26", "28", "41", "43", "
 all_elec <- p[!grepl(paste(remove, collapse="|"), p$hhID),] 
 hw_elec <- q[!grepl(paste(remove, collapse="|"), q$hhID),]
 
-DT <- rbind(hw_elec, all_elec)
+hw_elec <- hw_elec[,c("linkID","r_dateTime","powerW")]
+names(hw_elec) <- c("linkID","r_dateTime","HWelec")
+all_elec <- all_elec[,c("linkID","r_dateTime","powerW")]
+names(all_elec) <- c("linkID","r_dateTime","nonHWelec")
+
+hw_elec <- data.table(hw_elec)
+all_elec <- data.table(all_elec)
+
+
+#save(hw_elec, file = paste0(dFile, "hw_elec"))
+#save(all_elec, file = paste0(dFile, "all_elec"))
+
+
+DT <- dplyr::left_join(all_elec,hw_elec)
+
+
+DT <- data.table(DT)
 DT <- DT[, dateTime_nz := lubridate::as_datetime(r_dateTime, # stored as UTC
                                                  tz = 'Pacific/Auckland')] # so we can extract within NZ dateTime`
-
-setkey(DT, linkID, dateTime_nz)
-
-# Seperate off hot water electricity from DT
-q <- DT[grepl("ater", DT$circuit)]
-names(q) <- c("linkID","r_dateTime", "circuit", "HWelec","dateTime_nz")
-q[,circuit:=NULL]
-q$powerW
-
-# Seperate off all electricity from DT
-# Note nonHWelec at this stage is actually ALL elec
-p <- DT[grepl("mputed", DT$circuit)]
-names(p) <- c("linkID","r_dateTime","circuit", "nonHWelec","dateTime_nz")
-p[,circuit:=NULL]
-
-# Combine
-DT <- dplyr::left_join(q,p)
 
 # Reorder columns
 setcolorder(DT, neworder = 
               c("linkID","r_dateTime","dateTime_nz","HWelec","nonHWelec"))
+# Remove rows with NA values
+DT <- na.omit(DT)
 # Remove HW elec from all elec
 DT$nonHWelec <- DT$nonHWelec - DT$HWelec
 
-DT <- data.table(DT)
+#DT <- data.table(DT)
 
 save(DT, file = paste0(dFile, "DT.Rda"))
 
 # Note that some rows which had only one observation
 # (i.e a nonHWelec value for a particular time with no
-# corresponding HWelec value for that time) were
-# automatically dropped from DT
+# corresponding HWelec value for that time) were dropped from DT
 # The following calculates for how many values this ocurred
 
-pc_rm <- (length(p$linkID) - length(q$linkID))/length(DT$linkID)*100
-
+pc_rm <- (length(all_elec$linkID) - length(hw_elec$linkID))/length(DT$linkID)*100
+save(pc_rm, file = paste0(dFile, "pc_rm"))
 # This shows that less than 1% (~0.7%) of values have been removed
 # by this process - we can live with this.
 
-#load("~/HWC-bookdown/Masters/data/DT.Rda")
+#load(paste0(dFile,"DT.Rda"))
 
 # This gives the datetime as the START of each 15 min average
 DT[, qHour := hms::trunc_hms(dateTime_nz, 15*60)]
@@ -106,6 +106,12 @@ DT_hh <- DT %>%
   summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
 
 save(DT_hh, file = paste0(dFile, "DT_hh.Rda"))
+
+########################################################################
+# The remainder of this script is generally unnecessary for the main body
+# of analysis carried out in this thesis, but provided the means to 
+# determine how to carry out the initial processing occurring above
+
 
 # This creates a summary of each house
 
