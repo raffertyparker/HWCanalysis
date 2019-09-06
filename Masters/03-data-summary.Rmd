@@ -30,20 +30,6 @@ library(lubridate)
 library(xts)
 ```
 
-```{r loadFiles, include=FALSE}
-dFile <- "~/HWCanalysis/Masters/data/"   # Data folder
-pFile <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did not like '~' notation)
-```
-The data used for this analysis was collected from monitoring the electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. It is publically available from the UK Data Service. More information about this dataset, including detailed reports of data issues. the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/.
-
-This project analyses and models the GREEN Grid data in order to determine predictability of hot water electricity use. This would assist in controlling hot water electricity for demand response by reducing negative effects on service. In addition, it may provide the means for hot water cylinders to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted demand. 
-
-Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (15, 17 and 46) due to issues with the data _expand upon this - use and reference https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19)_. 
-In addition, households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering, and household `rf_23` had hot water controlled by a home energy management system thus these households are also unsuitable for this analysis and were removed. This left 32 households remaining. These were chosen to have a start date of _XXX_ See file `suitable_houses.txt` for more information.
-
-Data files from the remaining households are unzipped and processed using the `GREENGridData` package[cite]. Total electricity is imputed from the submeters using `imputeTotalPower.R`. This is then extracted along with the hot water electricity demand using `extractCircuitFromCleanGridSpy1min.R`. Finally, the hot water electricity is subtracted from total electricity, giving hot water electricity, and other electricity.
-
-
 ```{r load1minHouse, include = FALSE}
 # Choose which househould we want to examine
 # Available houses:
@@ -71,7 +57,9 @@ if (as.numeric(mins) == 1) {
     print("Check minute sample rate (only 1 and 30 currently available)")
 }
 
-load(paste0("~/HWCanalysis/Masters/data/", dtName, ".Rda"))
+load(paste0(dFile, dtName, ".Rda"))
+
+
 ```
 
 # Data summary
@@ -86,25 +74,6 @@ DT %>%
 ```
 Note that household 24 has a negative mean non-hot water electricity. This is due to the presence of solar PV. 
 A full list of houses that have solar PV is given in `PV_houses.Rda`. It is not known at this stage whether these negative values will effect our analysis, but we do not remove houses with PV at this stage.
-
-## Element power
-
-In order to estimate potential benefits to the grid, as well as to calculate percentage errors of later modelling, we need a reasonable estimate of the power rating of each element. To achieve this, we use the assumption that over a one year period, there is at least one minute where the element is on continuously. This assumption implies that the maximum "average" element wattage over one year of one minute intervals is the element rating. Refer to `/scripts/element_rating.R` for more information.
-
-
-```{r loadElementData, include=FALSE}
-load(file = paste0(dFile, "element_DF.Rda"))
-knitr::kable(element_DF, caption = "Estimated maximum element output for each house")
-elMin <- min(element_DF$elementMax)
-elMax <- max(element_DF$elementMax)
-elMinHouse <- as.character(element_DF[element_DF$elementMax == min(element_DF$elementMax), "house"])
-elMaxHouse <- as.character(element_DF[element_DF$elementMax == max(element_DF$elementMax), "house"])
-```
-
-It can be seen that the maximum wattage (averaged over 1 minute) of each element ranges between `r elMin`W (household `r elMinHouse`) and `r elMax`W (household `r elMaxHouse`). 
-
-_Some outliers might need removing before processing the elementMax script_
-_Include the kable of element max_
 
 ## Autocovariance of hot water use
 
