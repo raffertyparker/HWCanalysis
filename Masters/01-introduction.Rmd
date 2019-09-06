@@ -1,4 +1,9 @@
 # Introduction
+```{r loadFiles, include=FALSE}
+dFile <- "~/HWCanalysis/Masters/data/"   # Data folder
+pFile <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did not like '~' notation)
+```
+
 
 ## Demand side management
 
