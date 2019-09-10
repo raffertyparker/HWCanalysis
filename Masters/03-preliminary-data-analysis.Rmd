@@ -1,5 +1,16 @@
-# Introduction to the data {#data-intro}
+# Preliminary data analysis {#data-prelim}
+This chapter explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preperation process, then uses methods to compare and visualise cycles and correllations within relevant variables. 
 
+## Initial data cleaning
+Some of the houses in the original dataset are not suited to this analysis due. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process. _use and reference https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19)_. 
+
+Data files from the remaining households are unzipped and processed using the `GREENGridData` package[cite]. Total electricity is imputed from the submeters using `imputeTotalPower.R`. From this output, we extract imputed total electricity demand and hot water electricity demand using `extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
+In particular, households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering, and household `rf_23` had hot water controlled by a home energy management system. These households are therefore also unsuitable for this analysis and were removed. 
+The remaining 32 households were combined into one data table. There were some occurrences whereby data existed for total electricity, but not for hot water electricity, giving `NA` values in the hot water electricity column. All rows where this occurred (corresponding to `r round(pc_rm, 2)`% of the total combined data table) were removed. At each point in time for the remaining data, hot water electricity is subtracted from total electricity, giving hot water electricity, and other electricity. 
+_Michael mentioned that I should pick a start date for all data and remove anything before it_ Due to some anomolies in the first occurrences of data collection for some houses a start date of XX/XX/XX was chosen, with data before this period discarded.
+As much analysis would be carried out for "half hour" data, another datatable was constructed which took averages of the one minute electricity values over each half hour. 
+
+Refer to the script `processing.R` (see appendix) to view the processing code.
 ```{r load_pkg, include = FALSE}
 # List of packages required for this analysis
 pkg <- c("dplyr", "ggplot2", "knitr", "bookdown", "devtools")
@@ -62,7 +73,7 @@ load(paste0(dFile, dtName, ".Rda"))
 
 ```
 
-# Data summary
+## Data summary
 First, we select a house and investigate the potential for forecasting hot water electricity demand using historical hot water electricity 
 use patterns and/or other household electricity use. The one minute sample rate is maintained for this analysis.
 _This may be better explained through a broader summary of all houses (as already done under Documentation at https://cfsotago.github.io/GREENGridData/) followed by plots of a few houses showing these key concepts_
@@ -117,3 +128,5 @@ Plotting the cross-covarience (known as a _cross correlogram_) allows visual ins
 ```{r crosscovariance, fig.cap="Crosscovariance of all households"}
 knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
 ```
+
+
