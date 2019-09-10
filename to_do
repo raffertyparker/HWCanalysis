@@ -1,36 +1,19 @@
 ################## TO DO ##################
 
-Section 1.1 (Demand Side Mangement) needs "bigger picture" why peaks matter, costs etc. Include references.
-
-Create methodology - this needs to outline time series theory including our metrics and data cleaning
-
-Each chapter needs to introduce exactly what is happening in the chapter.
-
-Preliminary analysis - name of chapter with ccv, acv etc. Include individual houses as well as aggregate. 
-Mention where and why the preliminary analysis links to the methods.
-
 Pick a start date in the data and cut everthing before it. Use Bens analysis to inform.
 
 Check for and remove anomolies with HWC data (all houses)
-
-Look for patents/papers by Iván Castro
-
-Write theory
-
-Decouple - thesis from code
-	 - blocks of code from one another
-	 - thesis from reproducible research output 
 
 rewrite lit review under context of predictive models, not thermal models
 include electricity forecasting literature in lit review
 
 repeat steps of VAR model with ARIMA model for comparison
 
+Look for patents/papers by Iván Castro
+
 Create GAM with 30 minute data
 
 become familiar with Kalman filter, logistic regression in R
-
-double-check average plot (looks 12 hours wrong)
 
 try to plot weighting coefficients and pull out code of how VAR model gets them
 so we may use this for our GAM model
