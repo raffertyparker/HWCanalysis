@@ -1,11 +1,12 @@
 # Preliminary data analysis {#data-prelim}
-This chapter explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preperation process, then uses methods to compare and visualise cycles and correllations within relevant variables. 
+This chapter explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preperation process, then uses methods to compare and visualise cycles and correllations within relevant variables. The analysis is built upon a broader overview of the data available at https://cfsotago.github.io/GREENGridData/.
 
 ## Initial data cleaning
-Some of the houses in the original dataset are not suited to this analysis due. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process. _use and reference https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19)_. 
+Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process (see https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19 for more information). 
+Households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering, and household `rf_23` had hot water controlled by a home energy management system. These households are therefore also unsuitable for this analysis and were removed. 
 
 Data files from the remaining households are unzipped and processed using the `GREENGridData` package[cite]. Total electricity is imputed from the submeters using `imputeTotalPower.R`. From this output, we extract imputed total electricity demand and hot water electricity demand using `extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
-In particular, households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering, and household `rf_23` had hot water controlled by a home energy management system. These households are therefore also unsuitable for this analysis and were removed. 
+
 The remaining 32 households were combined into one data table. There were some occurrences whereby data existed for total electricity, but not for hot water electricity, giving `NA` values in the hot water electricity column. All rows where this occurred (corresponding to `r round(pc_rm, 2)`% of the total combined data table) were removed. At each point in time for the remaining data, hot water electricity is subtracted from total electricity, giving hot water electricity, and other electricity. 
 _Michael mentioned that I should pick a start date for all data and remove anything before it_ Due to some anomolies in the first occurrences of data collection for some houses a start date of XX/XX/XX was chosen, with data before this period discarded.
 As much analysis would be carried out for "half hour" data, another datatable was constructed which took averages of the one minute electricity values over each half hour. 
@@ -90,8 +91,9 @@ A full list of houses that have solar PV is given in `PV_houses.Rda`. It is not 
 
 We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising cyclical behaviour of data, and is defined as
 
-$\gamma_k = E[(x_t - \mu)(x_{t+k} - \mu)]$ 
-
+\begin{equation}
+\gamma_k = E[(x_t - \mu)(x_{t+k} - \mu)]
+\end{equation}
 where $k$ is the lag value and $\mu$ is the mean of both $x_t$ and $x_{t+k}$.
 <!--
 ![Autocovariance of all houses.](~/HWCanalysis/Masters/plots/acf_all_houses.png)
@@ -119,8 +121,9 @@ Table \@ref(frequencyAnalysis) shows that while some houses have "expected" cycl
 
 In a similar fashion to the autocovariance function, the cross-covariance function of two variables $x, y$ is given by
 
-$\gamma_k(x,y) = \operatorname{E}[(x_{t+k} - \mu_x)(y_t - \mu_y)]$
-
+\begin{equation}
+\gamma_k(x,y) = \operatorname{E}[(x_{t+k} - \mu_x)(y_t - \mu_y)]
+\end{equation}
 where variable $x$ lags variable $y$ by lag $k$[@Cowpertwait2009].
 
 Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use at lags of around half an hour.
@@ -129,4 +132,55 @@ Plotting the cross-covarience (known as a _cross correlogram_) allows visual ins
 knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
 ```
 
+## Seasonality
 
+One reason why linear prediction models fail with our electricity data is due to the cyclical nature of residential electricity usage (referred to as 'seasonality'). There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using loess', whereby loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
+
+```{r stl, eval=FALSE}
+# Needs editing to work with DT
+
+#df$times <- as.POSIXct(df$times) # may not be necessary if set up correctly
+ts.HW <- ts(dt$HWelec, frequency = 48)
+#ts.HW <- ts(dt$HWelec, frequency = 48*7)
+decomp.HW <- decompose(ts.HW)
+plot(decomp.HW)
+```
+
+```{r stl_gg, eval=FALSE}
+
+#df_xts <- as.xts(df) 
+#frequency(dt$HWelec) <- time3[1]
+
+#stat_stl(ts.HW, s.window = "Periodic")
+HWstl <-  stl(ts.HW, s.window = "periodic")
+#plot(HWstl)
+######
+
+s_df <- tsdf(ts.HW)
+ggplot(ap_df, aes(x = x, y = y)) +
+   stat_stl(s.window = 60)
+
+# periodic if fixed seasonality; doesn't work well:
+ggplot(dt, aes(x = datetime, y = HWelec)) +
+   stat_stl(s.window = "Periodic")
+
+################################
+library(ggseas)
+load("~/HWCanalysis/Masters/data_new/rf_13_at_1.Rda")
+s$r_dateTimeNZ <- lubridate::with_tz(s$r_dateTime, tz = "Pacific/Auckland")
+
+
+ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
+      method = "stl", s.window = 7) +
+   geom_line() +
+   labs(x = "   n  ", colour = "") +
+   scale_y_continuous("Power(W)", label = comma) +
+   ggtitle("Seasonal decomposition of electricity demand") +
+   theme(legend.position = c(0.17, 0.92))
+
+   grid.text("Source: Statistics New Zealand, Balance of Payments", 0.7, 0.03,
+          gp = gpar(fontfamily = "myfont", fontface = "italic", cex = 0.7))
+
+```
+
+_This is a great package that seperates out the cycle, trend, and noise, and plots them. The plotting needs some work as you cannot see the cycles very well (need to 'zoom in' on the plot, which isn't working for me right now)._

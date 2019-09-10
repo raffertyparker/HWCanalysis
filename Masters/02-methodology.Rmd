@@ -1,17 +1,51 @@
 # Methodology {#methodology}
 
+<!-- Required to number equations in HTML files -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
 
-```{r pc_rm, include=FALSE}
+```{r loadDTandpc_rm, include=FALSE}
 # This loads percentage of data removed
 load(paste0(dFile, "pc_rm"))
+load(paste0(dFile, "DT.Rda"))
 ```
 The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. It is publically available from the UK Data Service. More information about this dataset, including detailed reports of data issues, the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/.
 
 All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis.
 
-The analysis is broadly broken into three sections. 
-Chapter \@ref(data-prelim) explains the cleaning and preperatory process, and then provides a broad overview of various relevant patterns and attributes of the dataset. 
-Smart meters in New Zealand currently store (and transmit) data that is averaged over half-hour periods. Chapter \@ref(half-hour) explores a number of statistical models of each household using half-hour averaged data. 
-Chapter \@ref(one-min) uses similar models adapted for a one minute frequency, as this provides closer approximation to the physical process of the hot water cylinder element.
-The exploratory texchniques and predictive models utilised are all described and discussed immediately proceeding the results of their forecasts, as this provides tangible examples to assist in their comprehension.
+```{r headDT, include=FALSE, fig.cap="Example of the clean and processed data used in the analysis"}
+knitr::kable(head(DT))
+```
+
+The data was cleaned and wrangled until it was in the format shown in Table \@ref(headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the actual local datetime, and `HWelec` and `nonHWelec` are the average hot water electricity and non hot water electricity (respectively) used over the time steps in the data (1 minute shown).
+As we are concerned with predictability and patterns within our data over time, we must utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] was used extensively to inform the overall process.
+
+## Time series overview and notation
+
+A time series $\{x_1, x_2, ..., x_n\}$, (also abbreviated to $\{x_t\}$) is a collection of n samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
+
+Many mathematical descriptions of models utilise an operator $B$, known as the 'backward shift' or 'lag' operator, where 
+\begin{equation}
+Bx_t = x_{t+1}
+\end{equation}. 
+
+Many time series' show a general increase or decrease over time, known as a trend, as well as cyclic fluctuations, known as seasonality.
+
+The mean of a sample is denoted with an overline, such that
+
+\begin{equation}
+\overline x = \sum x_i/n
+\end{equation}
+
+## Chapter overview
+
+The main body of analysis is broadly broken into three sections. 
+Chapter \@ref(data-prelim) explains the cleaning and preparatory process, and then provides a broad overview of various relevant patterns and attributes of the data. 
+Smart meters in New Zealand currently store electricity data that has been averaged over half-hour periods. Chapter \@ref(half-hour) explores a number of statistical models to forecast hot water electricity demand of each household using half-hour averaged data. 
+Chapter \@ref(one-min) uses similar models adapted for a one minute frequency, with forecasts predicting a "binary" probabilistic outcome of element on/element off, as this provides closer approximation to the physical process of electricity use of a hot water cylinder.
+The exploratory techniques and predictive models utilised are all described and discussed immediately proceeding the results of their forecasts, as this provides tangible examples to assist in their comprehension.
 Each forecasting model used is then compared to one another by the sum of the root mean squared of the difference between the predicted value and the acual value (known as the 'residual'). These comparative results are provided in the Conclusion (Chapter \@ref(conclusion)).
+

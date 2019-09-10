@@ -27,6 +27,7 @@ dt$HWelec[is.na(dt$HWelec) == TRUE] <- dtHWlag
 dt$nonHWelec[is.na(dt$nonHWelec) == TRUE] <- dtNonHWlag
 # This seems to work ok - maybe not the most elegant method
 ```
+
 The element within a typical hot water cylinder works is controlled thermostatically by an "on-off" (otherwise known as "bang-bang") controller. This type of controller turns the element fully "on" when the water temperature drops below a certain temperature, and then fully off again once the water reaches another (slightly higher) temperature. _include diagram?_
 On small timescales, the element may then be considered a binary process, impacting our choice of forecasting model. Forecasting a binary output required more sophisticated models than forecasting a "continous" output. 
 While a more sophisticated model that provides a binary output will be considered in Chapter \@ref(one-min), this project hopes to "build up" the sophistication of the modelling from more mathematically simple techniques.
@@ -34,15 +35,17 @@ In our case, this may be obtained through taking the average hot water electrici
 Some additional data preperation is then necessary. 
 _Smooth new UKDS datset_
 
+## Random walk without drift
 
-<!-- Required to number equations in HTML files -->
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  TeX: { equationNumbers: { autoNumber: "AMS" } }
-});
-</script>
+A time series $\{x_t\}$ is known as a 'random walk' if 
 
-## Simple linear model with lagged HW electricity
+\begin{equation}
+x_t = x_{t+1} + w_t
+\end{equation}
+where $\{w_t\}$ is a white noise series. 
+This model assumes (providing $\{\overline w_t\} = 0$) that hot water electricity demand of the next timestep can be best predicted by the demand of the current timestep.
+
+## Linear regression of lagged HW electricity
 
 Linear regression is a common forecasting model prized for its simplicity in interpretation and computation. A linear regression model fits a straight line through each point within the dataset such that the line minimises the sum of the square of each distance between the line and the data points. _show plot to explain?_
 For time-series forecasting, linear regression uses time as the independent (or 'explanatory') variable, with the value to be predicted (such as electricity demand) as the dependent (or 'response') variable.  _show figure demonstrating?_
@@ -90,64 +93,6 @@ While Table \@ref(fig:ccvMaxLagTable) and Figure \@ref(fig:ccvMaxLagPlot) show t
 knitr::include_graphics(paste0(pFile, "maxXcorAllHouses.pdf"))
 ```
 
-## Seasonality
-
-One reason why linear prediction models fail with our electricity data is due to the cyclical nature of residential electricity usage (referred to as 'seasonality'). There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using loess', whereby loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
-
-```{r stl, echo=FALSE}
-
-
-#df$times <- as.POSIXct(df$times) # may not be necessary if set up correctly
-
-ts.HW <- ts(dt$HWelec, frequency = 48)
-#ts.HW <- ts(dt$HWelec, frequency = 48*7)
-
-
-decomp.HW <- decompose(ts.HW)
-
-plot(decomp.HW)
-
-```
-
-```{r stl_gg, eval=FALSE}
-
-#df_xts <- as.xts(df) 
-#frequency(dt$HWelec) <- time3[1]
-
-#stat_stl(ts.HW, s.window = "Periodic")
-HWstl <-  stl(ts.HW, s.window = "periodic")
-#plot(HWstl)
-######
-
-s_df <- tsdf(ts.HW)
-ggplot(ap_df, aes(x = x, y = y)) +
-   stat_stl(s.window = 60)
-
-# periodic if fixed seasonality; doesn't work well:
-ggplot(dt, aes(x = datetime, y = HWelec)) +
-   stat_stl(s.window = "Periodic")
-
-################################
-library(ggseas)
-load("~/HWCanalysis/Masters/data_new/rf_13_at_1.Rda")
-s$r_dateTimeNZ <- lubridate::with_tz(s$r_dateTime, tz = "Pacific/Auckland")
-
-
-ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
-      method = "stl", s.window = 7) +
-   geom_line() +
-   labs(x = "   n  ", colour = "") +
-   scale_y_continuous("Power(W)", label = comma) +
-   ggtitle("Seasonal decomposition of electricity demand") +
-   theme(legend.position = c(0.17, 0.92))
-
-   grid.text("Source: Statistics New Zealand, Balance of Payments", 0.7, 0.03,
-          gp = gpar(fontfamily = "myfont", fontface = "italic", cex = 0.7))
-
-```
-
-_This is a great package that seperates out the cycle, trend, and noise, and plots them. The plotting needs some work as you cannot see the cycles very well (need to 'zoom in' on the plot, which isn't working for me right now)._
-
 ## Moving average
 
 _ I might as well include a moving average model. It is easy to impliment and would be a good segue into ARIMA_ 
@@ -170,11 +115,9 @@ _INCOMPLETE_
 
 We now explore forecasts using a vector autoregression model. 
 The model is of the following form:
-
-
-$\bf{y}_t = A_1 \bf{y}_{t-1} + … + A_p \bf{y}_{t-p} + CD_t + \bf{u}_t$
-
-
+\begin{equation}
+\bf{y}_t = A_1 \bf{y}_{t-1} + … + A_p \bf{y}_{t-p} + CD_t + \bf{u}_t
+\end{equation}
 where $\bf{y}_t$ is a $K \times 1$ vector of endogenous variables and $u_t$ assigns a spherical disturbance term of the same dimension. The coefficient matrices $A_1, …, A_p$ are of dimension $K \times K$. 
 
 
@@ -187,7 +130,9 @@ For our data, we utilise the cyclical values previously determined using frequen
  
 The optimal lag term can be determined using the VARselect function, which optimises lag values by minimising the Bayesian information criterion using the formula
 
-$SC(n) = \ln \det(\tilde{\sum}_u(n)) + \frac{\ln(T)}{T}$
+\begin{equation}
+SC(n) = \ln \det(\tilde{\sum}_u(n)) + \frac{\ln(T)}{T}
+\end{equation}
 
 where $\tilde{\sum}_u (n) = T^{-1} \sum_{t=1}^T \bf{\hat{u}}_t \bf{\hat{u}}_t'$ and n assigns the lag order.
 
@@ -287,8 +232,6 @@ p + labs(x = "Lag (half hours)", y = "Autocovariance", title = "")
 
 ```
 
-
-
 ```{r hourlyAverages, fig.cap="Hourly averages of hot water use"}
 
 library(data.table)
@@ -341,7 +284,6 @@ p + labs(y = "Observations",
 Figure \@ref(fig:frequencyPlot) shows the frequency of observations of power (100W bin width) for both the data and the model.
 It can be seen that the model does not fit the data accurately in this regard. In part this may be due to regular occurrences of the element only needing to reheat the water slightly due to thermal losses from the wall of the tank, or very minor hot water usage events.
 
-
 _not really relevant_
 Bijay Neupane, Torben Bach Pedersen, and Bo Thiesson in their paper "Towards Flexibility Detection in Device-Level Energy Consumption" filter short-lived events from their data in order to increase the accuracy of their statistical analysis.
 
@@ -368,7 +310,6 @@ This plot of the autocorrelation function of the residuals (Fig. \@ref(fig:resid
 
 The absolute value of the residuals is calculated, and the mean of this is taken to demonstrate the error of this model for the individual house selected.
 
-
 ```{r residualsPlot, include=FALSE}
 #hidden for now - doesn't really add anything
 plot(HWres, type = "c")
@@ -379,7 +320,6 @@ The mean value and standard deviation of the residual is `r round(meanHWres, 1)`
 _NOTE: work out error as percent of element power?_
 
 To explore this further we examine a dataframe consisting of the residuals of the various houses (see `scripts/VAR_residual_df.R`). 
-
 
 ```{r loadResidualDF}
 load(file = "~/HWCanalysis/Masters/data/resDF.Rda")
