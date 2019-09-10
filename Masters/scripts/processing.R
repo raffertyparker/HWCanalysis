@@ -10,7 +10,9 @@
 # BEFORE THIS SCRIPT WILL WORK YOU MUST:
 
 # Download and extract the files
-# Delete houses 15 and 17
+# Delete houses 15 and 17 as per github instructions
+# It may be preferable to also delete houses
+# 07, 09, 10, 17b, 19, 21, 23, 26, 28, 41, 43, 46, 47 as per suitable_house.txt
 # Impute total electricity from the submeters using `imputeTotalPower.R`
 # Extract total electricity from the imputed output files using 
 # extractCircuitFromCleanGridSpy1min.R, circuit string "mputed"
@@ -18,10 +20,11 @@
 # extractCircuitFromCleanGridSpy1min.R, circuit string "ater"
 
 # THIS SCRIPT THEN:
-# Deletes houses 07, 09, 10, 17b, 19, 21, 23, 26, 28, 41, 43, 46, 47
-# as per suitable_houses.txt
+# Removes houses 07, 09, 10, 17b, 19, 21, 23, 26, 28, 41, 43, 46, 47
+# if not already done
 # Combines hot water elec and total in new datatable
 # Subtracts hot water from total
+# Creates some further summary data which may be unnecessary for the main analysis
 
 library(data.table)
 library(lubridate)
@@ -36,7 +39,7 @@ if (!exists("dFile")){
 p <- fread(paste0(dFile, "mputed_2010-01-01_2020-01-01_observations.csv.gz"))
 q <- fread(paste0(dFile, "ater_2010-01-01_2020-01-01_observations.csv.gz"))
 
-# remove houses as per suitable_houses.txt
+# remove unsuitable houses if they haven't been deleted already
 remove <- c("07", "09", "10", "17b", "19", "21", "23", "26", "28", "41", "43", "46", "47")
 all_elec <- p[!grepl(paste(remove, collapse="|"), p$hhID),] 
 hw_elec <- q[!grepl(paste(remove, collapse="|"), q$hhID),]
@@ -49,14 +52,10 @@ names(all_elec) <- c("linkID","r_dateTime","nonHWelec")
 hw_elec <- data.table(hw_elec)
 all_elec <- data.table(all_elec)
 
-
 #save(hw_elec, file = paste0(dFile, "hw_elec"))
 #save(all_elec, file = paste0(dFile, "all_elec"))
 
-
 DT <- dplyr::left_join(all_elec,hw_elec)
-
-
 DT <- data.table(DT)
 DT <- DT[, dateTime_nz := lubridate::as_datetime(r_dateTime, # stored as UTC
                                                  tz = 'Pacific/Auckland')] # so we can extract within NZ dateTime`
