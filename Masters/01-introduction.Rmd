@@ -55,4 +55,4 @@ _Make sure introduction has provided sufficient information that the reader will
 
 ## Aims
 
-_State research aims_
+This project analyses and models the GREEN Grid data in order to determine forecastability of residential hot water electricity use from smart meters with seperately metered hot water, as is commonly encountered in New Zealand. This would assist in controlling hot water electricity for demand response by reducing negative effects on service. In addition, it may provide the means for hot water cylinders to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted demand. It is an explanatory analysis and examines a number of different forecasting methods, which are compared to one another in the conclusion.

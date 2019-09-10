@@ -1,4 +1,4 @@
-# Modelling 1 minute data as a binary output {#one-min}
+# Modelling 1 minute data {#one-min}
 
 ```{r include_packages_2, include = FALSE}
 # This chunk ensures that the thesisdown package is

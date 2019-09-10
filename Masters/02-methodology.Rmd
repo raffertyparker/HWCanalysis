@@ -1,21 +1,17 @@
 # Methodology {#methodology}
+
+
 ```{r pc_rm, include=FALSE}
 # This loads percentage of data removed
 load(paste0(dFile, "pc_rm"))
 ```
-The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. It is publically available from the UK Data Service. More information about this dataset, including detailed reports of data issues. the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/.
+The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. It is publically available from the UK Data Service. More information about this dataset, including detailed reports of data issues, the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/.
 
-This project analyses and models the GREEN Grid data in order to determine predictability of hot water electricity use. This would assist in controlling hot water electricity for demand response by reducing negative effects on service. In addition, it may provide the means for hot water cylinders to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted demand. 
+All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis.
 
-Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data _expand upon this - use and reference https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19)_. 
-
-Data files from the remaining households are unzipped and processed using the `GREENGridData` package[cite]. Total electricity is imputed from the submeters using `imputeTotalPower.R`. From this output, we extract imputed total electricity demand and hot water electricity demand using `extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
-In particular, households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering, and household `rf_23` had hot water controlled by a home energy management system. These households are therefore also unsuitable for this analysis and were removed. 
-The remaining 32 households were combined into one data table. There were some occurrences whereby data existed for total electricity, but not for hot water electricity, giving `NA` values in the hot water electricity column. All rows where this occurred (corresponding to `r round(pc_rm, 2)`% of the total combined data table) were removed. At each point in time for the remaining data, hot water electricity is subtracted from total electricity, giving hot water electricity, and other electricity. 
-_Michael mentioned that I should pick a start date for all data and remove anything before it_ Due to some anomolies in the first occurrences of data collection for some houses a start date of XX/XX/XX was chosen, with data before this period discarded.
-As much analysis would be carried out for "half hour" data, another datatable was constructed which took averages of the one minute electricity values over each half hour. 
-
-Refer to the script `processing.R` (see appendix) to view the processing code.
-
-
-See file `suitable_houses.txt` for more information. 
+The analysis is broadly broken into three sections. 
+Chapter \@ref(data-prelim) explains the cleaning and preperatory process, and then provides a broad overview of various relevant patterns and attributes of the dataset. 
+Smart meters in New Zealand currently store (and transmit) data that is averaged over half-hour periods. Chapter \@ref(half-hour) explores a number of statistical models of each household using half-hour averaged data. 
+Chapter \@ref(one-min) uses similar models adapted for a one minute frequency, as this provides closer approximation to the physical process of the hot water cylinder element.
+The exploratory texchniques and predictive models utilised are all described and discussed immediately proceeding the results of their forecasts, as this provides tangible examples to assist in their comprehension.
+Each forecasting model used is then compared to one another by the sum of the root mean squared of the difference between the predicted value and the acual value (known as the 'residual'). These comparative results are provided in the Conclusion (Chapter \@ref(conclusion)).

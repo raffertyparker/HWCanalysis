@@ -90,7 +90,7 @@ While Table \@ref(fig:ccvMaxLagTable) and Figure \@ref(fig:ccvMaxLagPlot) show t
 knitr::include_graphics(paste0(pFile, "maxXcorAllHouses.pdf"))
 ```
 
-# Seasonality
+## Seasonality
 
 One reason why linear prediction models fail with our electricity data is due to the cyclical nature of residential electricity usage (referred to as 'seasonality'). There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using loess', whereby loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
 
@@ -148,11 +148,11 @@ ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
 
 _This is a great package that seperates out the cycle, trend, and noise, and plots them. The plotting needs some work as you cannot see the cycles very well (need to 'zoom in' on the plot, which isn't working for me right now)._
 
-# Moving average
+## Moving average
 
 _ I might as well include a moving average model. It is easy to impliment and would be a good segue into ARIMA_ 
 
-# ARIMA model
+## ARIMA model
 
 Some[@Cui2016] forecasting of electricity hot water use has been done using autoregressive moving average (ARIMA) models. We explore this briefly in order to make comparisons with other techniques.
 
@@ -166,7 +166,7 @@ plot(AA)
 ```
 _INCOMPLETE_
 
-# Vector Autoregression
+## Vector Autoregression
 
 We now explore forecasts using a vector autoregression model. 
 The model is of the following form:
