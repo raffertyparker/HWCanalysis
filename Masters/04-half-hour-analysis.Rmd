@@ -27,9 +27,8 @@ dt$HWelec[is.na(dt$HWelec) == TRUE] <- dtHWlag
 dt$nonHWelec[is.na(dt$nonHWelec) == TRUE] <- dtNonHWlag
 # This seems to work ok - maybe not the most elegant method
 ```
+This chapter uses a selection of models fitted to half hour averaged data in order to forecast the demand of the following half hour.
 
-The element within a typical hot water cylinder works is controlled thermostatically by an "on-off" (otherwise known as "bang-bang") controller. This type of controller turns the element fully "on" when the water temperature drops below a certain temperature, and then fully off again once the water reaches another (slightly higher) temperature. _include diagram?_
-On small timescales, the element may then be considered a binary process, impacting our choice of forecasting model. Forecasting a binary output required more sophisticated models than forecasting a "continous" output. 
 While a more sophisticated model that provides a binary output will be considered in Chapter \@ref(one-min), this project hopes to "build up" the sophistication of the modelling from more mathematically simple techniques.
 In our case, this may be obtained through taking the average hot water electricity demand over each half-hour within the data. This smooths the demand data such that it may be considered to be a continuous variable. _Show plots demonstrating this_ 
 Some additional data preperation is then necessary. 
@@ -45,9 +44,16 @@ x_t = x_{t+1} + w_t
 where $\{w_t\}$ is a white noise series. 
 This model assumes (providing $\{\overline w_t\} = 0$) that hot water electricity demand of the next timestep can be best predicted by the demand of the current timestep.
 
+```{r randomWalk}
+# Eventually move this to its own script
+
+
+```
+
 ## Linear regression of lagged HW electricity
 
-Linear regression is a common forecasting model prized for its simplicity in interpretation and computation. A linear regression model fits a straight line through each point within the dataset such that the line minimises the sum of the square of each distance between the line and the data points. _show plot to explain?_
+
+Linear regression is a common forecasting model prized for its simplicity in interpretation and computation. A linear regression model fits a straight line through each point within the dataset such that the line minimises the sum of the square of each distance between the line and the data points. _Provide equations and show plot to explain_
 For time-series forecasting, linear regression uses time as the independent (or 'explanatory') variable, with the value to be predicted (such as electricity demand) as the dependent (or 'response') variable.  _show figure demonstrating?_
 While this is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using data that displays cyclic behaviour, such as residential electricity demand.
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
@@ -109,7 +115,7 @@ HWarima <- arima(dt$HWelec, seasonal = time3, method = "CSS")
 plot(AA)
 
 ```
-_INCOMPLETE_
+_NOTE it is important to show the benefits of progressing to VAR from ARIMA somewhere_
 
 ## Vector Autoregression
 

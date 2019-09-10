@@ -1,5 +1,6 @@
 # Methodology {#methodology}
 
+This chapter gives a broad introduction to the nature and origin of our data, and the methods used in order to model hot water electricity demand.
 <!-- Required to number equations in HTML files -->
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -12,9 +13,10 @@ MathJax.Hub.Config({
 load(paste0(dFile, "pc_rm"))
 load(paste0(dFile, "DT.Rda"))
 ```
-The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. It is publically available from the UK Data Service. More information about this dataset, including detailed reports of data issues, the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/.
 
-All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis.
+## Data background
+
+The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. It is publically available from the UK Data Service. More information about this dataset, including detailed reports of data issues, the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/.
 
 ```{r headDT, include=FALSE, fig.cap="Example of the clean and processed data used in the analysis"}
 knitr::kable(head(DT))
@@ -22,6 +24,8 @@ knitr::kable(head(DT))
 
 The data was cleaned and wrangled until it was in the format shown in Table \@ref(headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the actual local datetime, and `HWelec` and `nonHWelec` are the average hot water electricity and non hot water electricity (respectively) used over the time steps in the data (1 minute shown).
 As we are concerned with predictability and patterns within our data over time, we must utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] was used extensively to inform the overall process.
+
+All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis.
 
 ## Time series overview and notation
 

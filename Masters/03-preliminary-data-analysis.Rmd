@@ -1,4 +1,6 @@
 # Preliminary data analysis {#data-prelim}
+_NOTE: need to mention throught this chapter where and why the preliminary analysis links to the methods_
+
 This chapter explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preperation process, then uses methods to compare and visualise cycles and correllations within relevant variables. The analysis is built upon a broader overview of the data available at https://cfsotago.github.io/GREENGridData/.
 
 ## Initial data cleaning
@@ -135,6 +137,7 @@ knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
 ## Seasonality
 
 One reason why linear prediction models fail with our electricity data is due to the cyclical nature of residential electricity usage (referred to as 'seasonality'). There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using loess', whereby loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
+_Expand on method?_
 
 ```{r stl, eval=FALSE}
 # Needs editing to work with DT
