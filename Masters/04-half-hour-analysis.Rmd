@@ -15,18 +15,16 @@ house <- "13"
 
 load(paste0("~/HWCanalysis/Masters/data_old/house_",
             house, "_at_30.Rda"))
-```
+
+if (!exists("dFile")){
+  dFile <- "~/HWCanalysis/Masters/data/" 
+}
+
+load(paste0(dFile, "DT_hh.Rda"))
 
 
-```{r NAfix30min}
-dtHWlag <- c(tail(dt$HWelec, length(dt$HWelec) - 48*7),
-             dt$HWelec[1:(48*7)])
-dtNonHWlag <- c(tail(dt$nonHWelec, length(dt$nonHWelec) - 48*7),
-                dt$nonHWelec[1:(48*7)])
-dt$HWelec[is.na(dt$HWelec) == TRUE] <- dtHWlag
-dt$nonHWelec[is.na(dt$nonHWelec) == TRUE] <- dtNonHWlag
-# This seems to work ok - maybe not the most elegant method
 ```
+
 This chapter uses a selection of models fitted to half hour averaged data in order to forecast the demand of the following half hour.
 
 While a more sophisticated model that provides a binary output will be considered in Chapter \@ref(one-min), this project hopes to "build up" the sophistication of the modelling from more mathematically simple techniques.
@@ -34,27 +32,16 @@ In our case, this may be obtained through taking the average hot water electrici
 Some additional data preperation is then necessary. 
 _Smooth new UKDS datset_
 
-## Random walk without drift
+## Random walk
 
-A time series $\{x_t\}$ is known as a 'random walk' if 
-
-\begin{equation}
-x_t = x_{t+1} + w_t
-\end{equation}
-where $\{w_t\}$ is a white noise series. 
-This model assumes (providing $\{\overline w_t\} = 0$) that hot water electricity demand of the next timestep can be best predicted by the demand of the current timestep.
-
-```{r randomWalk}
-# Eventually move this to its own script
-
+```{r randomWalk, eval=FALSE}
+# load appropriate plots here
 
 ```
 
 ## Linear regression of lagged HW electricity
 
 
-Linear regression is a common forecasting model prized for its simplicity in interpretation and computation. A linear regression model fits a straight line through each point within the dataset such that the line minimises the sum of the square of each distance between the line and the data points. _Provide equations and show plot to explain_
-For time-series forecasting, linear regression uses time as the independent (or 'explanatory') variable, with the value to be predicted (such as electricity demand) as the dependent (or 'response') variable.  _show figure demonstrating?_
 While this is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using data that displays cyclic behaviour, such as residential electricity demand.
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
 The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance1)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.

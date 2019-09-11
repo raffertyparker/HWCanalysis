@@ -1,5 +1,7 @@
 # Methodology {#methodology}
 
+_Need to broadly describe different approaches - it's fine to introduce ARIMA first then introduce AR, MA and random walks as special cases of ARIMA, these models will be restated (with model parameters) in results chapters_
+
 This chapter gives a broad introduction to the nature and origin of our data, and the methods used in order to model hot water electricity demand.
 <!-- Required to number equations in HTML files -->
 <script type="text/x-mathjax-config">
@@ -43,6 +45,41 @@ The mean of a sample is denoted with an overline, such that
 \begin{equation}
 \overline x = \sum x_i/n
 \end{equation}
+
+## Introduction to methods and models used
+
+This section outlines a broad introduction to the various models used.
+
+### Random walk
+
+A time series $\{x_t\}$ is known as a 'random walk' if 
+
+\begin{equation}
+x_t = x_{t+1} + w_t
+\end{equation}
+where $\{w_t\}$ is a white noise series. 
+This model assumes (providing $\{\overline w_t\} = 0$) that hot water electricity demand of the next timestep can be best predicted by the demand of the current timestep.
+
+### Linear regression
+
+Linear regression is a common forecasting model prized for its simplicity in interpretation and computation. A linear regression model fits a straight line through each point within the dataset such that the line minimises the sum of the square of each distance between the line and the data points. _Provide equations and show plot to explain_
+For time-series forecasting, linear regression uses time as the independent (or 'explanatory') variable, with the value to be predicted (such as electricity demand) as the dependent (or 'response') variable.  _show figure demonstrating?_
+
+### Moving average
+
+A q-order moving average process ($MA(q)$) is defined as
+\begin{equation}\label{MA1}
+x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q}
+\end{equation}
+where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(MA1) can be written in terms of the backshift operator $B$ as
+\begin{equation}
+x_t = (1 + \beta_1 B + \beta_2 B^2 + ... + \beta_q B^q)w_t = \phi_qBw_t
+\end{equation}
+where $\phi_q$ is a polynomial of order 2.
+
+### ARIMA
+
+### VAR
 
 ## Chapter overview
 
