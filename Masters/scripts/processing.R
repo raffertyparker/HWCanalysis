@@ -11,8 +11,6 @@
 
 # Download and extract the files
 # Delete houses 15 and 17 as per github instructions
-# It may be preferable to also delete houses
-# 07, 09, 10, 17b, 19, 21, 23, 26, 28, 41, 43, 46, 47 as per suitable_house.txt
 # Impute total electricity from the submeters using `imputeTotalPower.R`
 # Extract total electricity from the imputed output files using 
 # extractCircuitFromCleanGridSpy1min.R, circuit string "mputed"
@@ -21,7 +19,6 @@
 
 # THIS SCRIPT THEN:
 # Removes houses 07, 09, 10, 17b, 19, 21, 23, 26, 28, 41, 43, 46, 47
-# if not already done
 # Combines hot water elec and total in new datatable
 # Subtracts hot water from total
 # Creates some further summary data which may be unnecessary for the main analysis
@@ -36,8 +33,8 @@ if (!exists("dFile")){
   dFile <- "~/HWCanalysis/Masters/data/" 
 }
 
-p <- fread(paste0(dFile, "mputed_2010-01-01_2020-01-01_observations.csv.gz"))
-q <- fread(paste0(dFile, "ater_2010-01-01_2020-01-01_observations.csv.gz"))
+p <- fread(paste0(dFile, "mputed_2015-07-01_2020-01-01_observations.csv"))
+q <- fread(paste0(dFile, "ater_2015-07-01_2020-01-01_observations.csv.gz"))
 
 # remove unsuitable houses if they haven't been deleted already
 remove <- c("07", "09", "10", "17b", "19", "21", "23", "26", "28", "41", "43", "46", "47")
@@ -85,17 +82,17 @@ save(pc_rm, file = paste0(dFile, "pc_rm"))
 #load(paste0(dFile,"DT.Rda"))
 
 # This gives the datetime as the START of each 15 min average
-DT[, qHour := hms::trunc_hms(dateTime_nz, 15*60)]
+#DT[, qHour := hms::trunc_hms(dateTime_nz, 15*60)]
 
 # This creates the quarter-hour average data.table
 
-DT_qh <- DT %>% 
-  group_by(linkID, qHour) %>% 
-  summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
+#DT_qh <- DT %>% 
+#  group_by(linkID, qHour) %>% 
+#  summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
 
-save(DT_qh, file = paste0(dFile, "DT_qh.Rda"))
+#save(DT_qh, file = paste0(dFile, "DT_qh.Rda"))
 
-# This gives the datetime as the START of each 15 min average
+# This gives the datetime as the START of each 30 min average
 DT[, hHour := hms::trunc_hms(dateTime_nz, 30*60)]
 
 # Now we create the half-hour average data.table
