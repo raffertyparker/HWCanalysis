@@ -1,0 +1,4 @@
+# Discussion
+
+Here is where we compare models to one another and discuss.
+Include a radar chart comparing accuracy, computational efficiency, physical fidelity and interpretability
