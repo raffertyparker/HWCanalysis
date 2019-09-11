@@ -1,3 +1,13 @@
+11/09/19
+
+Don't narrow down comparison to one criteria i.e RMS error, instead use a combination of:
+-RMS accuracy
+-physical fidelity
+-interpretability
+-computational efficiency
+Display these comparisons in a radar chart
+
+
 04/09/19
 
 Overarching aim: produce work that can be built upon i.e. what works, what does not
