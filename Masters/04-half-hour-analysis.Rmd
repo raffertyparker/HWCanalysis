@@ -131,7 +131,7 @@ where $\tilde{\sum}_u (n) = T^{-1} \sum_{t=1}^T \bf{\hat{u}}_t \bf{\hat{u}}_t'$ 
 
 A separate analysis on our data was carried out using this function, with the maximum lag to consider set to 200 for computational punctuality. While the optimal lag varied somewhat for each household, a fixed value to input for each household was desired in order to simplify analysis that involved multiple houses. The value was ultimately fixed at 50 as this was the median optimal $SC(n)$ lag for the houses considered. _Note this seems to be a larger value than traditionally used_
 
-```{r VARModelling, message=FALSE}
+```{r VARModelling,  eval = FALSE }
 #install.packages("remotes")
 #remotes::install_github("DavZim/varsExtra")
 library(varsExtra) # refer to previous two lines for installation
@@ -153,7 +153,7 @@ var1 <- vars::VAR(dt2, p = 50, season = 24, type = "none") # Create model with c
 ```
 
 
-```{r ggfyPrep}
+```{r ggfyPrep, eval = FALSE}
 vals <- var1$datamat %>%
   dplyr::as_tibble() %>%
   dplyr::select(-dplyr::matches("\\.l[0-9]+")) %>%
@@ -192,7 +192,7 @@ dfSimp$datehour <- gsub(".* ", "", as.character(dfSimp$datehour))
 
 ```
 
-```{r zoomedIn, fig.cap="Behaviour of data and VAR model over 48 hours"}
+```{r zoomedIn,eval = FALSE, fig.cap="Behaviour of data and VAR model over 48 hours"}
 
 # select bounds of t to "zoom in" on a section of the plot
 p <- dfSimp %>%
@@ -213,7 +213,7 @@ p+labs(x = "Time", y = "Power (W)")
 #time_format("%H:%M")
 ```
 
-```{r VARACF, fig.cap="Autocovariance of VAR model"}
+```{r VARACF,eval = FALSE, fig.cap="Autocovariance of VAR model"}
 
 dfFitted <- vardf %>%
 dplyr::filter(type == "fitted" & var == "HWelec")
@@ -225,7 +225,7 @@ p + labs(x = "Lag (half hours)", y = "Autocovariance", title = "")
 
 ```
 
-```{r hourlyAverages, fig.cap="Hourly averages of hot water use"}
+```{r hourlyAverages,eval = FALSE, fig.cap="Hourly averages of hot water use"}
 
 library(data.table)
 
@@ -265,7 +265,7 @@ p + labs(x = "Hour of day", y = "Average power (W)", colour = "", linetype = "")
 
 ```
 
-```{r frequencyPlot, fig.cap="Frequency of power observations"}
+```{r frequencyPlot, eval = FALSE, fig.cap="Frequency of power observations"}
 p <- ggplot(dfSimp, aes(x = value, fill = type)) +
   geom_histogram(binwidth = 100) +
   facet_wrap(. ~ type)
@@ -281,7 +281,7 @@ _not really relevant_
 Bijay Neupane, Torben Bach Pedersen, and Bo Thiesson in their paper "Towards Flexibility Detection in Device-Level Energy Consumption" filter short-lived events from their data in order to increase the accuracy of their statistical analysis.
 
 The difference between the expected value the model predicts and the actual value is known as the residual.
-```{r residualDF}
+```{r residualDF, eval = FALSE}
 #residuals(var1)
 
 HWres <- var1$varresult$HWelec$residuals
@@ -293,7 +293,7 @@ sdRes <- sd(HWres)
 sdResAbs <- sd(HWresAbs)
 ```
 
-```{r residualACF, fig.cap="Autocovariance of the VAR model residual"}
+```{r residualACF, eval = FALSE, fig.cap="Autocovariance of the VAR model residual"}
 p <- forecast::ggAcf(HWres, lag.max = weekCycle*2, type = "correlation",
     plot = TRUE, na.action = na.pass)
 p + labs(x = "Lag", y = "Autocorrelation", title = "")
@@ -303,25 +303,26 @@ This plot of the autocorrelation function of the residuals (Fig. \@ref(fig:resid
 
 The absolute value of the residuals is calculated, and the mean of this is taken to demonstrate the error of this model for the individual house selected.
 
-```{r residualsPlot, include=FALSE}
+```{r residualsPlot, eval = FALSE}
 #hidden for now - doesn't really add anything
 plot(HWres, type = "c")
 ```
 
-The mean value and standard deviation of the residual is `r round(meanHWres, 1)`W and `r round(sdRes, 1)` respectively, whereas the mean and standard deviation of the absolute value of the residual is `r round(meanHWresAbs, 1)`W and `r round(sdResAbs, 1)` respectively. This suggests that while the VAR model residual at any one time for an individual house may be too large for accurate forecasting, the addition of more houses may significantly reduce this.
-
+<!--
+The mean value and standard deviation of the residual is r round(meanHWres, 1) W and  r round(sdRes, 1)  respectively, whereas the mean and standard deviation of the absolute value of the residual is  r round(meanHWresAbs, 1) W and  r round(sdResAbs, 1)  respectively. This suggests that while the VAR model residual at any one time for an individual house may be too large for accurate forecasting, the addition of more houses may significantly reduce this.
+-->
 _NOTE: work out error as percent of element power?_
 
 To explore this further we examine a dataframe consisting of the residuals of the various houses (see `scripts/VAR_residual_df.R`). 
 
-```{r loadResidualDF}
+```{r loadResidualDF, eval = FALSE}
 load(file = "~/HWCanalysis/Masters/data/resDF.Rda")
 load(file = "~/HWCanalysis/Masters/data/amalgamatedRes.Rda")
 ```
 
-The mean residual when all `r length(unique(resDF$house))` houses are considered together is `r round(mean(w[,"HWres"]), 1)`W, whereas the mean of the absolute value of all houses considered together is `r round(mean(w[, "HWresAbs"]), 1)`W.
+The mean residual when all r length(unique(resDF$house)) houses are considered together is r round(mean(w[,"HWres"]), 1)W, whereas the mean of the absolute value of all houses considered together is r round(mean(w[, "HWresAbs"]), 1)W.
 
-```{r cyclicalMatrix, include=FALSE}
+```{r cyclicalMatrix, eval = FALSE}
 #incomplete - an attempt to determine the component of the VAR model responsible for cyclical effects
 #cycle <- var1$varresult$HWelec$qr$qr
 #plot(cycle)

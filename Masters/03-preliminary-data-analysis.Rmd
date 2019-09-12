@@ -117,7 +117,7 @@ knitr::kable(freq_DF,
 
 Frequency analysis offers us the ability to automate the process of determining cycles in our data. Through the TSA package 'periodogram' we can extract the most dominant cycle frequencies within our data. These may then be input into later models that have the option of seasonality.  _Do I need to describe technique this package uses to do this? Should I include the periodogram (plot) itself?_
 
-Table \@ref(frequencyAnalysis) shows that while some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many have more erratic patterns, with some being over a year in duration. This is an interesting insight, however it poses a challenge for building "one size fits all" predictive models for our households.
+Table \@ref(tab:frequencyAnalysis) shows that while some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many have more erratic patterns, with some being over a year in duration. This is an interesting insight, however it poses a challenge for building "one size fits all" predictive models for our households.
 
 ## Cross covarience of hot water electricity use with non hot water electricity use
 
