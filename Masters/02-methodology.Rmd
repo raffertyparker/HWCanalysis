@@ -33,18 +33,18 @@ All data processing and modelling was conducted using the `R` programming langua
 
 A time series $\{x_1, x_2, ..., x_n\}$, (also abbreviated to $\{x_t\}$) is a collection of n samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
 
-Many mathematical descriptions of models utilise an operator $B$, known as the 'backward shift' or 'lag' operator, where 
+Many mathematical descriptions of predictive models utilise an operator $B$, known as the 'backward shift' or 'lag' operator, where 
 \begin{equation}
 Bx_t = x_{t+1}
 \end{equation}. 
-
-Many time series' show a general increase or decrease over time, known as a trend, as well as cyclic fluctuations, known as seasonality.
 
 The mean of a sample is denoted with an overline, such that
 
 \begin{equation}
 \overline x = \sum x_i/n
 \end{equation}
+
+Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and non hot-water electricity demand).
 
 ## Introduction to methods and models used
 
@@ -60,9 +60,19 @@ x_t = x_{t+1} + w_t
 where $\{w_t\}$ is a white noise series. 
 This model assumes (providing $\{\overline w_t\} = 0$) that hot water electricity demand of the next timestep can be best predicted by the demand of the current timestep.
 
-### Linear regression
+### Simple linear regression
 
-Linear regression is a common forecasting model prized for its simplicity in interpretation and computation. A linear regression model fits a straight line through each point within the dataset such that the line minimises the sum of the square of each distance between the line and the data points. _Provide equations and show plot to explain_
+Simple linear regression is a common forecasting model prized for its simplicity in interpretation and computation.
+A linear model for time series $\{x_t:t = 1,...,n\}$ is expressed using the formula
+\begin{equation}\label{linearModel}
+x_t = \alpha_0 + \alpha_1u_{1,t} + \alpha_2u_{2,t} + ... + \alpha_mu_{m,t} + z_t
+\end{equation}
+where $u_{i,t}$ is the value of the $i$th explanatory variable at time $t$, $z_t$ is the error at time $t$, and $\alpha_0, \alpha_1, ... , \alpha_n$ are model parameters, which are fitted to the dataset such that the line minimises the sum of the square of each distance between the line and the data points. For this more general method, values of $u_{i,t}$ may take polynomial values, for example $u_{i,t} = t^i$.
+A special case of a linear model is the simple linear regression, which is represented by a straight line. Thus equation \@ref(eq:linearModel) becomes
+\begin{equation}\label{simpleLinearRegression}
+x_t = \alpha_0 + \alpha_1 t
+\end{equation}
+
 For time-series forecasting, linear regression uses time as the independent (or 'explanatory') variable, with the value to be predicted (such as electricity demand) as the dependent (or 'response') variable.  _show figure demonstrating?_
 
 ### Moving average
@@ -78,6 +88,8 @@ x_t = (1 + \beta_1 B + \beta_2 B^2 + ... + \beta_q B^q)w_t = \phi_qBw_t
 where $\phi_q$ is a polynomial of order 2.
 
 ### ARIMA
+
+
 
 ### VAR
 
