@@ -22,7 +22,6 @@ if (!exists("dFile")){
 
 load(paste0(dFile, "DT_hh.Rda"))
 
-
 ```
 
 This chapter uses a selection of models fitted to half hour averaged data in order to forecast the demand of the following half hour.
@@ -34,13 +33,17 @@ _Smooth new UKDS datset_
 
 ## Random walk
 
-```{r randomWalk, eval=FALSE}
-# load appropriate plots here
+In our random walk model we assume no drift, and only attempt to predict one (half hour) time step onto the future. From Equation \@ref(eq:randomWalk), we get 
+\begin{equation}
+\hat x_{t+1} = x_t
+\end{equation}
 
+
+```{r randomWalk, out.width='100%', fig.cap="Actual electricity use and random walk model approximation over one day"}
+knitr::include_graphics(paste0(pFile, "randomWalk/rf06RW.pdf"))
 ```
 
 ## Linear regression of lagged HW electricity
-
 
 While this is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using data that displays cyclic behaviour, such as residential electricity demand.
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
@@ -280,7 +283,7 @@ It can be seen that the model does not fit the data accurately in this regard. I
 _not really relevant_
 Bijay Neupane, Torben Bach Pedersen, and Bo Thiesson in their paper "Towards Flexibility Detection in Device-Level Energy Consumption" filter short-lived events from their data in order to increase the accuracy of their statistical analysis.
 
-The difference between the expected value the model predicts and the actual value is known as the residual.
+
 ```{r residualDF, eval = FALSE}
 #residuals(var1)
 

@@ -24,19 +24,16 @@ The data used for this analysis was collected from monitoring the submetered ele
 knitr::kable(head(DT))
 ```
 
-The data was cleaned and wrangled until it was in the format shown in Table \@ref(headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the actual local datetime, and `HWelec` and `nonHWelec` are the average hot water electricity and non hot water electricity (respectively) used over the time steps in the data (1 minute shown).
+The data was cleaned and wrangled until it was in the format shown in Table \@ref(tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the actual local datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data (original 1 minute shown).
 As we are concerned with predictability and patterns within our data over time, we must utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] was used extensively to inform the overall process.
 
 All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis.
 
 ## Time series overview and notation
 
-A time series $\{x_1, x_2, ..., x_n\}$, (also abbreviated to $\{x_t\}$) is a collection of n samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
+A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
 
-Many mathematical descriptions of predictive models utilise an operator $B$, known as the 'backward shift' or 'lag' operator, where 
-\begin{equation}
-Bx_t = x_{t+1}
-\end{equation}. 
+The difference between an observed value and the value predicted by the model is known as the _residual_. Model that are advanced enough to effectively take into consideration data attributes such as trend and cyclic (or 'seasonal') effects should have a residual time series that appromiates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean.
 
 The mean of a sample is denoted with an overline, such that
 
@@ -44,7 +41,14 @@ The mean of a sample is denoted with an overline, such that
 \overline x = \sum x_i/n
 \end{equation}
 
+Many mathematical descriptions of predictive models utilise an operator $B$, known as the 'backward shift' or 'lag' operator, where 
+\begin{equation}
+Bx_t = x_{t-1}
+\end{equation}. 
+
 Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and non hot-water electricity demand).
+
+
 
 ## Introduction to methods and models used
 
@@ -54,11 +58,11 @@ This section outlines a broad introduction to the various models used.
 
 A time series $\{x_t\}$ is known as a 'random walk' if 
 
-\begin{equation}
+\begin{equation}\label{randomWalk}
 x_t = x_{t+1} + w_t
 \end{equation}
 where $\{w_t\}$ is a white noise series. 
-This model assumes (providing $\{\overline w_t\} = 0$) that hot water electricity demand of the next timestep can be best predicted by the demand of the current timestep.
+This model assumes (provided $\{\overline w_t\} = 0$) that hot water electricity demand of the next timestep can be best predicted by the demand of the current timestep.
 
 ### Simple linear regression
 

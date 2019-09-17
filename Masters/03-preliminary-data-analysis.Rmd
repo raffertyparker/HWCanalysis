@@ -101,7 +101,7 @@ where $k$ is the lag value and $\mu$ is the mean of both $x_t$ and $x_{t+k}$.
 ![Autocovariance of all houses.](~/HWCanalysis/Masters/plots/acf_all_houses.png)
 -->
 
-```{r autocovariance, fig.cap="Autocovariance of all households"}
+```{r autocovariance, out.width='100%', fig.cap="Autocovariance of all households"}
 knitr::include_graphics(paste0(pFile, "acfAllHouses.pdf"))
 ```
 
@@ -109,7 +109,7 @@ The results are interpreted by plotting $\gamma_k$ against the lag values. Figur
 
 While autocovariance plots are valuable for preliminary data analysis, models that incorporate these cycles need more precise numerical values of these cycles. One method of obtaining usable cycle periods is through frequency analysis.
 
-```{r frequencyAnalysis, fig.cap = "Three dominant cycle periods for each household, as determined using frequency analysis"}
+```{r frequencyAnalysis, out.width='100%',fig.cap = "Three dominant cycle periods for each household, as determined using frequency analysis"}
 load(file=paste0(dFile, "freq_DF.Rda"))
 knitr::kable(freq_DF, 
       col.names = c("Household", "Dominance", "Frequency (hours)"))
@@ -130,7 +130,7 @@ where variable $x$ lags variable $y$ by lag $k$[@Cowpertwait2009].
 
 Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use at lags of around half an hour.
 
-```{r crosscovariance, fig.cap="Crosscovariance of all households"}
+```{r crosscovariance, out.width='100%', fig.cap="Crosscovariance of all households"}
 knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
 ```
 
@@ -139,7 +139,7 @@ knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
 One reason why linear prediction models fail with our electricity data is due to the cyclical nature of residential electricity usage (referred to as 'seasonality'). There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using loess', whereby loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
 _Expand on method?_
 
-```{r stl, eval=FALSE}
+```{r stl, include = FALSE, eval=FALSE}
 # Needs editing to work with DT
 
 #df$times <- as.POSIXct(df$times) # may not be necessary if set up correctly
@@ -149,7 +149,7 @@ decomp.HW <- decompose(ts.HW)
 plot(decomp.HW)
 ```
 
-```{r stl_gg, eval=FALSE}
+```{r stl_gg, include = FALSE, eval=FALSE}
 
 #df_xts <- as.xts(df) 
 #frequency(dt$HWelec) <- time3[1]
