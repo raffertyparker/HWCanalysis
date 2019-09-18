@@ -1,15 +1,15 @@
 # Methodology {#methodology}
 
-_Need to broadly describe different approaches - it's fine to introduce ARIMA first then introduce AR, MA and random walks as special cases of ARIMA, these models will be restated (with model parameters) in results chapters_
+_Need to broadly describe different approaches - it may be better to introduce ARIMA first then introduce AR, MA and random walks as special cases of ARIMA. These models will be restated (with model parameters) in results chapters_
 
 This chapter gives a broad introduction to the nature and origin of our data, and the methods used in order to model hot water electricity demand.
-<!-- Required to number equations in HTML files -->
+<!-- Required to number equations in HTML files 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   TeX: { equationNumbers: { autoNumber: "AMS" } }
 });
 </script>
-
+-->
 ```{r loadDTandpc_rm, include=FALSE}
 # This loads percentage of data removed
 load(paste0(dFile, "pc_rm"))
@@ -25,15 +25,17 @@ knitr::kable(head(DT))
 ```
 
 The data was cleaned and wrangled until it was in the format shown in Table \@ref(tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the actual local datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data (original 1 minute shown).
-As we are concerned with predictability and patterns within our data over time, we must utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] was used extensively to inform the overall process.
+For our half hour analysis, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
 
-All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis.
+
+As we are concerned with predictability and patterns within our data over time, we must utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] was used extensively to inform the overall process.
+All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. _it's not yet, but will be_
 
 ## Time series overview and notation
 
-A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
+A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$[@Cowpertwait2009].
 
-The difference between an observed value and the value predicted by the model is known as the _residual_. Model that are advanced enough to effectively take into consideration data attributes such as trend and cyclic (or 'seasonal') effects should have a residual time series that appromiates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean.
+The difference between an observed value and the value predicted by the model is known as the _residual_. Model that are advanced enough to effectively take into consideration data attributes such as trend and cyclic (or 'seasonal') effects should have a residual time series that appromiates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean[@Cowpertwait2009].
 
 The mean of a sample is denoted with an overline, such that
 
@@ -46,13 +48,13 @@ Many mathematical descriptions of predictive models utilise an operator $B$, kno
 Bx_t = x_{t-1}
 \end{equation}. 
 
-Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and non hot-water electricity demand).
+Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and non hot-water electricity demand).[@Cowpertwait2009]
 
 
 
-## Introduction to methods and models used
+## Introduction to methods and models
 
-This section outlines a broad introduction to the various models used.
+This section outlines a broad introduction to the various models used either implicitly or explicitly in this analysis.
 
 ### Random walk
 
@@ -67,7 +69,7 @@ This model assumes (provided $\{\overline w_t\} = 0$) that hot water electricity
 ### Simple linear regression
 
 Simple linear regression is a common forecasting model prized for its simplicity in interpretation and computation.
-A linear model for time series $\{x_t:t = 1,...,n\}$ is expressed using the formula
+More generally, a linear model for time series $\{x_t:t = 1,...,n\}$ is expressed using the formula
 \begin{equation}\label{linearModel}
 x_t = \alpha_0 + \alpha_1u_{1,t} + \alpha_2u_{2,t} + ... + \alpha_mu_{m,t} + z_t
 \end{equation}
@@ -82,7 +84,7 @@ For time-series forecasting, linear regression uses time as the independent (or 
 ### Moving average
 
 A q-order moving average process ($MA(q)$) is defined as
-\begin{equation}\label{MA1}
+\begin{equation}\label{MA}
 x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q}
 \end{equation}
 where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(MA1) can be written in terms of the backshift operator $B$ as
@@ -91,18 +93,41 @@ x_t = (1 + \beta_1 B + \beta_2 B^2 + ... + \beta_q B^q)w_t = \phi_qBw_t
 \end{equation}
 where $\phi_q$ is a polynomial of order 2.
 
+### Autoregression
+
+A time series $x_t$ is an autoregressive process of order $p$ (referred to as $AR(p)$) if it can be represented as
+\begin{equation}\label{AR}
+x_t = \alpha_1x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t
+\end{equation}
+
+where $\{w_t\}$ is white noise and $\alpha_i$ are model parameters, $\alpha_p \neq 0$.
+
+A prediction is then given by
+
+\begin{equation}\label{AR}
+\hat x_{t} = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p}
+\end{equation}.
+
+### Integrated model
+
+Differencing a time series $\{x_t\}$ is a method of removing trends, where, for example with a random walk process, the difference is white noise $x_t - x_{t-1} = w_t$.
+More generally, a time series $\{x_t\}$ is referred to as _integrated_ of order $d$ (denoted $I(d)$) if the $d$th difference of $\{x_t\}$ is white noise.
+_elaborate this slightly_
+The random walk model is the special case $I(1)$.
+
 ### ARIMA
 
-
+An Autoregressive Moving Average (ARMA) process of order $(p,q)$ combines autoregression with the moving average process, adding the two together in the form 
+\begin{equation}\label{ARMA}
+x_t = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q}
+\end{equation}
+This may be expressed in terms of the backward shift operator in polynomial form
+\begin{equation}\label{ARMApolyform}
+\theta (B) x_t = \phi (B) w_t
+\end{equation}
+The three previously described processes are frequently combined into what as known as an Autoregressive Integrated Moving Average.
+A time series $\{x_t\}$ is referred to as an $ARIMA(p,d,q)$ process if, when differenced $d$ times, it becomes an $ARMA(p,q)$ process.
+_put the above 3 together as ARIMA_
 
 ### VAR
-
-## Chapter overview
-
-The main body of analysis is broadly broken into three sections. 
-Chapter \@ref(data-prelim) explains the cleaning and preparatory process, and then provides a broad overview of various relevant patterns and attributes of the data. 
-Smart meters in New Zealand currently store electricity data that has been averaged over half-hour periods. Chapter \@ref(half-hour) explores a number of statistical models to forecast hot water electricity demand of each household using half-hour averaged data. 
-Chapter \@ref(one-min) uses similar models adapted for a one minute frequency, with forecasts predicting a "binary" probabilistic outcome of element on/element off, as this provides closer approximation to the physical process of electricity use of a hot water cylinder.
-The exploratory techniques and predictive models utilised are all described and discussed immediately proceeding the results of their forecasts, as this provides tangible examples to assist in their comprehension.
-Each forecasting model used is then compared to one another by the sum of the root mean squared of the difference between the predicted value and the acual value (known as the 'residual'). These comparative results are provided in the Conclusion (Chapter \@ref(conclusion)).
 
