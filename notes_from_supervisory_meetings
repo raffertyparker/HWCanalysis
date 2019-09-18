@@ -1,3 +1,12 @@
+18/09/19
+
+METHODOLOGY
+Rather than give a general introduction to the mathematics of the models we should describe how well they fit in the context of electricity demand.
+Include examples and plots where necessary
+Include metrics - how each model will be compared to one another.
+Write as if I'm introducing the models to somebody in the electricity sector.
+Reference where other people have used these models for electricity demand.
+
 11/09/19
 
 Don't narrow down comparison to one criteria i.e RMS error, instead use a combination of:
