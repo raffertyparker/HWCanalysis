@@ -20,8 +20,8 @@ rmdLibs <- c("data.table", # data munching
 GREENGridData::loadLibraries(rmdLibs)
 
 #> Local parameters ----
-circuitPattern <- "ater" # change this to change the circuit(s) extracted
-dateFrom <- "2010-01-01" # change this to change the (inclusive) UTC date to search from
+circuitPattern <- "mputed" # change this to change the circuit(s) extracted
+dateFrom <- "2015-07-01" # change this to change the (inclusive) UTC date to search from
 dateTo <- "2020-01-01" # change this to change the (inclusive) UTC date to search to
 # NB: searching in whole UTC dates will produce partial days in other timezones (e.g. NZ). We hate timezones.
 
@@ -37,7 +37,7 @@ if(localData == 1){
   # local
   # amend these paths to suit your location
   # if the script fails it is most probably because the paths are incorrect
-  iPath <- "~/GridspyData/UKDS/powerData/imputed/" # downloaded from https://dx.doi.org/10.5255/UKDA-SN-853334
+  iPath <- "~/HWCanalysis/Masters/powerData/imputed/" # downloaded from https://dx.doi.org/10.5255/UKDA-SN-853334
   oPath <- "~/HWCanalysis/Masters/data/" # where the extract is saved. Create this before you run the script or it will fail
 } else {
   # HCS
