@@ -33,9 +33,9 @@ All data processing and modelling was conducted using the `R` programming langua
 
 ## Time series overview and notation
 
-A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$[@Cowpertwait2009].
+From [@Cowpertwait2009], a time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
 
-The difference between an observed value and the value predicted by the model is known as the _residual_. Model that are advanced enough to effectively take into consideration data attributes such as trend and cyclic (or 'seasonal') effects should have a residual time series that appromiates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean[@Cowpertwait2009].
+The difference between an observed value and the value predicted by the model is known as the _residual_. Model that are advanced enough to effectively take into consideration data attributes such as trend and cyclic (known as 'seasonal') effects should have a residual time series that appromiates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean.
 
 The mean of a sample is denoted with an overline, such that
 
@@ -48,20 +48,19 @@ Many mathematical descriptions of predictive models utilise an operator $B$, kno
 Bx_t = x_{t-1}
 \end{equation}. 
 
-Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and non hot-water electricity demand).[@Cowpertwait2009]
-
-
+Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and non hot-water electricity demand).
 
 ## Introduction to methods and models
 
-This section outlines a broad introduction to the various models used either implicitly or explicitly in this analysis.
+This section outlines a broad introduction to the various models used either implicitly or explicitly in this analysis. Refer to [@Cowpertwait2009] for further information.
 
 ### Random walk
 
 A time series $\{x_t\}$ is known as a 'random walk' if 
 
-\begin{equation}\label{randomWalk}
+\begin{equation}
 x_t = x_{t+1} + w_t
+(\#eq:randomWalk)
 \end{equation}
 where $\{w_t\}$ is a white noise series. 
 This model assumes (provided $\{\overline w_t\} = 0$) that hot water electricity demand of the next timestep can be best predicted by the demand of the current timestep.
@@ -70,22 +69,25 @@ This model assumes (provided $\{\overline w_t\} = 0$) that hot water electricity
 
 Simple linear regression is a common forecasting model prized for its simplicity in interpretation and computation.
 More generally, a linear model for time series $\{x_t:t = 1,...,n\}$ is expressed using the formula
-\begin{equation}\label{linearModel}
+\begin{equation}
 x_t = \alpha_0 + \alpha_1u_{1,t} + \alpha_2u_{2,t} + ... + \alpha_mu_{m,t} + z_t
+(\#eq:linearModel)
 \end{equation}
 where $u_{i,t}$ is the value of the $i$th explanatory variable at time $t$, $z_t$ is the error at time $t$, and $\alpha_0, \alpha_1, ... , \alpha_n$ are model parameters, which are fitted to the dataset such that the line minimises the sum of the square of each distance between the line and the data points. For this more general method, values of $u_{i,t}$ may take polynomial values, for example $u_{i,t} = t^i$.
 A special case of a linear model is the simple linear regression, which is represented by a straight line. Thus equation \@ref(eq:linearModel) becomes
-\begin{equation}\label{simpleLinearRegression}
+\begin{equation}
 x_t = \alpha_0 + \alpha_1 t
+(\#eq:simpleLinearRegression)
 \end{equation}
 
 For time-series forecasting, linear regression uses time as the independent (or 'explanatory') variable, with the value to be predicted (such as electricity demand) as the dependent (or 'response') variable.  _show figure demonstrating?_
 
 ### Moving average
 
-A q-order moving average process ($MA(q)$) is defined as
-\begin{equation}\label{MA}
+A q-order moving average process, $MA(q)$ is defined as
+\begin{equation}
 x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q}
+(\#eq:MA)
 \end{equation}
 where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(MA1) can be written in terms of the backshift operator $B$ as
 \begin{equation}
@@ -96,16 +98,18 @@ where $\phi_q$ is a polynomial of order 2.
 ### Autoregression
 
 A time series $x_t$ is an autoregressive process of order $p$ (referred to as $AR(p)$) if it can be represented as
-\begin{equation}\label{AR}
+\begin{equation}
 x_t = \alpha_1x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t
+(\#eq:AR)
 \end{equation}
 
 where $\{w_t\}$ is white noise and $\alpha_i$ are model parameters, $\alpha_p \neq 0$.
 
 A prediction is then given by
 
-\begin{equation}\label{AR}
+\begin{equation}
 \hat x_{t} = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p}
+(\#eq:ARmodel)
 \end{equation}.
 
 ### Integrated model
@@ -118,16 +122,52 @@ The random walk model is the special case $I(1)$.
 ### ARIMA
 
 An Autoregressive Moving Average (ARMA) process of order $(p,q)$ combines autoregression with the moving average process, adding the two together in the form 
-\begin{equation}\label{ARMA}
+\begin{equation}
 x_t = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q}
+(\#eq:ARMA)
 \end{equation}
 This may be expressed in terms of the backward shift operator in polynomial form
-\begin{equation}\label{ARMApolyform}
+\begin{equation}
 \theta (B) x_t = \phi (B) w_t
+(\#eq:ARMApolyform)
 \end{equation}
 The three previously described processes are frequently combined into what as known as an Autoregressive Integrated Moving Average.
 A time series $\{x_t\}$ is referred to as an $ARIMA(p,d,q)$ process if, when differenced $d$ times, it becomes an $ARMA(p,q)$ process.
-_put the above 3 together as ARIMA_
-
+In a similar manner to how trends can be removed through differencing at lag 1, seasonal effects within data (such as daily use patterns) can be removed by differencing at lag $s$, where $s$ is the length of the season.
+A seasonal ARIMA model may also introduce additional autoregressive and moving average terms at lag $s$, giving a model of the form $ARIMA(p,d,q)(P,D,Q)_s$, expressed using the backward shift operator as
+\begin{equation}
+$\Theta_P(B^s)\theta_p(B)(1-B^s)^D(1-B)^d x_t = \Phi_Q(B^s)\phi_q(B)w_t$
+\end{equation}
 ### VAR
 
+Like ARIMA, but with an extra variable
+
+### Logistic regression
+
+Logistic regression goes here
+
+### Generalised additive models
+
+Generalised additive models goes here
+
+## Metrics
+
+Each model will be compared against one another using the following metrics
+
+### Accuracy
+
+This is determined by the root mean square (RMS) of the residuals, averaged over each house, with lower values indicating higher accuracy.
+
+### Physical fidelity
+
+This is a measure of how closely the model approximates the physical process of the element of the hot water cylinder turning on and off in response to the draw down of hot water. Properties of decent physical fidelity include the non-existance of negative values or values above the maximum power of the element being modelled, and replication of the "on/off" nature of the element at one minute timescales.
+
+### Interpretability
+
+This is a measure of how well we can infer fundamental behavioural properties (cycles, trends, correllations) from the model. For a model to score highly in this metric, its parameters need to be easily obtainable, and reasonably succinct. Models that are easy to interpret are valuable for understanding the human bahaviour behind hot water use, as well as for building simulations for further research. 
+
+### Computational efficiency
+
+For research purposes, the computational expense of modelling the electricity demand of a small number of households isn't of much concern. More computationally expensive models can be run overnight, and outputs need only be obtained once in order to conduct analysis on them.
+When considering industry use however, computational efficiency becomes much more important.
+In order to make the real-time predictions necessary to effectively participate in demand response markets, models for thousands, or even hundreds of thousands of households need to be updated regularly with reasonable speed. In addition to processing expense, the amount of storage space each model requires is also worth consideration when considering large numbers of households.
