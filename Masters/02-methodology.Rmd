@@ -35,7 +35,7 @@ All data processing and modelling was conducted using the `R` programming langua
 
 From [@Cowpertwait2009], a time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
 
-The difference between an observed value and the value predicted by the model is known as the _residual_. Model that are advanced enough to effectively take into consideration data attributes such as trend and cyclic (known as 'seasonal') effects should have a residual time series that appromiates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean.
+The difference between an observed value and the value predicted by the model is known as the _residual_. Most models are fitted to the data such that the model minimises the sum of the square of each residual (referred to as RSS, residual sum of squares). Models that are advanced enough to effectively take into consideration data attributes such as trend and cyclic (known as 'seasonal') effects should have a residual time series that appromiates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean. 
 
 The mean of a sample is denoted with an overline, such that
 
@@ -48,7 +48,7 @@ Many mathematical descriptions of predictive models utilise an operator $B$, kno
 Bx_t = x_{t-1}
 \end{equation}. 
 
-Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and non hot-water electricity demand).
+Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and non hot-water electricity demand). 
 
 ## Introduction to methods and models
 
@@ -73,7 +73,7 @@ More generally, a linear model for time series $\{x_t:t = 1,...,n\}$ is expresse
 x_t = \alpha_0 + \alpha_1u_{1,t} + \alpha_2u_{2,t} + ... + \alpha_mu_{m,t} + z_t
 (\#eq:linearModel)
 \end{equation}
-where $u_{i,t}$ is the value of the $i$th explanatory variable at time $t$, $z_t$ is the error at time $t$, and $\alpha_0, \alpha_1, ... , \alpha_n$ are model parameters, which are fitted to the dataset such that the line minimises the sum of the square of each distance between the line and the data points. For this more general method, values of $u_{i,t}$ may take polynomial values, for example $u_{i,t} = t^i$.
+where $u_{i,t}$ is the value of the $i$th explanatory variable at time $t$, $z_t$ is the error at time $t$, and $\alpha_0, \alpha_1, ... , \alpha_n$ are model parameters, which are fitted to the dataset by minimising the RSS. For this more general method, values of $u_{i,t}$ may take polynomial values, for example $u_{i,t} = t^i$.
 A special case of a linear model is the simple linear regression, which is represented by a straight line. Thus equation \@ref(eq:linearModel) becomes
 \begin{equation}
 x_t = \alpha_0 + \alpha_1 t
@@ -138,13 +138,16 @@ A seasonal ARIMA model may also introduce additional autoregressive and moving a
 \begin{equation}
 $\Theta_P(B^s)\theta_p(B)(1-B^s)^D(1-B)^d x_t = \Phi_Q(B^s)\phi_q(B)w_t$
 \end{equation}
+
 ### VAR
 
-Like ARIMA, but with an extra variable
+Vector Autoregression (VAR) is a model that utilises the same predictive method as the ARIMA model, with the addition of a seperate predictive variable. For this research, our additional variable is all other electricity use. We may reasonably assume that for many houses, the consumption of hot water use would correspond closely to other electricity use. The more obvious example is that electricity use, with the exception of thermostatic electric heating and appliances set to timers, would tend not to occur when residents are away from home or sleeping. In addition, we may expect hot water electricity use to lag (or lead) other electricity use. Consider a resident waking up, putting down some toast and boiling the kettle, then getting into the shower.
+Our VAR model hopes to capture the relationship between hot water use and other electricity use in order to provide additional accuracy to the ARIMA model.
 
 ### Logistic regression
 
-Logistic regression goes here
+The models previously mentioned assume the dependent variables are continuous and have no limits on them. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
+This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent (show figure).
 
 ### Generalised additive models
 
@@ -152,7 +155,7 @@ Generalised additive models goes here
 
 ## Metrics
 
-Each model will be compared against one another using the following metrics
+Each model will be compared against one another using a number of relevent metrics. 
 
 ### Accuracy
 
@@ -160,14 +163,18 @@ This is determined by the root mean square (RMS) of the residuals, averaged over
 
 ### Physical fidelity
 
-This is a measure of how closely the model approximates the physical process of the element of the hot water cylinder turning on and off in response to the draw down of hot water. Properties of decent physical fidelity include the non-existance of negative values or values above the maximum power of the element being modelled, and replication of the "on/off" nature of the element at one minute timescales.
+In addition to accuracy of prediction values, there are benefits to models that closely resemble the physical process they are predicting.  While a model that provides occasional values that are negative or greater than the element can output may provide a minimal RSS, they would be less than ideal to use when modelling for research purposes. 
+Physical fidelity is a measure of how closely the model approximates the physical process of the element of the hot water cylinder turning on and off in response to the draw down of hot water. Properties of decent physical fidelity include the non-existance of negative values or values above the maximum power of the element being modelled, and replication of the "on/off" nature of the element at one minute timescales.
 
 ### Interpretability
 
-This is a measure of how well we can infer fundamental behavioural properties (cycles, trends, correllations) from the model. For a model to score highly in this metric, its parameters need to be easily obtainable, and reasonably succinct. Models that are easy to interpret are valuable for understanding the human bahaviour behind hot water use, as well as for building simulations for further research. 
+Another important consideration for research purposes is interpretation of results. Model interpretability is a measure of how well we can infer fundamental behavioural properties (cycles, trends, correllations) from the model. Models that are easy to interpret are valuable for understanding the human behaviour behind hot water use, as well as for building simulations for further research.
+For a model to score highly in this metric, its parameters need to be easily obtainable, and preferably composed of succinct equations. 
+Models that simply output large matrices score less highly.
 
 ### Computational efficiency
 
 For research purposes, the computational expense of modelling the electricity demand of a small number of households isn't of much concern. More computationally expensive models can be run overnight, and outputs need only be obtained once in order to conduct analysis on them.
 When considering industry use however, computational efficiency becomes much more important.
-In order to make the real-time predictions necessary to effectively participate in demand response markets, models for thousands, or even hundreds of thousands of households need to be updated regularly with reasonable speed. In addition to processing expense, the amount of storage space each model requires is also worth consideration when considering large numbers of households.
+In order to make the real-time predictions necessary to effectively participate in demand response markets, models for thousands, or even hundreds of thousands of households need to be updated at least half-hourly, potentially more often, with reasonable speed. 
+In addition to processing expense, the amount of storage space each model requires is also worth consideration when considering large numbers of households.
