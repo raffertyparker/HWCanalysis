@@ -147,13 +147,11 @@ Our VAR model hopes to capture the relationship between hot water use and other 
 ### Logistic regression
 
 The models previously mentioned assume the dependent variables are continuous and have no limits on them. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
-This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot)
+This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot) for an example of this behaviour.
 
 ```{r elementPlot, out.width='100%', fig.cap="Hot water electricity use over a day for one household"}
 knitr::include_graphics(paste0(pFile, "oneDay.pdf"))
 ```
-
-
 
 ### Generalised additive models
 
