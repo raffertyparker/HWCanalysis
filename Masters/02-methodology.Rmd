@@ -87,7 +87,7 @@ For time-series forecasting, linear regression uses time as the independent (or 
 A q-order moving average process, $MA(q)$ is defined as
 \begin{equation}
 x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q}
-(\#eq:MA)
+(\#eq:MA1)
 \end{equation}
 where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(MA1) can be written in terms of the backshift operator $B$ as
 \begin{equation}
@@ -116,7 +116,7 @@ A prediction is then given by
 
 Differencing a time series $\{x_t\}$ is a method of removing trends, where, for example with a random walk process, the difference is white noise $x_t - x_{t-1} = w_t$.
 More generally, a time series $\{x_t\}$ is referred to as _integrated_ of order $d$ (denoted $I(d)$) if the $d$th difference of $\{x_t\}$ is white noise.
-_elaborate this slightly_
+_elaborate on this slightly_.
 The random walk model is the special case $I(1)$.
 
 ### ARIMA
@@ -147,7 +147,13 @@ Our VAR model hopes to capture the relationship between hot water use and other 
 ### Logistic regression
 
 The models previously mentioned assume the dependent variables are continuous and have no limits on them. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
-This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent (show figure).
+This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot)
+
+```{r elementPlot, out.width='100%', fig.cap="Hot water electricity use over a day for one household"}
+knitr::include_graphics(paste0(pFile, "oneDay.pdf"))
+```
+
+
 
 ### Generalised additive models
 
@@ -155,7 +161,7 @@ Generalised additive models goes here
 
 ## Metrics
 
-Each model will be compared against one another using a number of relevent metrics. 
+Each model will be compared against one another using the following relevent metrics. 
 
 ### Accuracy
 
@@ -164,7 +170,7 @@ This is determined by the root mean square (RMS) of the residuals, averaged over
 ### Physical fidelity
 
 In addition to accuracy of prediction values, there are benefits to models that closely resemble the physical process they are predicting.  While a model that provides occasional values that are negative or greater than the element can output may provide a minimal RSS, they would be less than ideal to use when modelling for research purposes. 
-Physical fidelity is a measure of how closely the model approximates the physical process of the element of the hot water cylinder turning on and off in response to the draw down of hot water. Properties of decent physical fidelity include the non-existance of negative values or values above the maximum power of the element being modelled, and replication of the "on/off" nature of the element at one minute timescales.
+Physical fidelity is a measure of how closely the model approximates the physical process of the element of the hot water cylinder turning on and off in response to the draw down of hot water. Properties of decent physical fidelity include the non-existance of negative values or values above the maximum power of the element being modelled, and replication of the on/off nature of the element at one minute timescales.
 
 ### Interpretability
 
