@@ -1,0 +1,8 @@
+<<<<<<< HEAD
+=======
+  -identify gap in lit
+  -what is this project about (i.e topic of artical)
+  -methodology
+  -findings
+  -conclusions
+>>>>>>> 258eb4bb5f7705f7c64a9f4e2b00630cec090137
