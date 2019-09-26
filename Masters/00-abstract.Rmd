@@ -1,3 +1,5 @@
-The preface pretty much says it all.  \par
-
-Second paragraph of abstract starts here.
+  -identify gap in lit
+  -what is this project about (i.e topic of artical)
+  -methodology
+  -findings
+  -conclusions
