@@ -58,6 +58,24 @@ While this is a useful method of analysing data that has a roughly linear trend,
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
 The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance1)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
 
+```{r loadSLdata}
+load(paste0(dFile, "models/simpleLinear/procTime.Rda"))
+load(paste0(dFile, "models/simpleLinear/sdResSL.Rda"))
+```
+
+```{r simpleLinear, out.width='100%', fig.cap="Actual electricity use and simple linear model approximation using previous half hour's non-hot water electricity over one day for four households"}
+knitr::include_graphics(paste0(pFile, "simpleLinear/fourHouses.pdf"))
+```
+Figure \@ref(fig:simpleLinear) shows the effectiveness of this model for four seperate households. Note that the top two households in the figure, `rf_13` and `rf_30`, show the model fitting reasonable poorly with the data. 
+Household `rf_13` appears to predict increase in hot water electricity demand before it actually occurs. 
+This should be compared to Figure \@ref(fig:crosscovariance), which shows the correllation between hot water and not hot water electricity peaking at around 200 minutes lag.
+Household `rf_30` shows a model which appears to be very unresponsive to the data. Again, on close examination of Figure \@ref(fig:crosscovariance) we see that this household has a peak in crosscorrelation at around 800 minutes. 
+This indicates that for some households, a correlation lag of greater than 30 mins may increase accuracy. 
+Households `rf_42` and `rf_44` show a more accurate model result, however due to the presence of a non-zero y intercept these models will always consistantly overestimate hot water electricity whenever the true value is zero.
+
+This simple linear model has a range of standard deviation of residuals between `r round(min(sdResSL), 2)`W and `r round(max(sdResSL), 2)`W, with a mean of `r mean(sdResSL[,1])`W and median of `r median(sdResSL[,1])`W. 
+The model does not accurately capture zero values, and is significantly smoother than the actual data, however no negative values are present. It therefore scores low to moderate for physical fidelity. 
+Interpretability is high, as the output can be understood by the simple equation $\hat x_{t+1} = \alpha_0 + \alpha_1 w_t$, where $w_t$ is non hot water electricity at time $t$. The computational time to fit models for all households considered was `r round(as.numeric(SLproc[3]), 2)` milliseconds, and the 27 models took up 37.4MB of hard drive space.
 
 ```{r linearRelations, fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity"}
 # Select all except the first value of hot water electricity
@@ -94,7 +112,7 @@ kable(maxCor,
 
 While Table \@ref(fig:ccvMaxLagTable) and Figure \@ref(fig:ccvMaxLagPlot) show that many houses have their maximum values at the boundary (30 minutes), around half have their maximum cross-correlations occurring at longer timescales.
 
-```{r ccvMaxLagPlot, fig.cap="Lag at maximum correllation for each household (bin width 30 minutes)"}
+```{r ccvMaxLagPlot, out.width='100%', fig.cap="Lag at maximum correllation for each household (bin width 30 minutes)"}
 knitr::include_graphics(paste0(pFile, "maxXcorAllHouses.pdf"))
 ```
 
