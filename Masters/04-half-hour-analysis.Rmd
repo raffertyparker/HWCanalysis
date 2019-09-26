@@ -50,11 +50,11 @@ knitr::include_graphics(paste0(pFile, "randomWalk/fourHouses.pdf"))
 
 As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistantly 'missing' the actual values.
 
-The random walk model has a range of standard deviation of residuals between `r round(min(sdResRW), 2)`W and `r round(max(sdResRW), 2)`W, with a mean of `r mean(sdResRW[,1])`W and median of `r median(sdResRW[,1])`W. The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is also high, as the output can be understood by the simple equation $\hat x_{t+1} = x_t$. The computational time to fit models for all households considered was `r round(as.numeric(RWproc[3]), 2)` milliseconds, and the 27 models took up 11.9MB of hard drive space.
+The random walk model has a range of standard deviation of residuals between `r round(min(sdResRW), 2)`W and `r round(max(sdResRW), 2)`W, with a mean of `r round(mean(sdResRW[,1]), 2)`W and median of `r round(median(sdResRW[,1]), 2)`W. The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is also high, as the output can be understood by the simple equation $\hat x_{t+1} = x_t$. The computational time to fit models for all households considered was `r round(as.numeric(RWproc[3]), 2)` milliseconds, and the 27 models took up 11.9MB of hard drive space.
 
-## Linear regression of lagged HW electricity
+## Linear regression of hot water electricity against lagged other electricity
 
-While this is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using data that displays cyclic behaviour, such as residential electricity demand.
+While linear regression is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using data that displays cyclic behaviour, such as residential electricity demand.
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
 The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance1)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
 
