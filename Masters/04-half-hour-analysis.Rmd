@@ -33,6 +33,11 @@ _Smooth new UKDS datset_
 
 ## Random walk
 
+```{r loadRWdata}
+load(paste0(dFile, "models/randomWalk/procTime.Rda"))
+load(paste0(dFile, "models/randomWalk/sdResRW.Rda"))
+```
+
 In our random walk model we assume no drift, and only attempt to predict one (half hour) time step onto the future. From Equation \@ref(eq:randomWalk), we get 
 \begin{equation}
 \hat x_{t+1} = x_t
@@ -44,6 +49,8 @@ knitr::include_graphics(paste0(pFile, "randomWalk/fourHouses.pdf"))
 ```
 
 As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistantly 'missing' the actual values.
+
+The random walk model has a range of standard deviation of residuals between `r round(min(sdResRW), 2)`W and `r round(max(sdResRW), 2)`W, with a mean of `r mean(sdResRW[,1])`W and median of `r median(sdResRW[,1])`W. The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is also high, as the output can be understood by the simple equation $\hat x_{t+1} = x_t$. The computational time to fit models for all households considered was `r round(as.numeric(RWproc[3]), 2)` milliseconds, and the 27 models took up 11.9MB of hard drive space.
 
 ## Linear regression of lagged HW electricity
 
