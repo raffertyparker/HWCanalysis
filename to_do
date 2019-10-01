@@ -1,6 +1,11 @@
 ################## TO DO ##################
 
-Extract RSS from models
+Make sense of rf_24 in acv plot
+Redo ccv plot
+
+Move VAR equation from results to methodology
+
+Extract RSS from models, replace sd in body with RSS
 
 METHODOLOGY (to give to Michael Wed 2nd)
 -Provide context
