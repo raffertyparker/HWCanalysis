@@ -1,16 +1,16 @@
 # Preliminary data analysis {#data-prelim}
 _NOTE: need to mention throught this chapter where and why the preliminary analysis links to the methods_
 
-This chapter explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preperation process, then uses methods to compare and visualise cycles and correllations within relevant variables. The analysis is built upon a broader overview of the data available at https://cfsotago.github.io/GREENGridData/.
+This chapter explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preperation process, then uses methods to compare and visualise cycles and correllations within relevant variables. The analysis draws upon a broader overview of the data available at https://cfsotago.github.io/GREENGridData/.
 
 ## Initial data cleaning
 Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process (see https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19 for more information). 
 Households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering, and household `rf_23` had hot water controlled by a home energy management system. These households are therefore also unsuitable for this analysis and were removed. 
 
-Data files from the remaining households are unzipped and processed using the `GREENGridData` package[cite]. Total electricity is imputed from the submeters using `imputeTotalPower.R`. From this output, we extract imputed total electricity demand and hot water electricity demand using `extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
+Data files from the remaining households are unzipped and processed using the `GREENGridData` package \@ref(R-GREENGridData). Total electricity is imputed from the submeters using the script `imputeTotalPower.R` (obtained from the `GREENGridData` github repository). From this output, we extract imputed total electricity demand and hot water electricity demand using `GREENGridData::extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
 
-The remaining 32 households were combined into one data table. There were some occurrences whereby data existed for total electricity, but not for hot water electricity, giving `NA` values in the hot water electricity column. All rows where this occurred (corresponding to `r round(pc_rm, 2)`% of the total combined data table) were removed. At each point in time for the remaining data, hot water electricity is subtracted from total electricity, giving hot water electricity, and other electricity. 
-_Michael mentioned that I should pick a start date for all data and remove anything before it_ Due to some anomolies in the first occurrences of data collection for some houses a start date of XX/XX/XX was chosen, with data before this period discarded.
+The remaining 32 households were combined into one data table. Hot water electricity is then subtracted from total electricity, giving hot water electricity, and other electricity. 
+Due to some anomolies in the first occurrences of data collection for some houses a start date of 01/07/15 was chosen for all households, with data before this period discarded.
 As much analysis would be carried out for "half hour" data, another datatable was constructed which took averages of the one minute electricity values over each half hour. 
 
 Refer to the script `processing.R` (see appendix) to view the processing code.
@@ -77,9 +77,8 @@ load(paste0(dFile, dtName, ".Rda"))
 ```
 
 ## Data summary
-First, we select a house and investigate the potential for forecasting hot water electricity demand using historical hot water electricity 
-use patterns and/or other household electricity use. The one minute sample rate is maintained for this analysis.
-_This may be better explained through a broader summary of all houses (as already done under Documentation at https://cfsotago.github.io/GREENGridData/) followed by plots of a few houses showing these key concepts_
+
+See Table \@ref{tab:summary1} for the mean values of hot water electricity and other electricity for each household.
 ```{r summary1}
 DT %>%
   group_by(linkID) %>%
@@ -87,7 +86,7 @@ DT %>%
   summarise_each(funs = mean)
 ```
 Note that household 24 has a negative mean non-hot water electricity. This is due to the presence of solar PV. 
-A full list of houses that have solar PV is given in `PV_houses.Rda`. It is not known at this stage whether these negative values will effect our analysis, but we do not remove houses with PV at this stage.
+A full list of houses that have solar PV is given in `PV_houses.Rda`. _It is not known at this stage whether these negative values will effect our analysis, but we do not remove houses with PV at this stage._
 
 ## Autocovariance of hot water use
 
@@ -105,7 +104,8 @@ where $k$ is the lag value and $\mu$ is the mean of both $x_t$ and $x_{t+k}$.
 knitr::include_graphics(paste0(pFile, "acfAllHouses.pdf"))
 ```
 
-The results are interpreted by plotting $\gamma_k$ against the lag values. Figure \@ref(autocovariance) indicates that our houses are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals. In addition, some houses display a third daily cycle, or a weekly cycle (peaks increasing again towards the end of the plot). 
+The results are interpreted by plotting $\gamma_k$ against the lag values. Figure \@ref(fig:autocovariance) indicates that our houses are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals. In addition, some houses display a third daily cycle, or a weekly cycle (peaks increasing again towards the end of the plot). 
+Household `rf_24` displays strong daily anticorrellations. _Currently unsure as to why this is. Household 23 apparently has a HEMS but not 24_
 
 While autocovariance plots are valuable for preliminary data analysis, models that incorporate these cycles need more precise numerical values of these cycles. One method of obtaining usable cycle periods is through frequency analysis.
 
@@ -114,6 +114,7 @@ load(file=paste0(dFile, "freq_DF.Rda"))
 knitr::kable(freq_DF, 
       col.names = c("Household", "Dominance", "Frequency (hours)"))
 ```
+
 
 Frequency analysis offers us the ability to automate the process of determining cycles in our data. Through the TSA package 'periodogram' we can extract the most dominant cycle frequencies within our data. These may then be input into later models that have the option of seasonality.  _Do I need to describe technique this package uses to do this? Should I include the periodogram (plot) itself?_
 
@@ -130,7 +131,7 @@ where variable $x$ lags variable $y$ by lag $k$[@Cowpertwait2009].
 
 Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use at lags of around half an hour.
 
-```{r crosscovariance, out.width='100%', fig.cap="Crosscovariance of all households"}
+```{r crossCovariance, out.width='100%', fig.cap="Crosscovariance of all households"}
 knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
 ```
 
@@ -186,4 +187,4 @@ ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
 
 ```
 
-_This is a great package that seperates out the cycle, trend, and noise, and plots them. The plotting needs some work as you cannot see the cycles very well (need to 'zoom in' on the plot, which isn't working for me right now)._
+_This is a great package that seperates out the cycle, trend, and noise, and plots them. Needs some work to run nicely_
