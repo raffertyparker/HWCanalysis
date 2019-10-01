@@ -20,11 +20,11 @@ load(paste0(dFile, "DT.Rda"))
 
 The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. It is publically available from the UK Data Service. More information about this dataset, including detailed reports of data issues, the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/.
 
-```{r headDT, include=FALSE, fig.cap="Example of the clean and processed data used in the analysis"}
+```{r headDT, fig.cap="Example of the clean and processed data used in the analysis"}
 knitr::kable(head(DT))
 ```
 
-The data was cleaned and wrangled until it was in the format shown in Table \@ref(tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the actual local datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data (original 1 minute shown).
+The data was cleaned and processed until it was in the format shown in Table \@ref(tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the local (New Zealand) datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data (original 1 minute shown).
 For our half hour analysis, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
 
 
@@ -35,7 +35,7 @@ All data processing and modelling was conducted using the `R` programming langua
 
 From [@Cowpertwait2009], a time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
 
-The difference between an observed value and the value predicted by the model is known as the _residual_. Most models are fitted to the data such that the model minimises the sum of the square of each residual (referred to as RSS, residual sum of squares). Models that are advanced enough to effectively take into consideration data attributes such as trend and cyclic (known as 'seasonal') effects should have a residual time series that appromiates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean. 
+The difference between an observed value and the value predicted by the model is known as the _residual_. Most models are fitted to the data such that the model minimises the sum of the square of each residual (referred to as RSS, residual sum of squares). Models that are advanced enough to effectively take into consideration data attributes such as trend and cyclic effects (known as 'seasonality') should have a residual time series that approximates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean. 
 
 The mean of a sample is denoted with an overline, such that
 
@@ -68,13 +68,7 @@ This model assumes (provided $\{\overline w_t\} = 0$) that hot water electricity
 ### Simple linear regression
 
 Simple linear regression is a common forecasting model prized for its simplicity in interpretation and computation.
-More generally, a linear model for time series $\{x_t:t = 1,...,n\}$ is expressed using the formula
-\begin{equation}
-x_t = \alpha_0 + \alpha_1u_{1,t} + \alpha_2u_{2,t} + ... + \alpha_mu_{m,t} + z_t
-(\#eq:linearModel)
-\end{equation}
-where $u_{i,t}$ is the value of the $i$th explanatory variable at time $t$, $z_t$ is the error at time $t$, and $\alpha_0, \alpha_1, ... , \alpha_n$ are model parameters, which are fitted to the dataset by minimising the RSS. For this more general method, values of $u_{i,t}$ may take polynomial values, for example $u_{i,t} = t^i$.
-A special case of a linear model is the simple linear regression, which is represented by a straight line. Thus equation \@ref(eq:linearModel) becomes
+A special case of a linear model is the simple linear regression, which is represented by a straight line. This is represented by the equation
 \begin{equation}
 x_t = \alpha_0 + \alpha_1 t
 (\#eq:simpleLinearRegression)
@@ -89,7 +83,7 @@ A q-order moving average process, $MA(q)$ is defined as
 x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q}
 (\#eq:MA1)
 \end{equation}
-where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(MA1) can be written in terms of the backshift operator $B$ as
+where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(eq:MA1) can be written in terms of the backshift operator $B$ as
 \begin{equation}
 x_t = (1 + \beta_1 B + \beta_2 B^2 + ... + \beta_q B^q)w_t = \phi_qBw_t
 \end{equation}
@@ -141,15 +135,39 @@ A seasonal ARIMA model may also introduce additional autoregressive and moving a
 
 ### VAR
 
-Vector Autoregression (VAR) is a model that utilises the same predictive method as the ARIMA model, with the addition of a seperate predictive variable. For this research, our additional variable is all other electricity use. We may reasonably assume that for many houses, the consumption of hot water use would correspond closely to other electricity use. The more obvious example is that electricity use, with the exception of thermostatic electric heating and appliances set to timers, would tend not to occur when residents are away from home or sleeping. In addition, we may expect hot water electricity use to lag (or lead) other electricity use. Consider a resident waking up, putting down some toast and boiling the kettle, then getting into the shower.
+Vector Autoregression (VAR) is a model that utilises the same predictive method as the ARIMA model, with the addition of (at least) one additional variable. 
+This gives two time series', $\{x_t\}$ and $\{y_t\}$, which, for a VAR(1) process, can be expressed as
+\begin{equation}
+x_t = \theta_{11}x_{t-1} + \theta_{12}y_{t-1} + w_{x,t}
+y_t = \theta_{21}x_{t-1} + \theta_{22}y_{t-1} + w_{y,t}
+(\#eq:VAR1)
+\end{equation}
+where $\{w_{x,t}\}$ and $\{w_{y,t}\}$ are bivariate white noise and $\phi_{i,j}$ are model parameters.
+
+Using matrix notation, equation \@ref(eq:VAR1) can be written as
+\begin{equation}
+\bf{Z}_t = \bf{\Theta}\bf{Z}_{t-1} + \bf{w}_t
+(\#eq:VAR)
+\end{equation}
+where $\bf{Z}_t = \begin{pmatrix}x_t \\ y_t \end{pmatrix}$, $\bf{\Theta} = \begin{pmatrix}\theta_{11} & \theta_{12}\\ \theta_{21} & \theta_{22}\end{pmatrix}$, and $\bf{w}_t = \begin{pmatrix}w_{x,t} \\ w_{y,t}\end{pmatrix}$.
+
+Equation \@ref(eq:VAR) can be expressed using the backshift operator as 
+\begin{equation}
+(\bf{I} - \bf{\Theta}B)\bf{Z}_t = \bf{\Phi}(B)\bf{Z}_{t} + \bf{w}_t
+(\#eq:VARbs)
+\end{equation}
+
+where $\bf{\Phi}$ is a matrix polynomial of order 1 and $\bf{I}$ is a 2 x 2 identity matrix.
+
+For this research, our additional variable is all other electricity use. We may reasonably assume that for many houses, the consumption of hot water use would correspond closely to other electricity use. The more obvious example is that electricity use, with the exception of thermostatic electric heating and appliances set to timers, would tend not to occur when residents are away from home or sleeping. In addition, we may expect hot water electricity use to lag (or lead) other electricity use. Consider a resident waking up, putting down some toast and boiling the kettle, then getting into the shower.
 Our VAR model hopes to capture the relationship between hot water use and other electricity use in order to provide additional accuracy to the ARIMA model.
 
 ### Logistic regression
 
-The models previously mentioned assume the dependent variables are continuous and have no limits on them. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
+The models previously mentioned assume the dependent variables are continuous and have no upper or lower bounds. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
 This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot) for an example of this behaviour.
 
-```{r elementPlot, out.width='100%', fig.cap="Hot water electricity use over a day for one household"}
+```{r elementPlot, include=FALSE, out.width='100%', fig.cap="Hot water electricity use over a day for one household"}
 knitr::include_graphics(paste0(pFile, "oneDay.pdf"))
 ```
 
@@ -159,7 +177,7 @@ Generalised additive models goes here
 
 ## Metrics
 
-Each model will be compared against one another using the following relevent metrics. 
+Each model will be compared against one another using the following metrics. 
 
 ### Accuracy
 
@@ -167,18 +185,18 @@ This is determined by the root mean square (RMS) of the residuals, averaged over
 
 ### Physical fidelity
 
-In addition to accuracy of prediction values, there are benefits to models that closely resemble the physical process they are predicting.  While a model that provides occasional values that are negative or greater than the element can output may provide a minimal RSS, they would be less than ideal to use when modelling for research purposes. 
+In addition to accuracy of prediction values, there are benefits to models that closely resemble the physical process they are predicting.  While a model that provides occasional values that are negative or greater than the element can output may provide a minimal RSS, they would not be optimal to use when modelling for research purposes. 
 Physical fidelity is a measure of how closely the model approximates the physical process of the element of the hot water cylinder turning on and off in response to the draw down of hot water. Properties of decent physical fidelity include the non-existance of negative values or values above the maximum power of the element being modelled, and replication of the on/off nature of the element at one minute timescales.
 
 ### Interpretability
 
 Another important consideration for research purposes is interpretation of results. Model interpretability is a measure of how well we can infer fundamental behavioural properties (cycles, trends, correllations) from the model. Models that are easy to interpret are valuable for understanding the human behaviour behind hot water use, as well as for building simulations for further research.
 For a model to score highly in this metric, its parameters need to be easily obtainable, and preferably composed of succinct equations. 
-Models that simply output large matrices score less highly.
+Models that simply output large matrices score poorly.
 
 ### Computational efficiency
 
-For research purposes, the computational expense of modelling the electricity demand of a small number of households isn't of much concern. More computationally expensive models can be run overnight, and outputs need only be obtained once in order to conduct analysis on them.
+For research purposes, the computational expense of modelling the electricity demand of a small number of households isn't of much concern. 
 When considering industry use however, computational efficiency becomes much more important.
 In order to make the real-time predictions necessary to effectively participate in demand response markets, models for thousands, or even hundreds of thousands of households need to be updated at least half-hourly, potentially more often, with reasonable speed. 
 In addition to processing expense, the amount of storage space each model requires is also worth consideration when considering large numbers of households.
