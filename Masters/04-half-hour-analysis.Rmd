@@ -4,7 +4,7 @@
 knitr::opts_chunk$set(echo=TRUE, engine.path = list(python = '/anaconda/bin/python'))
 ```
 -->
-```{r load30minHouse}
+```{r load30minHouse, include=FALSE}
 # Choose which househould we want to examine
 # Available houses:
 # "06","08","13","22","24","25","27","29","30","31","32",
@@ -24,12 +24,14 @@ load(paste0(dFile, "DT_hh.Rda"))
 
 ```
 
-This chapter uses a selection of models fitted to half hour averaged data in order to forecast the demand of the following half hour.
+This chapter uses a selection of models fitted to our half hour averaged data in order to forecast the demand of the following half hour.
 
-While a more sophisticated model that provides a binary output will be considered in Chapter \@ref(one-min), this project hopes to "build up" the sophistication of the modelling from more mathematically simple techniques.
-In our case, this may be obtained through taking the average hot water electricity demand over each half-hour within the data. This smooths the demand data such that it may be considered to be a continuous variable. _Show plots demonstrating this_ 
-Some additional data preperation is then necessary. 
-_Smooth new UKDS datset_
+While a more sophisticated model that provides a binary on/off output will be considered in Chapter \@ref(one-min), this project hopes to "build up" the sophistication of the modelling from more mathematically simple techniques.
+In our case, this may be obtained through taking the average hot water electricity demand over each half-hour within the data. This smooths the demand data such that it may be closer to approximating to be a continuous variable. 
+```{r hhElementPlot, out.width='100%', fig.cap="Half-hour averaged hot water electricity use over one day"}
+knitr::include_graphics(paste0(pFile, "oneDay30min.pdf"))
+```
+Figure \@ref(fig:hhElementPlot) may be compared with Figure \@ref(fig:elementPlot) in Chapter \@ref(methodology) to see the smooting effect of half-hour averaging.
 
 ## Random walk
 
@@ -50,13 +52,15 @@ knitr::include_graphics(paste0(pFile, "randomWalk/fourHouses.pdf"))
 
 As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistantly 'missing' the actual values.
 
-The random walk model has a range of standard deviation of residuals between `r round(min(sdResRW), 2)`W and `r round(max(sdResRW), 2)`W, with a mean of `r round(mean(sdResRW[,1]), 2)`W and median of `r round(median(sdResRW[,1]), 2)`W. The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is also high, as the output can be understood by the simple equation $\hat x_{t+1} = x_t$. The computational time to fit models for all households considered was `r round(as.numeric(RWproc[3]), 2)` milliseconds, and the 27 models took up 11.9MB of hard drive space.
+The random walk model has a range of standard deviation of residuals between `r round(min(sdResRW), 2)`W and `r round(max(sdResRW), 2)`W, with a mean of `r round(mean(sdResRW[,1]), 2)`W and median of `r round(median(sdResRW[,1]), 2)`W. 
+_Standard deviation probably unnecessary, replace with RSS._ 
+The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is also high, as the output can be understood by the simple equation $\hat x_{t+1} = x_t$. The computational time to fit models for all households considered was `r round(as.numeric(RWproc[3]), 2)` milliseconds, and the 27 models took up 11.9MB of hard drive space.
 
 ## Linear regression of hot water electricity against lagged other electricity
 
 While linear regression is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using data that displays cyclic behaviour, such as residential electricity demand.
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
-The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance1)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
+The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
 
 ```{r loadSLdata}
 load(paste0(dFile, "models/simpleLinear/procTime.Rda"))
@@ -68,49 +72,36 @@ knitr::include_graphics(paste0(pFile, "simpleLinear/fourHouses.pdf"))
 ```
 Figure \@ref(fig:simpleLinear) shows the effectiveness of this model for four seperate households. Note that the top two households in the figure, `rf_13` and `rf_30`, show the model fitting reasonable poorly with the data. 
 Household `rf_13` appears to predict increase in hot water electricity demand before it actually occurs. 
-This should be compared to Figure \@ref(fig:crosscovariance), which shows the correllation between hot water and not hot water electricity peaking at around 200 minutes lag.
+This should be compared to Figure \@ref(fig:crosscovariance), which shows the correllation between hot water and not hot water electricity peaking at around 200 minutes lag for this household.
 Household `rf_30` shows a model which appears to be very unresponsive to the data. Again, on close examination of Figure \@ref(fig:crosscovariance) we see that this household has a peak in crosscorrelation at around 800 minutes. 
 This indicates that for some households, a correlation lag of greater than 30 mins may increase accuracy. 
 Households `rf_42` and `rf_44` show a more accurate model result, however due to the presence of a non-zero y intercept these models will always consistantly overestimate hot water electricity whenever the true value is zero.
 
 This simple linear model has a range of standard deviation of residuals between `r round(min(sdResSL), 2)`W and `r round(max(sdResSL), 2)`W, with a mean of `r mean(sdResSL[,1])`W and median of `r median(sdResSL[,1])`W. 
+_Standard deviation probably unnecessary, replace with RSS._
 The model does not accurately capture zero values, and is significantly smoother than the actual data, however no negative values are present. It therefore scores low to moderate for physical fidelity. 
 Interpretability is high, as the output can be understood by the simple equation $\hat x_{t+1} = \alpha_0 + \alpha_1 w_t$, where $w_t$ is non hot water electricity at time $t$. The computational time to fit models for all households considered was `r round(as.numeric(SLproc[3]), 2)` milliseconds, and the 27 models took up 37.4MB of hard drive space.
 
-```{r linearRelations, fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity"}
-# Select all except the first value of hot water electricity
-HWminusOne <- tail(dt$HWelec, (length(dt$HWelec) - 1))  
-# This gives the HW electricity half an hour "in advance" 
-# of non hot water electricity
-# Now select all except the last value of non HW electricity
-nonHW <- head(dt$nonHWelec, (length(dt$HWelec) - 1))    
-# Last value removed so it is same dimension as HWminusOne
-linearRelData <- as.data.frame(cbind(HWminusOne,nonHW))
-lmFormula <- HWminusOne ~ nonHW
-
-p <- ggplot(data = linearRelData, aes(x = nonHW, y = HWminusOne)) +
-  geom_point() + geom_smooth(method="lm") +
-  stat_poly_eq(formula = lmFormula, 
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
-               label.x.npc = "right",
-               rr.digits = 2, parse = TRUE)         
-p + labs(x = "Non hot water electricity", 
-         y = "Following half-hour hot water electricity", title = "")
+```{r linearRelations, include=FALSE, fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household rf_12"}
+knitr::include_graphics(paste0(pFile, "rf06LinearPlot.pdf"))
 ```
 
 Figure \@ref(fig:linearRelations) shows a simple linear regression of current non hot water electricity demand with the following half-hour's hot water electricity demand. This is shown to demonstrate the ability to use current electricity demand to predict hot water electricity demand over the next half hour. The low $R^2$ value obtained indicates that this would be an inadequate model for forecasting purposes when considered alone, however it has potential as an input into a model that takes other parameters into consideration. 
 
-
+_Consider moving much of this optimal lag time part to the previous chapter_
 We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. The ability to examine these  of these has been constructed by taking the maximum cross covarience value for each house, restricted to lag values above 30 minutes, as this is the minimum lag after which these predictions may be useful for participation in demand response markets in New Zealand.
 
+
 ```{r ccvMaxLagTable}
+
 load(paste0(dFile, "ccv_max.Rda"))
 maxCor <- maxCor[, c(2,1,3)]
 kable(maxCor,
       col.names =  c("Household", "Lag", "Cross covariance"))
 ```
 
-While Table \@ref(fig:ccvMaxLagTable) and Figure \@ref(fig:ccvMaxLagPlot) show that many houses have their maximum values at the boundary (30 minutes), around half have their maximum cross-correlations occurring at longer timescales.
+
+While Table \@ref(tab:ccvMaxLagTable) and Figure \@ref(fig:ccvMaxLagPlot) show that many houses have their maximum values at the boundary (30 minutes), around half have their maximum cross-correlations occurring at longer timescales.
 
 ```{r ccvMaxLagPlot, out.width='100%', fig.cap="Lag at maximum correllation for each household (bin width 30 minutes)"}
 knitr::include_graphics(paste0(pFile, "maxXcorAllHouses.pdf"))
@@ -118,7 +109,7 @@ knitr::include_graphics(paste0(pFile, "maxXcorAllHouses.pdf"))
 
 ## Moving average
 
-_ I might as well include a moving average model. It is easy to impliment and would be a good segue into ARIMA_ 
+_I might as well include a moving average model. It is easy to impliment and would be a good segue into ARIMA_ 
 
 ## ARIMA model
 
@@ -136,6 +127,7 @@ _NOTE it is important to show the benefits of progressing to VAR from ARIMA some
 
 ## Vector Autoregression
 
+_This needs moving to methodology_
 We now explore forecasts using a vector autoregression model. 
 The model is of the following form:
 \begin{equation}
@@ -161,7 +153,7 @@ where $\tilde{\sum}_u (n) = T^{-1} \sum_{t=1}^T \bf{\hat{u}}_t \bf{\hat{u}}_t'$ 
 
 A separate analysis on our data was carried out using this function, with the maximum lag to consider set to 200 for computational punctuality. While the optimal lag varied somewhat for each household, a fixed value to input for each household was desired in order to simplify analysis that involved multiple houses. The value was ultimately fixed at 50 as this was the median optimal $SC(n)$ lag for the houses considered. _Note this seems to be a larger value than traditionally used_
 
-```{r VARModelling,  eval = FALSE }
+```{r VARModelling, include=FALSE, eval = FALSE }
 #install.packages("remotes")
 #remotes::install_github("DavZim/varsExtra")
 library(varsExtra) # refer to previous two lines for installation
@@ -183,7 +175,7 @@ var1 <- vars::VAR(dt2, p = 50, season = 24, type = "none") # Create model with c
 ```
 
 
-```{r ggfyPrep, eval = FALSE}
+```{r ggfyPrep,  include=FALSE, eval = FALSE}
 vals <- var1$datamat %>%
   dplyr::as_tibble() %>%
   dplyr::select(-dplyr::matches("\\.l[0-9]+")) %>%
@@ -222,7 +214,7 @@ dfSimp$datehour <- gsub(".* ", "", as.character(dfSimp$datehour))
 
 ```
 
-```{r zoomedIn,eval = FALSE, fig.cap="Behaviour of data and VAR model over 48 hours"}
+```{r zoomedIn,eval = FALSE,  include=FALSE, fig.cap="Behaviour of data and VAR model over 48 hours"}
 
 # select bounds of t to "zoom in" on a section of the plot
 p <- dfSimp %>%
@@ -243,7 +235,7 @@ p+labs(x = "Time", y = "Power (W)")
 #time_format("%H:%M")
 ```
 
-```{r VARACF,eval = FALSE, fig.cap="Autocovariance of VAR model"}
+```{r VARACF,eval = FALSE,  include=FALSE, fig.cap="Autocovariance of VAR model"}
 
 dfFitted <- vardf %>%
 dplyr::filter(type == "fitted" & var == "HWelec")
@@ -255,7 +247,7 @@ p + labs(x = "Lag (half hours)", y = "Autocovariance", title = "")
 
 ```
 
-```{r hourlyAverages,eval = FALSE, fig.cap="Hourly averages of hot water use"}
+```{r hourlyAverages,eval = FALSE, include=FALSE, fig.cap="Hourly averages of hot water use"}
 
 library(data.table)
 
@@ -295,7 +287,7 @@ p + labs(x = "Hour of day", y = "Average power (W)", colour = "", linetype = "")
 
 ```
 
-```{r frequencyPlot, eval = FALSE, fig.cap="Frequency of power observations"}
+```{r frequencyPlot, eval = FALSE, include=FALSE, fig.cap="Frequency of power observations"}
 p <- ggplot(dfSimp, aes(x = value, fill = type)) +
   geom_histogram(binwidth = 100) +
   facet_wrap(. ~ type)
@@ -306,10 +298,6 @@ p + labs(y = "Observations",
 
 Figure \@ref(fig:frequencyPlot) shows the frequency of observations of power (100W bin width) for both the data and the model.
 It can be seen that the model does not fit the data accurately in this regard. In part this may be due to regular occurrences of the element only needing to reheat the water slightly due to thermal losses from the wall of the tank, or very minor hot water usage events.
-
-_not really relevant_
-Bijay Neupane, Torben Bach Pedersen, and Bo Thiesson in their paper "Towards Flexibility Detection in Device-Level Energy Consumption" filter short-lived events from their data in order to increase the accuracy of their statistical analysis.
-
 
 ```{r residualDF, eval = FALSE}
 #residuals(var1)
