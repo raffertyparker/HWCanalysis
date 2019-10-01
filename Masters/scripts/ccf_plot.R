@@ -22,12 +22,12 @@ for (house in unique(DT$linkID)){
   assign(house, data.frame(q$acf))
 }
 
-ccvDT <- bind_cols(rf_01,rf_02,rf_06,rf_08,rf_11,rf_12,rf_13,rf_14,
-                   rf_15b,rf_16,rf_17a,rf_18,rf_20,rf_22,rf_23,rf_24,
+ccvDT <- bind_cols(rf_01,rf_06,rf_08,rf_11,rf_13,rf_14,
+                   rf_15b,rf_17a,rf_22,rf_24,
                    rf_25,rf_27,rf_29,rf_30,rf_31, rf_32,rf_33,rf_34,
                    rf_35,rf_36,rf_37,rf_38,rf_39,rf_40,rf_42,rf_44,rf_45)
 
-names(ccvDT) <- c("rf_01","rf_02","rf_06","rf_08","rf_11","rf_12","rf_13","rf_14",
+names(ccvDT) <- c("rf_01","rf_06","rf_08","rf_11","rf_13","rf_14",
                   "rf_15b","rf_16","rf_17a","rf_18","rf_20","rf_22","rf_23","rf_24",
                   "rf_25","rf_27","rf_29","rf_30","rf_31","rf_32","rf_33",
                   "rf_34","rf_35","rf_36","rf_37","rf_38","rf_39","rf_40","rf_42",
