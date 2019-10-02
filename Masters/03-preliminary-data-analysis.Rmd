@@ -87,6 +87,17 @@ DT %>%
 ```
 Note that household 24 has a negative mean non-hot water electricity. This is due to the presence of solar PV. 
 A full list of houses that have solar PV is given in `PV_houses.Rda`. _It is not known at this stage whether these negative values will effect our analysis, but we do not remove houses with PV at this stage._
+```{r averagePlot, out.width='100%', include=FALSE, fig.cap="Average daily demand of hot water electricity for each household"}
+knitr::include_graphics(paste0(pFile, "averageDemand.pdf"))
+```
+
+Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks. Also of note is the large variation in average demand. 
+
+```{r HWboxplot, out.width='100%', include=FALSE, fig.cap="Box plot of hot water electricity demand for each household"}
+p <- ggplot2::ggplot(DT, aes(x = linkID, y = HWelec, group = linkID)) +
+  geom_boxplot()
+p + coord_flip()
+```
 
 ## Autocovariance of hot water use
 
@@ -112,7 +123,7 @@ While autocovariance plots are valuable for preliminary data analysis, models th
 ```{r frequencyAnalysis, out.width='100%',fig.cap = "Three dominant cycle periods for each household, as determined using frequency analysis"}
 load(file=paste0(dFile, "freq_DF.Rda"))
 knitr::kable(freq_DF, 
-      col.names = c("Household", "Dominance", "Frequency (hours)"))
+      col.names = c("Household", "Dominance", "Frequency (hours)"), longtable = TRUE)
 ```
 
 

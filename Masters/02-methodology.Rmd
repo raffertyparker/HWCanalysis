@@ -2,7 +2,8 @@
 
 _Need to broadly describe different approaches - it may be better to introduce ARIMA first then introduce AR, MA and random walks as special cases of ARIMA. These models will be restated (with model parameters) in results chapters_
 
-This chapter gives a broad introduction to the nature and origin of our data, and the methods used in order to model hot water electricity demand.
+This chapter begins by giving a broad introduction to the origin of our dataset, as well as noting some necessary preliminary cleaning. It goes on to provide a more theoretical background as to the nature of our data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
+
 <!-- Required to number equations in HTML files 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -18,15 +19,14 @@ load(paste0(dFile, "DT.Rda"))
 
 ## Data background
 
-The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. It is publically available from the UK Data Service. More information about this dataset, including detailed reports of data issues, the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/.
+The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. This dataset is publically available from the UK Data Service. Publications to date that have utilised the dataset include [@Ocampo2015], [@Suomalainen2017], [@Stephenson2018], [@JackKiti2018], and [@JackDew2018]. More information about this dataset, including detailed reports of data issues, the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/. 
 
-```{r headDT, fig.cap="Example of the clean and processed data used in the analysis"}
+```{r headDT, include=FALSE, fig.cap="Example of the clean and processed data used in the analysis"}
 knitr::kable(head(DT))
 ```
 
-The data was cleaned and processed until it was in the format shown in Table \@ref(tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the local (New Zealand) datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data (original 1 minute shown).
-For our half hour analysis, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
-
+For the purposes of the current project, the data was cleaned and processed until it was in the format shown in Table (\#tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the local (New Zealand) datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data.
+Chapter \@ref(half-hour) is concerned with constructing models that accurately represent the data storeage and transmission characteristics of current smart meters in New Zealand, in particular by using electricity demand data that has been averaged over half hour intervals. For this analysis, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
 
 As we are concerned with predictability and patterns within our data over time, we must utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] was used extensively to inform the overall process.
 All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. _it's not yet, but will be_

@@ -14,3 +14,4 @@ source(paste0(sFile, "acv_plot.R")) # This creates ACV plots
 source(paste0(sFile, "freq_analysis.R")) # Calculates the frequency analysis
 source(paste0(sFile, "random_walk.R"))
 source(paste0(sFile, "linear_plot_one_house.R"))
+source(paste0(sFile, "average_demand.R"))
