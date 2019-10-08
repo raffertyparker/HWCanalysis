@@ -68,6 +68,21 @@ setcolorder(DT, neworder =
 DT <- na.omit(DT)
 # Remove HW elec from all elec
 DT$nonHWelec <- DT$nonHWelec - DT$HWelec
+#save(DT, file = paste0(dFile, "DT_no_houses_removed.Rda"))
+load(paste0(dFile,"DT_no_houses_removed.Rda"))
+
+
+# This gives the datetime as the START of each 30 min average
+DT[, hHour := hms::trunc_hms(dateTime_nz, 30*60)]
+# Now we create the half-hour average data.table
+# this is done as the 1min DT was causing the machine to hang
+# when attempting to generate plots
+DT_hh <- DT %>% 
+  group_by(linkID, hHour) %>% 
+  summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
+
+DT_hh <- as.data.table(DT_hh)
+save(DT_hh, file = paste0(dFile, "DT_hh_no_houses_removed.Rda"))
 
 #####################################################################
 # This section creates plots of the raw data to demonstrate anomolies
@@ -75,31 +90,39 @@ DT$nonHWelec <- DT$nonHWelec - DT$HWelec
 
 library(ggplot2)
 
-p <- ggplot(DT, aes(x = dateTime_nz, y = HWelec)) + 
+p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) + 
   geom_point() + 
-  facet_wrap(~linkID)
+  facet_wrap(~linkID, ncol = 4)
 p + labs(x = "Date", y = "Power (W)", 
-         title = paste0("Household ", house))
-ggsave(filename = paste0(pFile, "prelim/allHouses.pdf"))
+         title = "")
+ggsave(filename = paste0(pFile, "prelim/allHouses.png"))
 
-for (house in unique(DT$linkID)){
-  q <- DT[linkID == house]
-  p <- ggplot(q, aes(x = dateTime_nz, y = HWelec)) +
+for (house in unique(DT_hh$linkID)){
+  q <- DT_hh[linkID == house]
+  p <- ggplot(q, aes(x = hHour, y = HWelec)) +
     geom_point()
   p + labs(x = "Date", y = "Power (W)", 
            title = paste0("Household ", house))
   ggsave(filename = paste0(pFile, "prelim/", house, ".pdf"))
 }
 
-
 #####################################################################
 
 # remove date with negative values on rf_14
 DT <- DT[!(linkID == "rf_14" & dateTime_nz < "2015-07-01")] 
 
-# remove missing values
-DT <- DT[!(linkID == "rf_31" & dateTime_nz > "2016-02-27")] 
-save(DT, file = paste0(dFile, "DT.Rda"))
+# Remove missing values
+DT <- DT[!(linkID == "rf_34" & dateTime_nz < "2015-03-27")] # one value then huge hole
+
+
+# May not be necessary to do the rest of these
+# check models with and without holes?
+# INCOMPLETE - see suitable_houses.txt for full list of holes
+#DT <- DT[!(linkID == "rf_06" & dateTime_nz < "2015-01-18") | dateTime_nz > "2017-02-27"] 
+#DT <- DT[!(linkID == "rf_12" & dateTime_nz < "2015-01-04")] 
+#DT <- DT[!(linkID == "rf_15" & dateTime_nz > "2015-09-03")] 
+#DT <- DT[!(linkID == "rf_31" & dateTime_nz > "2016-02-27")] 
+#save(DT, file = paste0(dFile, "DT.Rda"))
 
 # Note that some rows which had only one observation
 # (i.e a nonHWelec value for a particular time with no
@@ -111,7 +134,7 @@ save(pc_rm, file = paste0(dFile, "pc_rm"))
 # This shows that less than 1% (~0.7%) of values have been removed
 # by this process - we can live with this.
 
-load(paste0(dFile,"DT.Rda"))
+#load(paste0(dFile,"DT.Rda"))
 
 # This gives the datetime as the START of each 15 min average
 #DT[, qHour := hms::trunc_hms(dateTime_nz, 15*60)]

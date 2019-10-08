@@ -13,7 +13,23 @@ Hot water is heated with heat pump: rf_11
 Household has controlled hot water (home energy management system): rf_23* and rf_24*
 Extended periods with zero HW electricity: rf_27
 Zero HW electricity recorded after 26 Feb 2016: rf_31
-Negative vlues recorded before 01 Juj 2015: rf_14
+Negative values recorded before 01 Jul 2015: rf_14
+
+Note: currently unsure whether missing data would negatively effect the modelling
+MAY need to EXCLUDE the following
+Chunk of missing values:
+rf_06: before 18 Jan 2015 and after 27 Feb 2017
+rf_12: before 04 Jan 2015
+rf_15b: after 03 Sep 2015
+fr_34: before 27 Mar 2015
+rf_35: before 13 Jul 2016
+rf_36: before 04 Dec 2017
+rf_39: before 20 May 2015 and after 19 Nov 2017
+STILL TO WORK OUT EXACT DATES:
+30, 33, 38, 
+                        
+rf_02 and rf_13 have strange demand profiles (see plots in plots/prelim/)
+Unsure what to do about this.
 
 This leaves suitable houses: 
 
