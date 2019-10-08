@@ -32,14 +32,18 @@ library(dplyr)
 if (!exists("dFile")){
   dFile <- "~/HWCanalysis/Masters/data/" 
 }
+if (!exists("pFile")){
+  pFile <- "~/HWCanalysis/Masters/plots/" 
+}
 
-p <- fread(paste0(dFile, "mputed_2015-07-01_2020-01-01_observations.csv"))
-q <- fread(paste0(dFile, "ater_2015-07-01_2020-01-01_observations.csv.gz"))
+p <- fread(paste0(dFile, "mputed_2010-01-01_2020-01-01_observations.csv.gz"))
+q <- fread(paste0(dFile, "ater_2010-01-01_2020-01-01_observations.csv.gz"))
 
 # remove unsuitable houses if they haven't been deleted already
-remove <- c("07", "09", "10", "17b", "19", "21", "23", "26", "28", "41", "43", "46", "47")
-all_elec <- p[!grepl(paste(remove, collapse="|"), p$hhID),] 
-hw_elec <- q[!grepl(paste(remove, collapse="|"), q$hhID),]
+remove <- c("01", "07", "09", "10", "11", "17a", "17b", "19", "21",
+            "23", "24", "26", "27", "28", "41", "43", "46", "47")
+all_elec <- p[!grepl(paste(remove, collapse="|"), p$linkID),] 
+hw_elec <- q[!grepl(paste(remove, collapse="|"), q$linkID),]
 
 hw_elec <- hw_elec[,c("linkID","r_dateTime","powerW")]
 names(hw_elec) <- c("linkID","r_dateTime","HWelec")
@@ -65,8 +69,36 @@ DT <- na.omit(DT)
 # Remove HW elec from all elec
 DT$nonHWelec <- DT$nonHWelec - DT$HWelec
 
-#DT <- data.table(DT)
+#####################################################################
+# This section creates plots of the raw data to demonstrate anomolies
+# and holes. The offending households are cleaned up after this block
 
+library(ggplot2)
+
+p <- ggplot(DT, aes(x = dateTime_nz, y = HWelec)) + 
+  geom_point() + 
+  facet_wrap(~linkID)
+p + labs(x = "Date", y = "Power (W)", 
+         title = paste0("Household ", house))
+ggsave(filename = paste0(pFile, "prelim/allHouses.pdf"))
+
+for (house in unique(DT$linkID)){
+  q <- DT[linkID == house]
+  p <- ggplot(q, aes(x = dateTime_nz, y = HWelec)) +
+    geom_point()
+  p + labs(x = "Date", y = "Power (W)", 
+           title = paste0("Household ", house))
+  ggsave(filename = paste0(pFile, "prelim/", house, ".pdf"))
+}
+
+
+#####################################################################
+
+# remove date with negative values on rf_14
+DT <- DT[!(linkID == "rf_14" & dateTime_nz < "2015-07-01")] 
+
+# remove missing values
+DT <- DT[!(linkID == "rf_31" & dateTime_nz > "2016-02-27")] 
 save(DT, file = paste0(dFile, "DT.Rda"))
 
 # Note that some rows which had only one observation
@@ -79,7 +111,7 @@ save(pc_rm, file = paste0(dFile, "pc_rm"))
 # This shows that less than 1% (~0.7%) of values have been removed
 # by this process - we can live with this.
 
-#load(paste0(dFile,"DT.Rda"))
+load(paste0(dFile,"DT.Rda"))
 
 # This gives the datetime as the START of each 15 min average
 #DT[, qHour := hms::trunc_hms(dateTime_nz, 15*60)]
