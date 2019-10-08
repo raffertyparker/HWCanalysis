@@ -5,17 +5,21 @@ For more information see the Documentation section at https://cfsotago.github.io
 
 UPDATED:
 
-Numbers not in dataset: 03 through 05
-Removed immediately as per github instructions : 15, 17, 46
-Data doesn't have seperate hot water metering: 07, 09, 10, 17b, 19, 21, 26, 28, 41, 43, 47
-Hot water is heated with heat pump: 11 
-Household has controlled hot water (home energy management system): 23* 
+Numbers not in dataset: rf_03 through rf_05
+Empty data file: rf_02
+Removed immediately as per github instructions : rf_15, rf_17, rf_46
+Data doesn't have seperate hot water metering: rf_07, rf_09, rf_10, rf_17b, rf_19, rf_21, rf_26, rf_28, rf_41, rf_43, rf_47
+Hot water is heated with heat pump: rf_11 
+Household has controlled hot water (home energy management system): rf_23* and rf_24*
+Extended periods with zero HW electricity: rf_27
+Zero HW electricity recorded after 26 Feb 2016: rf_31
+Negative vlues recorded before 01 Juj 2015: rf_14
 
 This leaves suitable houses: 
 
-01, 02, 06, 08, 13, 22, 24*, 25, 27*, 29, 30, 31, 32, 33,
-34**, 35**, 36**, 37, 38, 40, 42**, 44, 45**, 46(**)(***), 
+01, 06, 08, 13, 14(***), 15b, 22, 24*, 25, 29, 30, 31(***), 32, 33,
+34**, 35**, 36**, 37, 38, 40, 42**, 44, 45**, 
 
 * Household has photovoltaic system
 ** Hot water not on ripple control
-*** Hot water has imaginary column
+*** Missing/negative values need deleting
