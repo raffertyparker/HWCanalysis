@@ -1,11 +1,10 @@
 INITIALISE runs all necessary scripts in the correct order, 
 HOWEVER, before it will work:
+  paths to data folder ("dFile") and where to store any generated plot ("pFile") need to be defined
   imputeTotalPower needs data filepaths changed 
   circuitsToSum file must be downloaded from GREENGrid github (if not processing using the GREENGrid package)
   extractCircuitFromCleanGridSpy needs data filepaths changed appropriately
   Houses 15 and 17 need to be deleted as per GREENGrid github instructions
-It my also be preferable to manually delete houses 07, 09, 10, 17b, 19, 21, 23, 26, 28, 41, 43, 46, 47 
-They are automatically removed later anyway, but deleting them initially would save computational costs.
 
 Scripts extractCircuitFromCleanGridSpy and imputeTotalPower are taken from https://github.com/CfSOtago/GREENGridData
 Their original authors are Ben Anderson and Jason Mair (respectively)
