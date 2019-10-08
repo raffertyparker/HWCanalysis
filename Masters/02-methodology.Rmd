@@ -26,35 +26,23 @@ knitr::kable(head(DT))
 ```
 
 For the purposes of the current project, the data was cleaned and processed until it was in the format shown in Table (\#tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the local (New Zealand) datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data.
-Chapter \@ref(half-hour) is concerned with constructing models that accurately represent the data storeage and transmission characteristics of current smart meters in New Zealand, in particular by using electricity demand data that has been averaged over half hour intervals. For this analysis, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
+Chapter \@ref(half-hour) is concerned with constructing models that accurately represent the data storage and transmission characteristics of current smart meters in New Zealand, in particular by using electricity demand data that has been averaged over half hour intervals. For this analysis, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
 
-As we are concerned with predictability and patterns within our data over time, we must utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] was used extensively to inform the overall process.
+As this work is focussed on forecasting hot water electricity usage, we are concerned with predictability and patterns within our data over time, thus we utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] was used extensively to inform the overall process.
 All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. _it's not yet, but will be_
 
 ## Time series overview and notation
 
-From [@Cowpertwait2009], a time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$. A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
+A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009]. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$.  A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$ _May not be necessary to include if we only consider k = 1_.
+The difference between an observed value and the value predicted by the model is known as the _residual_. 
 
-The difference between an observed value and the value predicted by the model is known as the _residual_. Most models are fitted to the data such that the model minimises the sum of the square of each residual (referred to as RSS, residual sum of squares). Models that are advanced enough to effectively take into consideration data attributes such as trend and cyclic effects (known as 'seasonality') should have a residual time series that approximates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean. 
-
-The mean of a sample is denoted with an overline, such that
-
-\begin{equation}
-\overline x = \sum x_i/n
-\end{equation}
-
-Many mathematical descriptions of predictive models utilise an operator $B$, known as the 'backward shift' or 'lag' operator, where 
-\begin{equation}
-Bx_t = x_{t-1}
-\end{equation}. 
-
-Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and non hot-water electricity demand). 
+Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and the electricity demand of other appliances). 
 
 ## Introduction to methods and models
 
 This section outlines a broad introduction to the various models used either implicitly or explicitly in this analysis. Refer to [@Cowpertwait2009] for further information.
 
-### Random walk
+### Naïve model
 
 A time series $\{x_t\}$ is known as a 'random walk' if 
 
@@ -63,7 +51,10 @@ x_t = x_{t+1} + w_t
 (\#eq:randomWalk)
 \end{equation}
 where $\{w_t\}$ is a white noise series. 
-This model assumes (provided $\{\overline w_t\} = 0$) that hot water electricity demand of the next timestep can be best predicted by the demand of the current timestep.
+Random walk models are more commonly used in simulations. When used in simulations, a random walk model will artificially generate white noise to simulate a potential evolution of the variable in time.
+Due to their simplicity and ease of computation they are also used in forecasting as a 'benchmark' model, by which other models may be compared. For this reason, they are referred to as 'naïve' models.
+When used for forecasting, this model assumes that the mean of the white noise is equal to zero, ($\{\overline w_t\} = 0$), and consequently that the dependant variable (hot water electricity demand, in our case) of the next timestep can be best predicted by the demand of the current timestep. 
+_show figure demonstrating_
 
 ### Simple linear regression
 
@@ -74,7 +65,9 @@ x_t = \alpha_0 + \alpha_1 t
 (\#eq:simpleLinearRegression)
 \end{equation}
 
-For time-series forecasting, linear regression uses time as the independent (or 'explanatory') variable, with the value to be predicted (such as electricity demand) as the dependent (or 'response') variable.  _show figure demonstrating?_
+For time-series forecasting, simple linear regression can fit a line to historical values of the dependent (or 'response') variable in order to predict future values. While this useful for determining general trends over time, they cannot capture any regular shorter term fluctuations of time series data (referred to as 'seasonality'). 
+Another way of utilising simple linear regression for forecasting is by introducing a seperate predictor variable. For our data, we seperate electricity demand into hot water, and other appliances. Simple linear regression is a foundational method of exploring how the demand of other appliances at time $t$ can be used to predict hot water electricity demand at a time $t + k$.
+_show figure demonstrating?_
 
 ### Moving average
 
@@ -83,11 +76,11 @@ A q-order moving average process, $MA(q)$ is defined as
 x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q}
 (\#eq:MA1)
 \end{equation}
-where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(eq:MA1) can be written in terms of the backshift operator $B$ as
+where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(eq:MA1) can be expressed as
 \begin{equation}
 x_t = (1 + \beta_1 B + \beta_2 B^2 + ... + \beta_q B^q)w_t = \phi_qBw_t
 \end{equation}
-where $\phi_q$ is a polynomial of order 2.
+where $B$ is the backshift operator, $Bx_t = x_{t-1}$, and $\phi_q$ is a polynomial of order 2.
 
 ### Autoregression
 

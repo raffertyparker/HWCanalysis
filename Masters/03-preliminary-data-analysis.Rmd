@@ -5,9 +5,14 @@ This chapter explores our dataset for the purpose of ascertaining any patterns a
 
 ## Initial data cleaning
 Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process (see https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19 for more information). 
-Households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering, and household `rf_23` had hot water controlled by a home energy management system. These households are therefore also unsuitable for this analysis and were removed. 
-
 Data files from the remaining households are unzipped and processed using the `GREENGridData` package \@ref(R-GREENGridData). Total electricity is imputed from the submeters using the script `imputeTotalPower.R` (obtained from the `GREENGridData` github repository). From this output, we extract imputed total electricity demand and hot water electricity demand using `GREENGridData::extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
+During the preliminary data exploration, a number of households in the dataset were found to have characteristics that deemed them unsuitable for this analysis, and were removed.
+Households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering. 
+Households `rf_23` and `rf_24` had hot water controlled by either a timer or a home energy management system, in order to maximise self-consumption of their solar PV.
+Household `rf_11` had a heat-pump hot water system, which rather than a typical on/off element, instead had constant electricity draw of around 54W.  
+Household `rf_17a` had extremely low hot water electricity values, indicating a problem with the sensor. 
+Households `rf_27`, `rf_01`, `rf_15b`,  had periods of days, weeks, or even months where no hot water electricity was used, interspersed with (somewhat) normal usage. 
+In addition, household `rf_31` only collected zero values for hot water electricity after 26th of February 2016. This household was cropped so as to only contain values before this date.
 
 The remaining 32 households were combined into one data table. Hot water electricity is then subtracted from total electricity, giving hot water electricity, and other electricity. 
 Due to some anomolies in the first occurrences of data collection for some houses a start date of 01/07/15 was chosen for all households, with data before this period discarded.
@@ -94,6 +99,7 @@ knitr::include_graphics(paste0(pFile, "averageDemand.pdf"))
 Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks. Also of note is the large variation in average demand. 
 
 ```{r HWboxplot, out.width='100%', include=FALSE, fig.cap="Box plot of hot water electricity demand for each household"}
+# put this as its own script
 p <- ggplot2::ggplot(DT, aes(x = linkID, y = HWelec, group = linkID)) +
   geom_boxplot()
 p + coord_flip()
@@ -148,8 +154,10 @@ knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
 
 ## Seasonality
 
-One reason why linear prediction models fail with our electricity data is due to the cyclical nature of residential electricity usage (referred to as 'seasonality'). There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using loess', whereby loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
-_Expand on method?_
+Residential electricity usage would be expected to display high seasonality, corresponding to daily (and weekly) behavioural patterns of the household residents.
+There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using loess', whereby loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
+Most models are fitted to the data such that the model minimises the sum of the square of each residual (referred to as RSS, residual sum of squares).
+Models that are advanced enough to effectively take into consideration data attributes such as trend and cyclic effects (known as 'seasonality') have a residual time series that approximates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean. 
 
 ```{r stl, include = FALSE, eval=FALSE}
 # Needs editing to work with DT
