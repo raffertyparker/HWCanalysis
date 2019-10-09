@@ -68,8 +68,8 @@ setcolorder(DT, neworder =
 DT <- na.omit(DT)
 # Remove HW elec from all elec
 DT$nonHWelec <- DT$nonHWelec - DT$HWelec
-#save(DT, file = paste0(dFile, "DT_no_houses_removed.Rda"))
-load(paste0(dFile,"DT_no_houses_removed.Rda"))
+save(DT, file = paste0(dFile, "DT_no_houses_removed.Rda"))
+#load(paste0(dFile,"DT_no_houses_removed.Rda"))
 
 
 # This gives the datetime as the START of each 30 min average
@@ -123,6 +123,17 @@ DT <- DT[!(linkID == "rf_34" & dateTime_nz < "2015-03-27")] # one value then hug
 #DT <- DT[!(linkID == "rf_15" & dateTime_nz > "2015-09-03")] 
 #DT <- DT[!(linkID == "rf_31" & dateTime_nz > "2016-02-27")] 
 #save(DT, file = paste0(dFile, "DT.Rda"))
+library(dplyr)
+
+for (house in unique(DT$linkID)){
+  assign(paste0(house, "_at_1_min"), DT[linkID == house])
+  s <- nrow(get(paste0(house, "_at_1_min")))
+  assign(paste0(house, "_at_1_min_for_fitting"), get(paste0(house, "_at_1_min"))[1:as.integer(0.8*s),]) %>%
+    save(file = paste0(dFile, "households/fitting/", house, "_at_1_min_for_fitting.Rda"))
+  assign(paste0(house, "_at_1_min_for_validating"), get(paste0(house, "_at_1_min"))[as.integer(0.8*s):s,]) %>%
+    save(file = paste0(dFile, "households/validating/", house, "_at_1_min_for_validating.Rda"))
+}
+
 
 # Note that some rows which had only one observation
 # (i.e a nonHWelec value for a particular time with no
