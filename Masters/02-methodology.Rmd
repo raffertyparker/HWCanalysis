@@ -20,6 +20,7 @@ load(paste0(dFile, "DT.Rda"))
 ## Data background
 
 The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. This dataset is publically available from the UK Data Service. Publications to date that have utilised the dataset include [@Ocampo2015], [@Suomalainen2017], [@Stephenson2018], [@JackKiti2018], and [@JackDew2018]. More information about this dataset, including detailed reports of data issues, the cleaning process, and access instructions, is available at https://cfsotago.github.io/GREENGridData/. 
+_MISSING DATA: explain what steps were taken (or not taken) to deal with holes in data. Reference other work if possible. Start by finding how much is missing as a percentage by calculating actual number of data between start date and end date divided by expected number._
 
 ```{r headDT, include=FALSE, fig.cap="Example of the clean and processed data used in the analysis"}
 knitr::kable(head(DT))
@@ -107,7 +108,7 @@ _elaborate on this slightly_.
 The random walk model is the special case $I(1)$.
 
 ### ARIMA
-
+_Perhaps abandon IMA part and just do seasonal AR_
 An Autoregressive Moving Average (ARMA) process of order $(p,q)$ combines autoregression with the moving average process, adding the two together in the form 
 \begin{equation}
 x_t = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q}
@@ -118,7 +119,7 @@ This may be expressed in terms of the backward shift operator in polynomial form
 \theta (B) x_t = \phi (B) w_t
 (\#eq:ARMApolyform)
 \end{equation}
-The three previously described processes are frequently combined into what as known as an Autoregressive Integrated Moving Average.
+The previously described processes are frequently combined into what as known as an Autoregressive Integrated Moving Average.
 A time series $\{x_t\}$ is referred to as an $ARIMA(p,d,q)$ process if, when differenced $d$ times, it becomes an $ARMA(p,q)$ process.
 In a similar manner to how trends can be removed through differencing at lag 1, seasonal effects within data (such as daily use patterns) can be removed by differencing at lag $s$, where $s$ is the length of the season.
 A seasonal ARIMA model may also introduce additional autoregressive and moving average terms at lag $s$, giving a model of the form $ARIMA(p,d,q)(P,D,Q)_s$, expressed using the backward shift operator as
@@ -131,18 +132,32 @@ A seasonal ARIMA model may also introduce additional autoregressive and moving a
 Vector Autoregression (VAR) is a model that utilises the same predictive method as the ARIMA model, with the addition of (at least) one additional variable. 
 This gives two time series', $\{x_t\}$ and $\{y_t\}$, which, for a VAR(1) process, can be expressed as
 \begin{equation}
-x_t = \theta_{11}x_{t-1} + \theta_{12}y_{t-1} + w_{x,t}
-y_t = \theta_{21}x_{t-1} + \theta_{22}y_{t-1} + w_{y,t}
-(\#eq:VAR1)
+    x_t = \theta_{11}x_{t-1} + \theta_{12}y_{t-1} + w_{x,t}
+    (\#eq:VAR1)
 \end{equation}
+\begin{equation}
+    y_t = \theta_{21}x_{t-1} + \theta_{22}y_{t-1} + w_{y,t}
+    (\#eq:VAR2)
+\end{equation}
+
 where $\{w_{x,t}\}$ and $\{w_{y,t}\}$ are bivariate white noise and $\phi_{i,j}$ are model parameters.
 
-Using matrix notation, equation \@ref(eq:VAR1) can be written as
+Using matrix notation, equations \@ref(eq:VAR1) and \@ref(eq:VAR2) can be written as
 \begin{equation}
 \bf{Z}_t = \bf{\Theta}\bf{Z}_{t-1} + \bf{w}_t
 (\#eq:VAR)
 \end{equation}
-where $\bf{Z}_t = \begin{pmatrix}x_t \\ y_t \end{pmatrix}$, $\bf{\Theta} = \begin{pmatrix}\theta_{11} & \theta_{12}\\ \theta_{21} & \theta_{22}\end{pmatrix}$, and $\bf{w}_t = \begin{pmatrix}w_{x,t} \\ w_{y,t}\end{pmatrix}$.
+where 
+\begin{equation*}
+    \bf{Z}_t = \begin{pmatrix}x_t \\ y_t \end{pmatrix}
+\end{equation*}
+\begin{equation*}
+\bf{\Theta} = \begin{pmatrix}\theta_{11} & \theta_{12}\\ \theta_{21} & \theta_{22}\end{pmatrix}
+\end{equation*}
+and
+\begin{equation*}
+\bf{w}_t = \begin{pmatrix}w_{x,t} \\ w_{y,t}\end{pmatrix}
+\end{equation*}.
 
 Equation \@ref(eq:VAR) can be expressed using the backshift operator as 
 \begin{equation}
