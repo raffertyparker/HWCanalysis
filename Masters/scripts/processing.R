@@ -167,7 +167,19 @@ DT_hh <- DT %>%
   group_by(linkID, hHour) %>% 
   summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
 
+DT_hh <- as.data.table(DT_hh)
+setcolorder(DT_hh, c("hHour", "linkID","nonHWelec" ,"HWelec"))
 save(DT_hh, file = paste0(dFile, "DT_hh.Rda"))
+
+# This seperates data into training and test (fitting and validating)
+for (house in unique(DT_hh$linkID)){
+  assign(paste0(house, "_at_30_min"), DT_hh[linkID == house])
+  s <- nrow(get(paste0(house, "_at_30_min")))
+  assign(paste0(house, "_at_30_min_for_fitting"), get(paste0(house, "_at_30_min"))[1:as.integer(0.8*s),]) %>%
+    save(file = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.Rda"))
+  assign(paste0(house, "_at_30_min_for_validating"), get(paste0(house, "_at_30_min"))[as.integer(0.8*s):s,]) %>%
+    save(file = paste0(dFile, "households/validating/", house, "_at_30_min_for_validating.Rda"))
+}
 
 ########################################################################
 # The remainder of this script is generally unnecessary for the main body
