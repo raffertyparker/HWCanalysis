@@ -1,5 +1,6 @@
 ################## TO DO ##################
 
+Plot from Linear + RW using plot_model function
 Create models, get results
 See what others have done with missing data
 Consider removing all reference to IMA
