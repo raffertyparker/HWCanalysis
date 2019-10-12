@@ -123,7 +123,6 @@ DT <- DT[!(linkID == "rf_34" & dateTime_nz < "2015-03-27")] # one value then hug
 #DT <- DT[!(linkID == "rf_15" & dateTime_nz > "2015-09-03")] 
 #DT <- DT[!(linkID == "rf_31" & dateTime_nz > "2016-02-27")] 
 #save(DT, file = paste0(dFile, "DT.Rda"))
-library(dplyr)
 
 for (house in unique(DT$linkID)){
   assign(paste0(house, "_at_1_min"), DT[linkID == house])
@@ -145,7 +144,7 @@ save(pc_rm, file = paste0(dFile, "pc_rm"))
 # This shows that less than 1% (~0.7%) of values have been removed
 # by this process - we can live with this.
 
-#load(paste0(dFile,"DT.Rda"))
+load(paste0(dFile,"DT_hh.Rda"))
 
 # This gives the datetime as the START of each 15 min average
 #DT[, qHour := hms::trunc_hms(dateTime_nz, 15*60)]
@@ -171,14 +170,18 @@ DT_hh <- as.data.table(DT_hh)
 setcolorder(DT_hh, c("hHour", "linkID","nonHWelec" ,"HWelec"))
 save(DT_hh, file = paste0(dFile, "DT_hh.Rda"))
 
+houses <- unique(DT_hh$linkID)
+save(houses, file = paste0(dFile, "houses.Rda"))
+
+load(paste0(dFile, "DT_hh.Rda"))
 # This seperates data into training and test (fitting and validating)
 for (house in unique(DT_hh$linkID)){
   assign(paste0(house, "_at_30_min"), DT_hh[linkID == house])
   s <- nrow(get(paste0(house, "_at_30_min")))
   assign(paste0(house, "_at_30_min_for_fitting"), get(paste0(house, "_at_30_min"))[1:as.integer(0.8*s),]) %>%
-    save(file = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.Rda"))
+  write_csv(path = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
   assign(paste0(house, "_at_30_min_for_validating"), get(paste0(house, "_at_30_min"))[as.integer(0.8*s):s,]) %>%
-    save(file = paste0(dFile, "households/validating/", house, "_at_30_min_for_validating.Rda"))
+    write_csv(path = paste0(dFile, "households/validating/", house, "_at_30_min_for_validating.csv"))
 }
 
 ########################################################################
