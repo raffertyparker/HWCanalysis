@@ -8,7 +8,7 @@ if (!exists("sFile")){
   sFile <- "~/HWCanalysis/Masters/scripts/" 
 }
 if (!exists("DT_hh")){
-load(paste0(dFile, "DT_hh.Rda"))
+  load(paste0(dFile, "DT_hh.Rda"))
 }
 
 library(dplyr)
@@ -18,10 +18,11 @@ library(xts)
 source(paste0(sFile, "plot_model.R"))
 
 #sdResRW <- list()
-DT_hh <- as.xts(DT_hh)
+#DT_hh <- as.xts(DT_hh)
 load(paste0(dFile, "houses.Rda"))
 for (house in houses){
-  p <- forecast::naive(DT_hh$HWelec[DT_hh$linkID == house], h = 1) # compute forecast
+  p <- forecast::naive(as.xts(DT_hh[DT_hh$linkID == house])$HWelec, h = 1) # compute forecast
+  p$x <- as.xts(DT_hh[DT_hh$linkID == house])$HWelec
   assign(paste0(house, "_model"), p) # assigns unique variable name
   get(paste0(house, "_model")) %>%
     save(file = paste0(dFile, "models/randomWalk/", house, "_at_30.Rda"))
@@ -59,4 +60,5 @@ p + labs(y = "Power (W)", colour = "")
 
 ggplot_build(p)$data
 ggsave(filename = paste0(pFile, "randomWalk/fourHouses.pdf"))
+
 
