@@ -13,7 +13,6 @@ if (!exists("DT_hh")){
   load(paste0(dFile, "DT_hh.Rda"))
 }
 
-
 DT_hh$nonHWshift <- shift(DT_hh$nonHWelec)
 #sdResSL <- list()
 load(paste0(dFile, "houses.Rda"))
