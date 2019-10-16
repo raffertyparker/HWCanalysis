@@ -15,6 +15,7 @@ library(forecast)
 library(xts)
 library(data.table)
 library(ggplot2)
+library(readr)
 
 load(paste0(dFile, "houses.Rda"))
 
@@ -30,20 +31,20 @@ for (house in houses){
   assign(paste0("ts_", house, "_testing"), 
          as.xts(get(paste0(house, "_at_30_min_for_validating"))))
 
-  # Create ARIMA model from training data
-  assign(paste0(house, "_30_min_ARIMA"), 
-         auto.arima(get(paste0("ts_", house, "_fitting"))$HWelec, 
-                    stepwise = FALSE, approximation = FALSE)) %>% 
-    save(file = paste0(dFile, "models/ARIMA/", house, "_fitted_model.Rda"))
+  # Create AR model from training data
+  assign(paste0(house, "_30_min_AR"), 
+         modelAR(get(paste0("ts_", house, "_fitting"))$HWelec, 
+                    p = 5, P = 1)) %>% 
+    save(file = paste0(dFile, "models/AR/", house, "_fitted_model.Rda"))
   # Validate model from test data
-  assign(paste0(house, "_30_min_ARIMA_validate"), 
+  assign(paste0(house, "_30_min_AR_validate"), 
          Arima(get(paste0("ts_", house, "_testing"))$HWelec, 
-               model = get(paste0(house, "_30_min_ARIMA")))) %>%
-    save(file = paste0(dFile, "models/ARIMA/", house, "_validated_model.Rda"))
+               model = get(paste0(house, "_30_min_AR")))) %>%
+    save(file = paste0(dFile, "models/AR/", house, "_validated_model.Rda"))
 }
 
 # Make plot for demonstration purposes
-plotModel(get(paste0(house, "_30_min_ARIMA_validate")), "ARIMA")
+plotModel(get(paste0(house, "_30_min_AR_validate")), "AR")
 
 # NEED TO GET LIST AS FULL FILENAME
 # THEN LOAD FILES
