@@ -27,15 +27,16 @@ for (house in houses){
   pMdl <- dplyr::arrange(pMdl, Time)
   assign(house, mdl)
   get(house) %>%
-    save(file = paste0(dFile, "models/simpleLinear/", house, "_at_30.Rda"))
+    saveRDS(file = paste0(dFile, "models/simpleLinear/", house, "_at_30.rds"))
   assign(house, pMdl)
   get(house) %>%
-    save(file = paste0(dFile, "models/simpleLinear/", house, "_at_30_for_plotting.Rda"))
+    saveRDS(file = paste0(dFile, "models/simpleLinear/", house, "_at_30_for_plotting.rds"))
   p <- ggplot(data = get(house)[48:(48*3), ], aes(x = Time)) +
     geom_line(aes(y = value, colour = variable)) +
     labs(y = "Power (W)", colour = "")
   ggsave(filename = paste0(pFile, "simpleLinear/", house, "SL.pdf"))
 }
+
 #sdResSL <- as.data.frame(sdResSL)
 #sdResSL <- as.data.frame(t(sdResSL)) # transposes for ease of computation
 #save(sdResSL, file = paste0(dFile, "models/simpleLinear/sdResSL.Rda"))
@@ -65,16 +66,13 @@ ggplotRegression <- function (fit) {
     labs(title = paste("Adj R2 = ",signif(summary(fit)$adj.r.squared, 5),
                        "Intercept =",signif(fit$coef[[1]],5 ),
                        " Slope =",signif(fit$coef[[2]], 5),
-                       " P =",signif(summary(fit)$coef[2,4], 5)))
+                       " P =",signif(summary(fit)$coef[2,4], 5)),
+         x = "Other appliance demand (time = t)", 
+         y = "Hot water demand (time = t+30 mins)")
 }
 
-
-pMdl <- cbind(DT_hh$hHour[DT_hh$linkID == house], DT_hh$HWelec[DT_hh$linkID == house], mdl$fitted.values)
-pMdl <- data.table(pMdl)
-names(pMdl) <- c("Time", "Actual", "Fitted")
-pMdl$Time <- lubridate::as_datetime(pMdl$Time, tz = 'Pacific/Auckland')
-pMdl <- melt(pMdl, id = "Time")
-pMdl <- dplyr::arrange(pMdl, Time)
+ggplotRegression(mdl)
+ggsave(paste0(pFile, "simpleLinear/rf_13_scatterplot.pdf"))
 
 
 fit1 <- lm(DT_hh$HWelec[DT_hh$linkID == house]~DT_hh$nonHWshift[DT_hh$linkID == house])

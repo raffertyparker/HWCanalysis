@@ -179,7 +179,7 @@ for (house in unique(DT_hh$linkID)){
   assign(paste0(house, "_at_30_min"), DT_hh[linkID == house])
   s <- nrow(get(paste0(house, "_at_30_min")))
   assign(paste0(house, "_at_30_min_for_fitting"), get(paste0(house, "_at_30_min"))[1:as.integer(0.8*s),]) %>%
-  write_csv(path = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
+  readr::write_csv(path = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
   assign(paste0(house, "_at_30_min_for_validating"), get(paste0(house, "_at_30_min"))[as.integer(0.8*s):s,]) %>%
     write_csv(path = paste0(dFile, "households/validating/", house, "_at_30_min_for_validating.csv"))
 }

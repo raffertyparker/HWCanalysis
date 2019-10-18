@@ -15,4 +15,5 @@ plotModel <- function(ModelData, ModelName){
     geom_line(aes(y = value, colour = variable)) +
     labs(y = "Power (W)", colour = "")
   ggsave(filename = paste0(pFile, ModelName,"/", house, ".pdf"))
+  ggsave(filename = paste0(pFile, ModelName,"/", house, ".png"))
 }

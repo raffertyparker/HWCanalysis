@@ -1,6 +1,6 @@
 # Plots 4 houses
 # Needs model in the environment to be named according to household (rf_XX)
-# Could be improved
+# Could be improved i.e. to start and end at midnight
 
 fourPlot <- function(modelName,house1,house2,house3,house4){
   house1$linkID <- deparse(substitute(house1))
@@ -19,4 +19,6 @@ fourPlot <- function(modelName,house1,house2,house3,house4){
   #facet_wrap(. ~ linkID, scales = "free")
   p + labs(y = "Power (W)", colour = "")
   ggsave(filename = paste0(pFile, modelName, "/fourHouses.pdf"))
+  ggsave(filename = paste0(pFile, modelName, "/fourHouses.png"))
 }
+
