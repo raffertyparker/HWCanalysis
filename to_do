@@ -1,9 +1,13 @@
 ################## TO DO ##################
 
+Restructure data to have dummy variables
+Make seasonality error reproducible, ask devs
+Can try break using a sine function, no need to use our data
+CREATE MODELS, GET RESULTS
+bats - SHOULD BE ABLE TO SPECIFY SEASONAL PERIODS
+Force seaonality using dummy variables
 Plot from Linear using plot_model function
-Create models, get results
 See what others have done with missing data
-Consider removing all reference to IMA
 Discuss missing data in methodology
 Make weekly profile plot
 Add other elec (dotted line) to linear model plot
