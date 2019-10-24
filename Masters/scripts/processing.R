@@ -26,7 +26,7 @@
 library(data.table)
 library(lubridate)
 library(dplyr)
-#library(plyr)
+library(readr)
 
 # Set path to where we are keeping data
 if (!exists("dFile")){
@@ -122,7 +122,15 @@ DT <- DT[!(linkID == "rf_34" & dateTime_nz < "2015-03-27")] # one value then hug
 #DT <- DT[!(linkID == "rf_12" & dateTime_nz < "2015-01-04")] 
 #DT <- DT[!(linkID == "rf_15" & dateTime_nz > "2015-09-03")] 
 #DT <- DT[!(linkID == "rf_31" & dateTime_nz > "2016-02-27")] 
-#save(DT, file = paste0(dFile, "DT.Rda"))
+
+
+#load(paste0(dFile, "DT.Rda"))
+
+DT$day <- weekdays(DT$dateTime_nz)
+DT$min <- gsub(".* ","", as.character(DT$dateTime_nz))
+DT$min <- gsub('.{3}$', '', DT$min)
+
+save(DT, file = paste0(dFile, "DT.Rda"))
 
 for (house in unique(DT$linkID)){
   assign(paste0(house, "_at_1_min"), DT[linkID == house])
@@ -132,7 +140,6 @@ for (house in unique(DT$linkID)){
   assign(paste0(house, "_at_1_min_for_validating"), get(paste0(house, "_at_1_min"))[as.integer(0.8*s):s,]) %>%
     save(file = paste0(dFile, "households/validating/", house, "_at_1_min_for_validating.Rda"))
 }
-
 
 # Note that some rows which had only one observation
 # (i.e a nonHWelec value for a particular time with no
@@ -144,7 +151,7 @@ save(pc_rm, file = paste0(dFile, "pc_rm"))
 # This shows that less than 1% (~0.7%) of values have been removed
 # by this process - we can live with this.
 
-load(paste0(dFile,"DT_hh.Rda"))
+#load(paste0(dFile,"DT_hh.Rda"))
 
 # This gives the datetime as the START of each 15 min average
 #DT[, qHour := hms::trunc_hms(dateTime_nz, 15*60)]
@@ -166,14 +173,37 @@ DT_hh <- DT %>%
   group_by(linkID, hHour) %>% 
   summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
 
+DT_hh$day <- weekdays(DT_hh$hHour)
+DT_hh$min <- gsub(".* ","", as.character(DT_hh$hHour))
+DT_hh$min <- gsub('.{3}$', '', DT_hh$min)
+
 DT_hh <- as.data.table(DT_hh)
-setcolorder(DT_hh, c("hHour", "linkID","nonHWelec" ,"HWelec"))
+setcolorder(DT_hh, c("hHour", "min", "day", "linkID","nonHWelec" ,"HWelec"))
+
 save(DT_hh, file = paste0(dFile, "DT_hh.Rda"))
 
 houses <- unique(DT_hh$linkID)
 save(houses, file = paste0(dFile, "houses.Rda"))
 
-load(paste0(dFile, "DT_hh.Rda"))
+#load(paste0(dFile, "DT_hh.Rda"))
+
+# This creates our dummy variables for seasonality
+# Converting
+for (index in unique(DT_hh$day)) {
+DT_hh[[index]] <- DT_hh$day == index
+}
+for(index in unique(DT_hh$min)){
+  DT_hh[[index]] <- DT_hh$min == index
+}
+save(DT_hh, file = paste0(dFile, "DT_hh_dummy.Rda"))
+
+to.replace <- names(which(sapply(DT_hh, is.logical)))
+for (var in to.replace) DT_hh[, (var):= as.numeric(get(var))]
+head(DT_hh)
+
+
+
+
 # This seperates data into training and test (fitting and validating)
 for (house in unique(DT_hh$linkID)){
   assign(paste0(house, "_at_30_min"), DT_hh[linkID == house])
