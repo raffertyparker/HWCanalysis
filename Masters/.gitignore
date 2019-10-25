@@ -1,2 +1,4 @@
 thesis.*
 plots/*
+reproducibleARIMAexample.R
+autoarima.R
