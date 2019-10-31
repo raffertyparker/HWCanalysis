@@ -21,12 +21,14 @@ Chunk of missing values:
 rf_06: before 18 Jan 2015 and after 27 Feb 2017
 rf_12: before 04 Jan 2015
 rf_15b: after 03 Sep 2015
-fr_34: before 27 Mar 2015
+rf_30: after 08 Oct 2015
+rf_31: after 27 Feb 2016
+rf_33: after 2016-10-28
+rf_34: before 27 Mar 2015
 rf_35: before 13 Jul 2016
-rf_36: before 04 Dec 2017
+rf_36: after 04 Dec 2017
+rf_38: before 22 Aug 2016
 rf_39: before 20 May 2015 and after 19 Nov 2017
-STILL TO WORK OUT EXACT DATES:
-30, 33, 38, 
                         
 rf_02 and rf_13 have strange demand profiles (see plots in plots/prelim/)
 Unsure what to do about this.
