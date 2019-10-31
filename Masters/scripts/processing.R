@@ -61,11 +61,13 @@ DT <- data.table(DT)
 DT <- DT[, dateTime_nz := lubridate::as_datetime(r_dateTime, # stored as UTC
                                                  tz = 'Pacific/Auckland')] # so we can extract within NZ dateTime`
 
+houses <- unique(DT$linkID)
+save(houses, file = paste0(dFile, "houses.Rda"))
 # Reorder columns
 setcolorder(DT, neworder = 
               c("linkID","r_dateTime","dateTime_nz","HWelec","nonHWelec"))
 # Remove rows with NA values
-DT <- na.omit(DT)
+#DT <- na.omit(DT)
 # Remove HW elec from all elec
 DT$nonHWelec <- DT$nonHWelec - DT$HWelec
 save(DT, file = paste0(dFile, "DT_no_houses_removed.Rda"))
@@ -97,13 +99,13 @@ p + labs(x = "Date", y = "Power (W)",
          title = "")
 ggsave(filename = paste0(pFile, "prelim/allHouses.png"))
 
-for (house in unique(DT_hh$linkID)){
-  q <- DT_hh[linkID == house]
+for (house in houses){
+  q <- DT[linkID == house]
   p <- ggplot(q, aes(x = hHour, y = HWelec)) +
     geom_point()
   p + labs(x = "Date", y = "Power (W)", 
            title = paste0("Household ", house))
-  ggsave(filename = paste0(pFile, "prelim/", house, ".pdf"))
+  ggsave(filename = paste0(pFile, "prelim/", house, "_test.pdf"))
 }
 
 #####################################################################
@@ -111,35 +113,77 @@ for (house in unique(DT_hh$linkID)){
 # remove date with negative values on rf_14
 DT <- DT[!(linkID == "rf_14" & dateTime_nz < "2015-07-01")] 
 
-# Remove missing values
-DT <- DT[!(linkID == "rf_34" & dateTime_nz < "2015-03-27")] # one value then huge hole
+# Keep largest 'section' of uninterrupted data per household
+# Discard everything else
+DT <- DT[!(linkID == "rf_34" & dateTime_nz < "2015-03-27")] 
+DT <- DT[!(linkID == "rf_06" & (dateTime_nz < "2015-01-18" | dateTime_nz > "2017-02-27"))] 
+DT <- DT[!(linkID == "rf_12" & dateTime_nz < "2015-01-04")] 
+DT <- DT[!(linkID == "rf_15b" & dateTime_nz > "2015-08-28")] 
+DT <- DT[!(linkID == "rf_31" & dateTime_nz > "2016-02-27")] 
+DT <- DT[!(linkID == "rf_30" & dateTime_nz > "2015-10-08")] 
+DT <- DT[!(linkID == "rf_33" & dateTime_nz > "2016-10-28")] 
+DT <- DT[!(linkID == "rf_34" & dateTime_nz < "2015-03-27")] 
+DT <- DT[!(linkID == "rf_35" & dateTime_nz < "2016-07-13")] 
+DT <- DT[!(linkID == "rf_36" & dateTime_nz > "2017-12-04")] 
+DT <- DT[!(linkID == "rf_38" & dateTime_nz < "2016-08-22")] 
+DT <- DT[!(linkID == "rf_39" & (dateTime_nz < "2015-05-20" | dateTime_nz > "2017-11-19"))] 
 
+# Now DT needs to be sorted chronologically by household
+DT <- setkey(DT,linkID,dateTime_nz)
 
-# May not be necessary to do the rest of these
-# check models with and without holes?
-# INCOMPLETE - see suitable_houses.txt for full list of holes
-#DT <- DT[!(linkID == "rf_06" & dateTime_nz < "2015-01-18") | dateTime_nz > "2017-02-27"] 
-#DT <- DT[!(linkID == "rf_12" & dateTime_nz < "2015-01-04")] 
-#DT <- DT[!(linkID == "rf_15" & dateTime_nz > "2015-09-03")] 
-#DT <- DT[!(linkID == "rf_31" & dateTime_nz > "2016-02-27")] 
+# This finds missing values and replaces with zeros
+# by creating a datetime vector the length it should be
+# based on beginning and end times at 1 min intervals
+# Then exports as model training data and validating data
+missingValues <- c()
+for (house in houses) {
+  s <- DT[linkID == house]
+  nRows <- length(s$r_dateTime)
+  nMins <- as.numeric(difftime(s$r_dateTime[nRows], s$r_dateTime[1],
+                               units="mins")) 
+  # Sequence of datetimes spanning from beginning to end of observations
+  dateTime_nz <- seq.POSIXt(from = s$dateTime_nz[1], by = "mins", length.out = nMins)
+  dt <- data.table(dateTime_nz)
+  newDT <- full_join(dt,s) 
+  newDT <- newDT[,c("dateTime_nz", "HWelec", "nonHWelec")]
+  s <- nrow(newDT)
+  # Keep track of missing values by number and percentage of total
+  missingValues <- rbind(missingValues, c(house, sum(is.na(newDT)), 
+                                          round(100*sum(is.na(newDT))/s, 2)))
+  newDT[is.na(newDT)] <- 0
+  assign(paste0(house, "_at_1_min"), newDT)
+  assign(paste0(house, "_at_1_min_for_fitting"), get(paste0(house, "_at_1_min"))[1:as.integer(0.8*s),]) %>%
+    save(file = paste0(dFile, "households/fitting/", house, "_at_1_min_for_fitting.Rda"))
+  assign(paste0(house, "_at_1_min_for_validating"), get(paste0(house, "_at_1_min"))[as.integer(0.8*s):s,]) %>%
+    save(file = paste0(dFile, "households/validating/", house, "_at_1_min_for_validating.Rda"))
+}
+missingValues <- as.data.frame(missingValues)
+names(missingValues) <- c("household", "NAs", "percent")
+write_csv(missingValues, paste0(dFile, "missingValues.csv"))
 
+# Plenty of missing minutes unfortunately
+# Households rf_14, rf_25 and rf_36 in particular
+# all have more than 5% of values missing
 
-#load(paste0(dFile, "DT.Rda"))
+#load(paste0(dFile, "DT_before_holes_removed.Rda"))
+
+######################################################
+# This was used to manually locate larger holes in the data
+#house <- "rf_36"
+#q <- DT[linkID == house]
+#p <- ggplot(q, aes(x = dateTime_nz, y = HWelec)) +
+#  geom_point()
+#p + labs(x = "Date", y = "Power (W)", 
+#         title = paste0("Household ", house))
+#tail(DT[linkID == house])
+#ggsave(filename = paste0(pFile, "prelim/", house, "_test.pdf"))
+######################################################
 
 DT$day <- weekdays(DT$dateTime_nz)
 DT$min <- gsub(".* ","", as.character(DT$dateTime_nz))
 DT$min <- gsub('.{3}$', '', DT$min)
 
 save(DT, file = paste0(dFile, "DT.Rda"))
-
-for (house in unique(DT$linkID)){
-  assign(paste0(house, "_at_1_min"), DT[linkID == house])
-  s <- nrow(get(paste0(house, "_at_1_min")))
-  assign(paste0(house, "_at_1_min_for_fitting"), get(paste0(house, "_at_1_min"))[1:as.integer(0.8*s),]) %>%
-    save(file = paste0(dFile, "households/fitting/", house, "_at_1_min_for_fitting.Rda"))
-  assign(paste0(house, "_at_1_min_for_validating"), get(paste0(house, "_at_1_min"))[as.integer(0.8*s):s,]) %>%
-    save(file = paste0(dFile, "households/validating/", house, "_at_1_min_for_validating.Rda"))
-}
 
 # Note that some rows which had only one observation
 # (i.e a nonHWelec value for a particular time with no
@@ -173,17 +217,38 @@ DT_hh <- DT %>%
   group_by(linkID, hHour) %>% 
   summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
 
-DT_hh$day <- weekdays(DT_hh$hHour)
-DT_hh$min <- gsub(".* ","", as.character(DT_hh$hHour))
-DT_hh$min <- gsub('.{3}$', '', DT_hh$min)
+#DT_hh$day <- weekdays(DT_hh$hHour)
+#DT_hh$min <- gsub(".* ","", as.character(DT_hh$hHour))
+#DT_hh$min <- gsub('.{3}$', '', DT_hh$min)
+
+#DT_hh <- as.data.table(DT_hh)
+#setcolorder(DT_hh, c("hHour", "min", "day", "linkID","nonHWelec" ,"HWelec"))
 
 DT_hh <- as.data.table(DT_hh)
-setcolorder(DT_hh, c("hHour", "min", "day", "linkID","nonHWelec" ,"HWelec"))
+setcolorder(DT_hh, c("hHour", "linkID","nonHWelec" ,"HWelec"))
+
+# Check for missing values again
+for (house in houses) {
+  s <- DT_hh[linkID == house]
+  nRows <- length(s$hHour)
+  nMins <- as.numeric(difftime(s$hHour[nRows], s$hHour[1],
+                               units="hours"))
+  
+  assign(paste0(house, "_missing_hours"), (nMins - nRows/2))
+}
 
 save(DT_hh, file = paste0(dFile, "DT_hh.Rda"))
 
 houses <- unique(DT_hh$linkID)
 save(houses, file = paste0(dFile, "houses.Rda"))
+
+p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) + 
+  geom_point() + 
+  facet_wrap(. ~ linkID, scales = "free", ncol = 4)
+ # facet_wrap(~linkID, ncol = 4)
+p + labs(x = "Date", y = "Power (W)", 
+         title = "")
+ggsave(filename = paste0(pFile, "prelim/allHousesAfterRemoval.png"))
 
 #load(paste0(dFile, "DT_hh.Rda"))
 
