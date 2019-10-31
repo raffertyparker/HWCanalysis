@@ -1,5 +1,6 @@
 # This takes model outputs and plots a day worth
 plotModel <- function(ModelData, ModelName){
+  require(lubridate)
   pMdl <- as.data.table(ModelData$x)
   names(pMdl) <- c("Time", "Actual")
   pMdl$Fitted <- ModelData$fitted
