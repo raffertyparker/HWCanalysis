@@ -130,33 +130,65 @@ DT <- DT[!(linkID == "rf_39" & (dateTime_nz < "2015-05-20" | dateTime_nz > "2017
 
 # Now DT needs to be sorted chronologically by household
 DT <- setkey(DT,linkID,dateTime_nz)
-
+# This gives the datetime as the START of each 30 min average
+DT[, hHour := hms::trunc_hms(dateTime_nz, 30*60)]
 # This finds missing values and replaces with zeros
 # by creating a datetime vector the length it should be
 # based on beginning and end times at 1 min intervals
 # Then exports as model training data and validating data
+# (80% and 20% of the total data, respectively)
 missingValues <- c()
 for (house in houses) {
-  s <- DT[linkID == house]
-  nRows <- length(s$r_dateTime)
-  nMins <- as.numeric(difftime(s$r_dateTime[nRows], s$r_dateTime[1],
+  q <- DT[linkID == house]
+  nRows <- length(q$r_dateTime)
+  nMins <- as.numeric(difftime(q$r_dateTime[nRows], q$r_dateTime[1],
                                units="mins")) 
   # Sequence of datetimes spanning from beginning to end of observations
-  dateTime_nz <- seq.POSIXt(from = s$dateTime_nz[1], by = "mins", length.out = nMins)
+  dateTime_nz <- seq.POSIXt(from = q$dateTime_nz[1], by = "mins", length.out = nMins)
   dt <- data.table(dateTime_nz)
-  newDT <- full_join(dt,s) 
+  newDT <- full_join(dt,q) 
   newDT <- newDT[,c("dateTime_nz", "HWelec", "nonHWelec")]
   s <- nrow(newDT)
   # Keep track of missing values by number and percentage of total
   missingValues <- rbind(missingValues, c(house, sum(is.na(newDT)), 
                                           round(100*sum(is.na(newDT))/s, 2)))
   newDT[is.na(newDT)] <- 0
-  assign(paste0(house, "_at_1_min"), newDT)
+  newDT$dateTime_nz <- as_datetime(newDT$dateTime_nz, tz = 'Pacific/Auckland')
+  assign(paste0(house, "_at_1_min"), newDT) %>%
+    write_csv(path = paste0(dFile, "households/", house, "_at_1_min.csv"))
   assign(paste0(house, "_at_1_min_for_fitting"), get(paste0(house, "_at_1_min"))[1:as.integer(0.8*s),]) %>%
-    save(file = paste0(dFile, "households/fitting/", house, "_at_1_min_for_fitting.Rda"))
+    write_csv(path = paste0(dFile, "households/fitting/", house, "_at_1_min_for_fitting.csv"))
   assign(paste0(house, "_at_1_min_for_validating"), get(paste0(house, "_at_1_min"))[as.integer(0.8*s):s,]) %>%
-    save(file = paste0(dFile, "households/validating/", house, "_at_1_min_for_validating.Rda"))
+    write_csv(path = paste0(dFile, "households/validating/", house, "_at_1_min_for_validating.csv"))
+  newDT <- data.table(newDT)
+  newDT[, hHour := hms::trunc_hms(dateTime_nz, 30*60)]
+  newDT_hh <- newDT %>% 
+    group_by(hHour) %>% 
+    summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
+  # Now create and save the half hour data
+  newDT_hh <- as.data.table(newDT_hh)
+  t <- nrow(newDT_hh)
+  setcolorder(newDT_hh, c("hHour", "nonHWelec" ,"HWelec"))
+  assign(paste0(house, "_at_30_min"), newDT_hh) %>%
+    write_csv(path = paste0(dFile, "households/", house, "_at_30_min.csv"))
+  assign(paste0(house, "_at_30_min_for_fitting"), get(paste0(house, "_at_30_min"))[1:as.integer(0.8*t),]) %>%
+    write_csv(path = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
+  assign(paste0(house, "_at_30_min_for_validating"), get(paste0(house, "_at_30_min"))[as.integer(0.8*t):t,]) %>%
+    write_csv(path = paste0(dFile, "households/validating/", house, "_at_30_min_for_validating.csv"))
 }
+
+#DT_hh <- DT %>% 
+#  group_by(linkID, hHour) %>% 
+#  summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
+
+#DT_hh$day <- weekdays(DT_hh$hHour)
+#DT_hh$min <- gsub(".* ","", as.character(DT_hh$hHour))
+#DT_hh$min <- gsub('.{3}$', '', DT_hh$min)
+
+#DT_hh <- as.data.table(DT_hh)
+#setcolorder(DT_hh, c("hHour", "min", "day", "linkID","nonHWelec" ,"HWelec"))
+
+
 missingValues <- as.data.frame(missingValues)
 names(missingValues) <- c("household", "NAs", "percent")
 write_csv(missingValues, paste0(dFile, "missingValues.csv"))
@@ -185,15 +217,7 @@ DT$min <- gsub('.{3}$', '', DT$min)
 
 save(DT, file = paste0(dFile, "DT.Rda"))
 
-# Note that some rows which had only one observation
-# (i.e a nonHWelec value for a particular time with no
-# corresponding HWelec value for that time) were dropped from DT
-# The following calculates for how many values this ocurred
 
-pc_rm <- (length(all_elec$linkID) - length(hw_elec$linkID))/length(DT$linkID)*100
-save(pc_rm, file = paste0(dFile, "pc_rm"))
-# This shows that less than 1% (~0.7%) of values have been removed
-# by this process - we can live with this.
 
 #load(paste0(dFile,"DT_hh.Rda"))
 
@@ -208,8 +232,7 @@ save(pc_rm, file = paste0(dFile, "pc_rm"))
 
 #save(DT_qh, file = paste0(dFile, "DT_qh.Rda"))
 
-# This gives the datetime as the START of each 30 min average
-DT[, hHour := hms::trunc_hms(dateTime_nz, 30*60)]
+
 
 # Now we create the half-hour average data.table
 
@@ -274,7 +297,7 @@ for (house in unique(DT_hh$linkID)){
   assign(paste0(house, "_at_30_min"), DT_hh[linkID == house])
   s <- nrow(get(paste0(house, "_at_30_min")))
   assign(paste0(house, "_at_30_min_for_fitting"), get(paste0(house, "_at_30_min"))[1:as.integer(0.8*s),]) %>%
-  readr::write_csv(path = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
+    readr::write_csv(path = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
   assign(paste0(house, "_at_30_min_for_validating"), get(paste0(house, "_at_30_min"))[as.integer(0.8*s):s,]) %>%
     write_csv(path = paste0(dFile, "households/validating/", house, "_at_30_min_for_validating.csv"))
 }
