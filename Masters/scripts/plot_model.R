@@ -3,7 +3,10 @@ plotModel <- function(ModelData, ModelName){
   require(lubridate)
   pMdl <- as.data.table(ModelData$x)
   names(pMdl) <- c("Time", "Actual")
-  pMdl$Fitted <- ModelData$fitted
+  ifelse("fitted" %in% names(ModelData), pMdl$Fitted <- ModelData$fitted,
+         pMdl$Fitted <- ModelData$fitted.values)
+#  ifelse(exists("ModelData$fitted"), pMdl$Fitted <- ModelData$fitted,
+#         pMdl$Fitted <- ModelData$fitted.values)
   pMdl <- melt(pMdl, id = "Time") 
   pMdl <- dplyr::arrange(pMdl, Time) # rearranges chronologically
   pMdl$Time <- lubridate::as_datetime(pMdl$Time, # convert from UTC
@@ -15,6 +18,7 @@ plotModel <- function(ModelData, ModelName){
          aes(x = Time)) +
     geom_line(aes(y = value, colour = variable)) +
     labs(y = "Power (W)", colour = "")
+  dir.create(paste0(pFile, ModelName,"/"), showWarnings = FALSE)
   ggsave(filename = paste0(pFile, ModelName,"/", house, ".pdf"))
   ggsave(filename = paste0(pFile, ModelName,"/", house, ".png"))
 }
