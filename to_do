@@ -1,24 +1,18 @@
 ################## TO DO ##################
 
-Restructure data to have dummy variables
-Make seasonality error reproducible, ask devs
+Look at variance etc of DFsummary
+Create GAM with 30 minute data
+Try to plot weighting coefficients and pull out code of how VAR model gets them
+so we may use this for our GAM model
 Can try break using a sine function, no need to use our data
-CREATE MODELS, GET RESULTS
 bats - SHOULD BE ABLE TO SPECIFY SEASONAL PERIODS
-Force seaonality using dummy variables
-Plot from Linear using plot_model function
 See what others have done with missing data
 Discuss missing data in methodology
 Make weekly profile plot
 Add other elec (dotted line) to linear model plot
 Redo ccv plot
-Extract RSS from models, replace sd in body with RSS
-Rewrite lit review under context of predictive models, not thermal models
+Rejig lit review under context of predictive models, not thermal models
 Include electricity forecasting literature in lit review
-Repeat steps of VAR model with ARIMA model for comparison
 Look for patents/papers by Iván Castro
-Create GAM with 30 minute data
-Become familiar with Kalman filter, logistic regression in R
-Try to plot weighting coefficients and pull out code of how VAR model gets them
-so we may use this for our GAM model
+Become familiar with Kalman filter
 Explain/reference frequency analysis/periodogram/stl
