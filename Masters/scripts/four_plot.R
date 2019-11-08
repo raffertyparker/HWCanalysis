@@ -2,23 +2,53 @@
 # Needs model in the environment to be named according to household (rf_XX)
 # Could be improved i.e. to start and end at midnight
 
-fourPlot <- function(modelName,house1,house2,house3,house4){
-  house1$linkID <- deparse(substitute(house1))
-  house2$linkID <- deparse(substitute(house2))
-  house3$linkID <- deparse(substitute(house3))
-  house4$linkID <- deparse(substitute(house4))
-  
-  plotDT <- rbind(house1,house2,house3,house4)
-  
-  plotDT <- dplyr::arrange(plotDT, Time)
-  # plotexample <- plotDT[48:(48*9), ]
-  
-  p <- ggplot(data = plotDT[48:(48*9), ], aes(x = Time)) +
-    geom_line(aes(y = value, colour = variable)) +
-    facet_grid(rows = vars(linkID), scales = "free_y")
-  #facet_wrap(. ~ linkID, scales = "free")
-  p + labs(y = "Power (W)", colour = "")
-  ggsave(filename = paste0(pFile, modelName, "/fourHouses.pdf"))
-  ggsave(filename = paste0(pFile, modelName, "/fourHouses.png"))
+if (!exists("dFile")){
+  dFile <- "~/HWCanalysis/Masters/data/" 
+}
+if (!exists("pFile")){
+  pFile <- "~/HWCanalysis/Masters/plots/" 
 }
 
+library(data.table)
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+library(lubridate)
+
+modelName <- "seasonalNaive"
+fourHouses <- c("rf_06", "rf_13", "rf_22", "rf_40") 
+
+for (house in fourHouses){ # Load appropriate models
+  assign(paste0(house, "_model"), 
+         readRDS(paste0(dFile, "models/", modelName, "/", house, "_model.rds")))
+}
+
+for (house in fourHouses){
+  assign("pMdl", as.data.table(get(paste0(house, "_model"))$x))
+  names(pMdl) <- c("dateTime_nz", "Actual")
+  ifelse("fitted.values" %in% names(get(paste0(house, "_model"))), 
+         pMdl$Fitted <- as.numeric(get(paste0(house, "_model"))$fitted.values),
+         pMdl$Fitted <- as.numeric(get(paste0(house, "_model"))$fitted))
+  pMdl$linkID <- house
+  startTime <- lubridate::as_datetime(paste(as.character( # startTime is midnight on first day of next month
+    rollback(pMdl$dateTime_nz[1] + dweeks(5), roll_to_first = TRUE, preserve_hms = FALSE)), "00:00:00"), 
+    tz = 'Pacific/Auckland')
+  pMdl <- data.table(pMdl)
+  pMdl <- pMdl[!is.na(pMdl$Fitted)] 
+  pMdl <- pMdl[pMdl$dateTime_nz %within% interval(startTime, startTime + days(1)), ]
+  
+  ifelse(house == fourHouses[1], 
+         plotDT <- pMdl,
+         plotDT <- rbind(plotDT, pMdl))
+}
+
+plotDT <- melt(plotDT, id.vars = c("dateTime_nz", "linkID"))
+#plotDT <- arrange(plotDT, dateTime_nz)
+
+p <- ggplot(data = plotDT, aes(x = dateTime_nz)) +
+  geom_line(aes(y = value, colour = variable)) +
+  facet_wrap(~linkID, ncol = 1, scales = "free")
+#facet_wrap(. ~ linkID, scales = "free")
+p + labs(y = "Power (W)", x = "", colour = "")
+ggsave(filename = paste0(pFile, modelName, "/fourHouses.pdf"))
+ggsave(filename = paste0(pFile, modelName, "/fourHouses.png"))
