@@ -20,29 +20,31 @@ library(ggplot2)
 load(paste0(dFile, "houses.Rda"))
 
 for (house in houses){
-  assign(paste0(house, "_at_30_min_for_fitting"), 
-         as.data.table(readr::read_csv(paste0("Masters/data/households/fitting/", 
-                                              house,"_at_30_min_for_fitting.csv"))))
-  assign(paste0(house, "_at_30_min_for_validating"), 
-         as.data.table(readr::read_csv(paste0("Masters/data/households/validating/", 
-                                              house,"_at_30_min_for_validating.csv"))))
-  assign(paste0("ts_", house, "_fitting"), 
-         as.xts(get(paste0(house, "_at_30_min_for_fitting"))))
-  assign(paste0("ts_", house, "_testing"), 
-         as.xts(get(paste0(house, "_at_30_min_for_validating"))))
+  dt_fit <- as.data.table(readr::read_csv(paste0(dFile,"households/fitting/",house,
+                                                 "_at_30_min_for_fitting.csv")))
+  dt_val <- as.data.table(readr::read_csv(paste0(dFile,"households/validating/",house,
+                                                 "_at_30_min_for_validating.csv")))
+  dt_fit$hHour <- lubridate::as_datetime(dt_fit$hHour, tz = 'Pacific/Auckland')
+  dt_fit$dHour <- hour(dt_fit$hHour)
+  dt_val$hHour <- lubridate::as_datetime(dt_val$hHour, tz = 'Pacific/Auckland')
+  dt_val$dHour <- hour(dt_val$hHour)
+  ts_fit <- as.xts(dt_fit)
+  ts_val <- as.xts(dt_val)
   
   # Create ARIMAX model from training data
+  # NOTE due to high frequency of time series this cannot be done using inbuilt seasonality function
+  # instead we send hour of day as an x_reg dummy variable
   assign(paste0(house, "_30_min_ARIMAX"), 
-         auto.arima(get(paste0("ts_", house, "_fitting"))$HWelec, 
+         auto.arima(ts_fit$HWelec, 
                     stepwise = FALSE, approximation = FALSE, 
-                    xreg = get(paste0("ts_", house, "_fitting"))$nonHWelec)) %>% 
+                    xreg = ts_fit$nonHWelec)) %>% 
     save(file = paste0(dFile, "models/ARIMAX/", house, "_fitted_model.Rda"))
   # Validate model from test data
   assign(paste0(house, "_30_min_ARIMAX_validate"), 
-         Arima(get(paste0("ts_", house, "_testing"))$HWelec, 
-               xreg = get(paste0("ts_", house, "_testing"))$nonHWelec, 
+         Arima(ts_val$HWelec, 
+               xreg = ts_val$nonHWelec, 
                model = get(paste0(house, "_30_min_ARIMAX")))) %>%
-    save(file = paste0(dFile, "models/ARIMAX/", house, "_validated_model.Rda"))
+    saveRDS(file = paste0(dFile, "models/ARIMAX/", house, "_validated_model.rds"))
   # Make plot for demonstration purposes
   plotModel(get(paste0(house, "_30_min_ARIMAX_validate")), "ARIMAX")
 }

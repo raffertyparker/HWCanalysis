@@ -1,5 +1,7 @@
 # This calculates a seasonal autoregression for each household 
 # and compares it
+# NOTE auto.arima does NOT consider seasonality
+
 if (!exists("dFile")){
   dFile <- "~/HWCanalysis/Masters/data/" 
 }
@@ -20,7 +22,7 @@ load(paste0(dFile, "houses.Rda"))
 
 for (house in houses){
   assign(paste0(house, "_at_30_min_for_fitting"), 
-         as.data.table(readr::read_csv(paste0("Masters/data/households/fitting/", 
+         as.data.table(readr::read_csv(paste0("households/fitting/", 
                                        house,"_at_30_min_for_fitting.csv"))))
   assign(paste0(house, "_at_30_min_for_validating"), 
          as.data.table(readr::read_csv(paste0("Masters/data/households/validating/", 
@@ -30,17 +32,17 @@ for (house in houses){
   assign(paste0("ts_", house, "_testing"), 
          as.xts(get(paste0(house, "_at_30_min_for_validating")), frequency = 48*365))
 
-  # Create ARIMAX model from training data
+  # Create ARIMA model from training data
   assign(paste0(house, "_30_min_ARIMA"), 
          auto.arima(get(paste0("ts_", house, "_fitting"))$HWelec, 
-                    stepwise = FALSE, approximation = FALSE)) %>% 
-    saveRDS(file = paste0(dFile, "models/ARIMA/", house, "_fitted_model.rds"))
+                    stepwise = FALSE, approximation = FALSE, D = 1))# %>% 
+  #   saveRDS(file = paste0(dFile, "models/ARIMA/", house, "_fitted_model.rds"))
   # Validate model from test data
-  assign(house, 
- # assign(paste0(house, "_30_min_ARIMA_validate"), 
+ # assign(house, 
+  assign(paste0(house, "_30_min_ARIMA_validate"), 
          Arima(get(paste0("ts_", house, "_testing"))$HWelec, 
-               model = get(paste0(house, "_30_min_ARIMA")))) %>%
-   saveRDS(file = paste0(dFile, "models/ARIMA/", house, "_validated_model.rds"))
+               model = get(paste0(house, "_30_min_ARIMA"))))# %>%
+ #  saveRDS(file = paste0(dFile, "models/ARIMA/", house, "_validated_model.rds"))
   # Make plot for demonstration purposes
 #  plotModel(get(paste0(house, "_30_min_ARIMA_validate")), "ARIMA")
 }
