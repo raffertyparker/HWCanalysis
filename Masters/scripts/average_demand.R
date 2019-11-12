@@ -27,6 +27,7 @@ p <- ggplot(DT_hh, aes(x=dayHour, y=HWelec))+
   facet_wrap(~linkID, ncol = 4, scales = "free_y")
 p + labs(x = "Hour of day", y = "Average demand (W)")
 ggsave(filename = paste0(pFile, "averages/averageDemand.pdf"))
+ggsave(filename = paste0(pFile, "averages/averageDemand.png"))
 
 # day plot (all households, other appliances)
 p <- ggplot(DT_hh, aes(x=dayHour, y=nonHWelec))+
@@ -34,6 +35,7 @@ p <- ggplot(DT_hh, aes(x=dayHour, y=nonHWelec))+
   facet_wrap(~linkID, ncol = 4, scales = "free_y")
 p + labs(x = "Hour of day", y = "Average demand (W)")
 ggsave(filename = paste0(pFile, "averages/averageNONHWDemand.pdf"))
+ggsave(filename = paste0(pFile, "averages/averageNONHWDemand.png"))
 
 # week plot (all households)
 p <- ggplot(DT_hh, aes(x=weekHour, y=HWelec))+
@@ -41,12 +43,14 @@ p <- ggplot(DT_hh, aes(x=weekHour, y=HWelec))+
   facet_wrap(~linkID, ncol = 4, scales = "free_y")
 p + labs(x = "Hour of week", y = "Average demand (W)")
 ggsave(filename = paste0(pFile, "averages/averageDemandWeek.pdf"))
+ggsave(filename = paste0(pFile, "averages/averageDemandWeek.png"))
 
 # day plot (individual households)
 for (house in unique(DT_hh$linkID)){
   p <- ggplot(DT_hh[linkID == house], aes(x=dayHour, y=HWelec))+
     stat_summary(fun.y="mean", geom="line")
   p + labs(x = "Hour of day", y = "Average demand (W)")
+  ggsave(filename = paste0(pFile, "averages/", house, "averageDemand.pdf"))
   ggsave(filename = paste0(pFile, "averages/", house, "averageDemand.png"))
 }
 

@@ -26,6 +26,7 @@ p <- ggplot(data = oneDay, aes(x = dateTime_nz)) +
   geom_line(aes(y = HWelec)) 
 p + labs(y = "Power (W)", x = "Time")
 ggsave(filename = paste0(pFile, "oneDay.pdf"))
+ggsave(filename = paste0(pFile, "oneDay.png"))
 
 
 DT_hh <- as.data.table(DT_hh)
@@ -36,3 +37,4 @@ p <- ggplot(data = oneDay30min, aes(x = hHour)) +
 #  theme(legend.position="none") Necessary for colour
 p + labs(y = "Power (W)", x = "Time")
 ggsave(filename = paste0(pFile, "oneDay30min.pdf"))
+ggsave(filename = paste0(pFile, "oneDay30min.png"))
