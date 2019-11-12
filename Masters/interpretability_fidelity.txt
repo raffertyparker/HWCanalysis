@@ -1,0 +1,47 @@
+Notes on interpretability/physical accuracy of models
+Fit to shape VERY dependent of parameters selected
+
+ARIMA:
+Minimal sub-zero values (rf_30 has 24) [(163-24)/163 = 0.85)]
+Reasonable fit to shape [0.8]
+Moderate number of parameters [0.5]
+TOTAL:
+0.85*0.3+0.8*0.3+0.5*0.4 = 0.695
+
+
+ARIMAX
+Largest amount of sub-zero values (rf_30 has 163) [0]
+Reasonable fit to shape [0.7]
+Large number of parameters [0.1]
+TOTAL:
+0*0.3+0.7*0.3+0.1*0.4 = 0.25
+
+
+SARIMA
+Moderate amount of sub-zero values (rf_30 has 79) [(163-79)/163 = 0.52]
+Reasonable fit to shape [0.5]
+Large number of parameters [0.1]
+TOTAL:
+0.52*0.3+0.5*0.3+0.1*0.4 = 0.346
+
+
+naive
+No sub-zero values [1]
+Perfectly fits shape [1]
+Succinct equation [1]
+TOTAL:
+1
+
+seasonal naive
+No sub-zero values [1]
+Perfectly fits shape [1]
+Succinct equation [1]
+TOTAL:
+1
+
+linear regression
+No sub-zero values [1]
+Fits shape very poorly [0]
+Succinct equation [0.9]
+TOTAL:
+1*0.3+0*0.3+0.9*0.4 = 0.66
