@@ -15,12 +15,16 @@ library(reshape2)
 library(dplyr)
 library(lubridate)
 
-modelName <- "seasonalNaive"
+modelName <- "ARIMAX"
 fourHouses <- c("rf_06", "rf_13", "rf_22", "rf_40") 
 
 for (house in fourHouses){ # Load appropriate models
-  assign(paste0(house, "_model"), 
-         readRDS(paste0(dFile, "models/", modelName, "/", house, "_model.rds")))
+  ifelse(file.exists(paste0(dFile, "models/", modelName, "/", house, "_model.rds")),
+         assign(paste0(house, "_model"), 
+                readRDS(paste0(dFile, "models/", modelName, "/", house, "_model.rds"))),
+         assign(paste0(house, "_model"), 
+                readRDS(paste0(dFile, "models/", modelName, "/", house, "_validated_model.rds")))
+         )
 }
 
 for (house in fourHouses){
@@ -45,8 +49,11 @@ for (house in fourHouses){
 plotDT <- melt(plotDT, id.vars = c("dateTime_nz", "linkID"))
 #plotDT <- arrange(plotDT, dateTime_nz)
 
+#library('ggplot2')
+theme_set(theme_minimal(base_size = 13))
+
 p <- ggplot(data = plotDT, aes(x = dateTime_nz)) +
-  geom_line(aes(y = value, colour = variable)) +
+  geom_line(aes(y = value, colour = variable), size = 1.5) +
   facet_wrap(~linkID, ncol = 1, scales = "free")
 #facet_wrap(. ~ linkID, scales = "free")
 p + labs(y = "Power (W)", x = "", colour = "")
