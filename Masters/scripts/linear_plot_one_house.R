@@ -14,8 +14,8 @@ library(data.table)
 library(ggpmisc)
 
 DF_hh <- as.data.frame(DT_hh)
-
-dt <- DF_hh[DF_hh$linkID == "rf_06", ] #select appropriate house
+house <- "rf_13"
+dt <- DF_hh[DF_hh$linkID == house, ] #select appropriate house
 # Select all except the first value of hot water electricity
 HWminusOne <- tail(dt$HWelec, (length(dt$HWelec) - 1))  
 # This gives the HW electricity half an hour "in advance" 
@@ -27,11 +27,12 @@ linearRelData <- as.data.frame(cbind(HWminusOne,nonHW))
 lmFormula <- HWminusOne ~ nonHW
 
 p <- ggplot(data = linearRelData, aes(x = nonHW, y = HWminusOne)) +
-  geom_point() + geom_smooth(method="lm") +
+  geom_point() + geom_smooth(method="lm", col = "red") +
   stat_poly_eq(formula = lmFormula, 
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
                label.x.npc = "right",
                rr.digits = 2, parse = TRUE)         
-p + labs(x = "Non hot water electricity", 
-         y = "Following half-hour hot water electricity", title = "")
-ggsave(filename = paste0(pFile, "rf06LinearPlot.pdf"))
+p + labs(x = "Other appliance demand (time = t)", 
+         y = "Hot water demand (time = t+30 mins)", title = "")
+ggsave(filename = paste0(pFile, house, "LinearPlot.pdf"))
+ggsave(filename = paste0(pFile, house, "LinearPlot.png"))
