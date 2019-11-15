@@ -48,7 +48,7 @@ ggsave(filename = paste0(pFile, "averages/averageDemandWeek.png"))
 # day plot (individual households)
 for (house in unique(DT_hh$linkID)){
   p <- ggplot(DT_hh[linkID == house], aes(x=dayHour, y=HWelec))+
-    stat_summary(fun.y="mean", geom="line")
+    stat_summary(fun.y="mean", geom="line", size = 1)
   p + labs(x = "Hour of day", y = "Average demand (W)")
   ggsave(filename = paste0(pFile, "averages/", house, "averageDemand.pdf"))
   ggsave(filename = paste0(pFile, "averages/", house, "averageDemand.png"))
@@ -73,7 +73,7 @@ twoDay <- tmpDT %>%
   summarise(nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
 
 p <- ggplot(data = twoDay, aes(x = Hour)) + 
-              geom_line(aes(y = HWelec)) +
+              geom_line(aes(y = HWelec), size = 1) +
               facet_grid(rows = vars(Date), scales = "free_x")
             p + labs(x = "Hour of day", y = "Power (W)")
             ggsave(filename = paste0(pFile, "averages/two_day_", house, ".png"))
