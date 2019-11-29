@@ -43,7 +43,7 @@ Data can be thought to be made up of dependent and independent (or 'explanatory'
 
 This section outlines a broad introduction to the various models used either implicitly or explicitly in this analysis. Refer to [@Cowpertwait2009] for further information.
 
-### Naïve model
+### Naive model
 
 A time series $\{x_t\}$ is known as a 'random walk' if 
 
@@ -53,7 +53,7 @@ x_t = x_{t+1} + w_t
 \end{equation}
 where $\{w_t\}$ is a white noise series. 
 Random walk models are more commonly used in simulations. When used in simulations, a random walk model will artificially generate white noise to simulate a potential evolution of the variable in time.
-Due to their simplicity and ease of computation they are also used in forecasting as a 'benchmark' model, by which other models may be compared. For this reason, they are referred to as 'naïve' models.
+Due to their simplicity and ease of computation they are sometimes used in forecasting as a 'benchmark' model, by which other models may be compared. For this reason, they are referred to as 'naive' models.
 When used for forecasting, this model assumes that the mean of the white noise is equal to zero, ($\{\overline w_t\} = 0$), and consequently that the dependant variable (hot water electricity demand, in our case) of the next timestep can be best predicted by the demand of the current timestep. 
 _show figure demonstrating_
 
@@ -175,7 +175,7 @@ Our VAR model hopes to capture the relationship between hot water use and other 
 The models previously mentioned assume the dependent variables are continuous and have no upper or lower bounds. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
 This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot) for an example of this behaviour.
 
-```{r elementPlot, include=FALSE, out.width='100%', fig.cap="Hot water electricity use over a day for one household"}
+```{r elementPlot, echo=FALSE, out.width='100%', fig.cap="Hot water electricity use over a day for one household"}
 knitr::include_graphics(paste0(pFile, "oneDay.pdf"))
 ```
 

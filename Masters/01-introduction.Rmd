@@ -7,7 +7,6 @@ dFile <- "~/HWCanalysis/Masters/data/"   # Data folder
 pFile <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did not like '~' notation)
 ```
 
-
 ## Demand side management
 
 Total electricity demand varies throughout time, with daily demand patterns in New Zealand generally exhibiting two peaks, one in the morning and one in the evening[@TranspowerNZ2015]. _Distinguish between local network and national peaks, as well as daily peaks from extreme events and seasonal peaks?_ Electricity supply must match this fluctuating demand, require underutilised generation and transmission infrustructure to be available on demand, a costly and inefficient situation[@Strbac2008]. This is likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015].
