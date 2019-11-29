@@ -5,7 +5,7 @@ This chapter explores our dataset for the purpose of ascertaining any patterns a
 
 ## Initial data cleaning
 Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process (see https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19 for more information). 
-Data files from the remaining households are unzipped and processed using the `GREENGridData` package \@ref(R-GREENGridData). Total electricity is imputed from the submeters using the script `imputeTotalPower.R` (obtained from the `GREENGridData` github repository). From this output, we extract imputed total electricity demand and hot water electricity demand using `GREENGridData::extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
+Data files from the remaining households are unzipped and processed using the `GREENGridData` package [@R-GREENGridData]. Total electricity is imputed from the submeters using the script `imputeTotalPower.R` (obtained from the `GREENGridData` github repository). From this output, we extract imputed total electricity demand and hot water electricity demand using `GREENGridData::extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
 During the preliminary data exploration, a number of households in the dataset were found to have characteristics that deemed them unsuitable for this analysis, and were removed.
 Households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering. 
 Households `rf_23` and `rf_24` had hot water controlled by either a timer or a home energy management system, in order to maximise self-consumption of their solar PV.
@@ -15,7 +15,6 @@ Households `rf_27`, `rf_01`, `rf_15b`,  had periods of days, weeks, or even mont
 In addition, household `rf_31` only collected zero values for hot water electricity after 26th of February 2016. This household was cropped so as to only contain values before this date.
 
 The remaining 32 households were combined into one data table. Hot water electricity is then subtracted from total electricity, giving hot water electricity, and other electricity. 
-Due to some anomolies in the first occurrences of data collection for some houses a start date of 01/07/15 was chosen for all households, with data before this period discarded.
 As much analysis would be carried out for "half hour" data, another datatable was constructed which took averages of the one minute electricity values over each half hour. 
 
 Refer to the script `processing.R` (see appendix) to view the processing code.
@@ -77,23 +76,20 @@ if (as.numeric(mins) == 1) {
 }
 
 load(paste0(dFile, dtName, ".Rda"))
-
-
 ```
 
 ## Data summary
 
-See Table \@ref{tab:summary1} for the mean values of hot water electricity and other electricity for each household.
-```{r summary1}
+See Table \@ref(tab:summary1) for the mean values of hot water electricity and other electricity for each household.
+```{r summary1, echo=FALSE}
 DT %>%
   group_by(linkID) %>%
-  select(-c(r_dateTime, dateTime_nz)) %>%
+  select(c(HWelec, nonHWelec)) %>%
   summarise_each(funs = mean)
 ```
-Note that household 24 has a negative mean non-hot water electricity. This is due to the presence of solar PV. 
-A full list of houses that have solar PV is given in `PV_houses.Rda`. _It is not known at this stage whether these negative values will effect our analysis, but we do not remove houses with PV at this stage._
-```{r averagePlot, out.width='100%', include=FALSE, fig.cap="Average daily demand of hot water electricity for each household"}
-knitr::include_graphics(paste0(pFile, "averageDemand.pdf"))
+
+```{r averagePlot, out.width='100%', echo=FALSE, fig.cap="Average daily demand of hot water electricity for each household"}
+knitr::include_graphics(paste0(pFile, "averages/averageDemand.pdf"))
 ```
 
 Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks. Also of note is the large variation in average demand. 
@@ -122,16 +118,14 @@ knitr::include_graphics(paste0(pFile, "acfAllHouses.pdf"))
 ```
 
 The results are interpreted by plotting $\gamma_k$ against the lag values. Figure \@ref(fig:autocovariance) indicates that our houses are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals. In addition, some houses display a third daily cycle, or a weekly cycle (peaks increasing again towards the end of the plot). 
-Household `rf_24` displays strong daily anticorrellations. _Currently unsure as to why this is. Household 23 apparently has a HEMS but not 24_
 
 While autocovariance plots are valuable for preliminary data analysis, models that incorporate these cycles need more precise numerical values of these cycles. One method of obtaining usable cycle periods is through frequency analysis.
 
-```{r frequencyAnalysis, out.width='100%',fig.cap = "Three dominant cycle periods for each household, as determined using frequency analysis"}
+```{r frequencyAnalysis, out.width='100%', fig.cap = "Three dominant cycle periods for each household, as determined using frequency analysis"}
 load(file=paste0(dFile, "freq_DF.Rda"))
 knitr::kable(freq_DF, 
       col.names = c("Household", "Dominance", "Frequency (hours)"), longtable = TRUE)
 ```
-
 
 Frequency analysis offers us the ability to automate the process of determining cycles in our data. Through the TSA package 'periodogram' we can extract the most dominant cycle frequencies within our data. These may then be input into later models that have the option of seasonality.  _Do I need to describe technique this package uses to do this? Should I include the periodogram (plot) itself?_
 
@@ -200,9 +194,6 @@ ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
    scale_y_continuous("Power(W)", label = comma) +
    ggtitle("Seasonal decomposition of electricity demand") +
    theme(legend.position = c(0.17, 0.92))
-
-   grid.text("Source: Statistics New Zealand, Balance of Payments", 0.7, 0.03,
-          gp = gpar(fontfamily = "myfont", fontface = "italic", cex = 0.7))
 
 ```
 

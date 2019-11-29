@@ -24,6 +24,11 @@ load(paste0(dFile, "DT_hh.Rda"))
 
 ```
 
+```{r loadSummaryStats}
+
+DFsummary <- readRDS(paste0(dFile, "allModelSummaryStats.rds"))
+dfSummary <- readRDS(paste0(dFile, "allHouseModelStats.rds"))
+```
 This chapter uses a selection of models fitted to our half hour averaged data in order to forecast the demand of the following half hour.
 
 While a more sophisticated model that provides a binary on/off output will be considered in Chapter \@ref(one-min), this project hopes to "build up" the sophistication of the modelling from more mathematically simple techniques.
@@ -33,69 +38,70 @@ knitr::include_graphics(paste0(pFile, "oneDay30min.pdf"))
 ```
 Figure \@ref(fig:hhElementPlot) may be compared with Figure \@ref(fig:elementPlot) in Chapter \@ref(methodology) to see the smooting effect of half-hour averaging.
 
-## Random walk
+## Naive model
 
 ```{r loadRWdata}
-load(paste0(dFile, "models/randomWalk/procTime.Rda"))
-load(paste0(dFile, "models/randomWalk/sdResRW.Rda"))
+# Should be unnecessary now
+#load(paste0(dFile, "models/randomWalk/procTime.Rda"))
+#load(paste0(dFile, "models/randomWalk/sdResRW.Rda"))
 ```
 
-In our random walk model we assume no drift, and only attempt to predict one (half hour) time step onto the future. From Equation \@ref(eq:randomWalk), we get 
+In our naive model we assume no drift, and only attempt to predict one (half hour) time step onto the future. From Equation \@ref(eq:randomWalk), we get 
 \begin{equation}
 \hat x_{t+1} = x_t
 \end{equation}
 
-
-```{r randomWalk, out.width='100%', fig.cap="Actual electricity use and random walk model approximation over one day for four households"}
+```{r randomWalk, out.width='100%', fig.cap="Actual electricity use and naive model approximation over one day for four households"}
 knitr::include_graphics(paste0(pFile, "randomWalk/fourHouses.pdf"))
 ```
 
 As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistantly 'missing' the actual values.
 
-The random walk model has a range of standard deviation of residuals between `r round(min(sdResRW), 2)`W and `r round(max(sdResRW), 2)`W, with a mean of `r round(mean(sdResRW[,1]), 2)`W and median of `r round(median(sdResRW[,1]), 2)`W. 
-_Standard deviation probably unnecessary, replace with RSS._ 
-The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is also high, as the output can be understood by the simple equation $\hat x_{t+1} = x_t$. The computational time to fit models for all households considered was `r round(as.numeric(RWproc[3]), 2)` milliseconds, and the 27 models took up 11.9MB of hard drive space.
+The random walk model has RMSE ranging between between `min(dfSummary$RMSE[dfSummary$model == "naive"])`W and `max(dfSummary$RMSE[dfSummary$model == "naive"])`W, with the average being `DFsummary$RMSE[DFsummary$model == "naive"]`W.
+
+The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is also high, as the output can be understood by the simple equation $\hat x_{t+1} = x_t$. The computational time to fit models to each household varied between `min(dfSummary$fittingTime[dfSummary$model == "naive"])`s and `max(dfSummary$fittingTime[dfSummary$model == "naive"])`s, with the average taking `DFsummary$fittingTime[DFsummary$model == "naive"]`s.
 
 ## Linear regression of hot water electricity against lagged other electricity
 
-While linear regression is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using data that displays cyclic behaviour, such as residential electricity demand.
+While simple linear regression is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using time series data that displays cyclic behaviour, such as residential electricity demand.
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
 The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
 
-```{r loadSLdata}
-load(paste0(dFile, "models/simpleLinear/procTime.Rda"))
-load(paste0(dFile, "models/simpleLinear/sdResSL.Rda"))
+```{r linearRelations, echo=FALSE, fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household rf_06"}
+knitr::include_graphics(paste0(pFile, "rf_13LinearPlot.pdf"))
 ```
+
+Figure \@ref(fig:linearRelations) shows a simple linear regression of current non hot water electricity demand with the following half-hour's hot water electricity demand. This is shown to demonstrate the ability to use current electricity demand to predict hot water electricity demand over the next half hour. Note the low $R^2$ value suggesting that, in it's current form, this model would be rather inadequate at forecasting demand.
 
 ```{r simpleLinear, out.width='100%', fig.cap="Actual electricity use and simple linear model approximation using previous half hour's non-hot water electricity over one day for four households"}
 knitr::include_graphics(paste0(pFile, "simpleLinear/fourHouses.pdf"))
 ```
 Figure \@ref(fig:simpleLinear) shows the effectiveness of this model for four seperate households. Note that the top two households in the figure, `rf_13` and `rf_30`, show the model fitting reasonable poorly with the data. 
 Household `rf_13` appears to predict increase in hot water electricity demand before it actually occurs. 
-This should be compared to Figure \@ref(fig:crosscovariance), which shows the correllation between hot water and not hot water electricity peaking at around 200 minutes lag for this household.
-Household `rf_30` shows a model which appears to be very unresponsive to the data. Again, on close examination of Figure \@ref(fig:crosscovariance) we see that this household has a peak in crosscorrelation at around 800 minutes. 
+This should be compared to Figure \@ref(fig:crossCovariance), which shows the correllation between hot water and not hot water electricity peaking at around 200 minutes lag for this household.
+Household `rf_30` shows a model which appears to be very unresponsive to the data. Again, on close examination of Figure \@ref(fig:crossCovariance) we see that this household has a peak in crosscorrelation at around 800 minutes. 
 This indicates that for some households, a correlation lag of greater than 30 mins may increase accuracy. 
 Households `rf_42` and `rf_44` show a more accurate model result, however due to the presence of a non-zero y intercept these models will always consistantly overestimate hot water electricity whenever the true value is zero.
 
-This simple linear model has a range of standard deviation of residuals between `r round(min(sdResSL), 2)`W and `r round(max(sdResSL), 2)`W, with a mean of `r mean(sdResSL[,1])`W and median of `r median(sdResSL[,1])`W. 
-_Standard deviation probably unnecessary, replace with RSS._
+The simple linear regression model has RMSE ranging between between `r min(dfSummary$RMSE[dfSummary$model == "simpleLinear"])`W and `r max(dfSummary$RMSE[dfSummary$model == "simpleLinear"])`W, with the average being `r DFsummary$RMSE[DFsummary$model == "simpleLinear"]`W.
+
 The model does not accurately capture zero values, and is significantly smoother than the actual data, however no negative values are present. It therefore scores low to moderate for physical fidelity. 
-Interpretability is high, as the output can be understood by the simple equation $\hat x_{t+1} = \alpha_0 + \alpha_1 w_t$, where $w_t$ is non hot water electricity at time $t$. The computational time to fit models for all households considered was `r round(as.numeric(SLproc[3]), 2)` milliseconds, and the 27 models took up 37.4MB of hard drive space.
+Interpretability is high, as the output can be understood by the simple equation $\hat x_{t+1} = \alpha_0 + \alpha_1 w_t$, where $w_t$ is non hot water electricity at time $t$.  The computational time to fit models to each household varied between `r min(dfSummary$fittingTime[dfSummary$model == "simpleLinear"])`s and `r max(dfSummary$fittingTime[dfSummary$model == "simpleLinear"])`s, with the average taking `r DFsummary$fittingTime[DFsummary$model == "simpleLinear"]`s.
 
-```{r linearRelations, include=FALSE, fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household rf_12"}
-knitr::include_graphics(paste0(pFile, "rf06LinearPlot.pdf"))
-```
-
-Figure \@ref(fig:linearRelations) shows a simple linear regression of current non hot water electricity demand with the following half-hour's hot water electricity demand. This is shown to demonstrate the ability to use current electricity demand to predict hot water electricity demand over the next half hour. The low $R^2$ value obtained indicates that this would be an inadequate model for forecasting purposes when considered alone, however it has potential as an input into a model that takes other parameters into consideration. 
+Notably, this model has lower RMSE's than the Naive model.
+In addition, this model lends itself to being utilised as an input into more complex models that take other parameters into consideration. 
 
 _Consider moving much of this optimal lag time part to the previous chapter_
-We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. The ability to examine these  of these has been constructed by taking the maximum cross covarience value for each house, restricted to lag values above 30 minutes, as this is the minimum lag after which these predictions may be useful for participation in demand response markets in New Zealand.
+We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. 
 
+Table \@ref(tab:ccvMaxLagTable) and the corresponding Figure \@ref(fig:ccvMaxLagPlot) have been constructed by taking the maximum cross covarience value for each house, restricted to lag values above 30 minutes, as this is the minimum lag after which these predictions may be useful for participation in demand response markets in New Zealand.
 
-```{r ccvMaxLagTable}
-
+```{r loadCCVdata, echo=FALSE}
 load(paste0(dFile, "ccv_max.Rda"))
 maxCor <- maxCor[, c(2,1,3)]
+```
+
+```{r ccvMaxLagTable, echo=FALSE}
 kable(maxCor,
       col.names =  c("Household", "Lag", "Cross covariance"))
 ```
@@ -135,9 +141,7 @@ The model is of the following form:
 \end{equation}
 where $\bf{y}_t$ is a $K \times 1$ vector of endogenous variables and $u_t$ assigns a spherical disturbance term of the same dimension. The coefficient matrices $A_1, …, A_p$ are of dimension $K \times K$. 
 
-
 Our model is fitted using the function VAR within the package vars, which estimates the vector autoregression model using ordinary least squares. 
-
 
 The model is constructed using inputs of hot water demand and non hot water demand, along with the integers of time steps that correspond to any cyclical effects (referred to as 'seasonality'), and the number of steps by which to lag the model by.
 
