@@ -16,13 +16,15 @@ DF$model <- factor(DF$model, levels = c("naive","seasonalNaive","simpleLinear",
 
 p <- ggplot(DF, aes(x = RMSE, group = model)) +
   geom_density() +
-  facet_grid(model ~.)
+  facet_grid(model ~.) +
+  theme_bw()
 ggsave(filename = paste0(pFile, "modelRMSEdensity.png"))
 ggsave(filename = paste0(pFile, "modelRMSEdensity.pdf"))
 
 p <- ggplot(DF, aes(x = RMSE, group = model)) +
   geom_bar() +
-  facet_grid(model ~.)
+  facet_grid(model ~.) +
+  theme_bw()
 ggsave(filename = paste0(pFile, "modelRMSEbar.png"))
 ggsave(filename = paste0(pFile, "modelRMSEbar.pdf"))
 
@@ -55,21 +57,23 @@ df_adjusted$memSize <- 1-(df$memSize - min(df$memSize))/(max(df$memSize) - min(d
 df_adjusted <- reshape2::melt(df_adjusted)
 
 df_adjusted$variable <- factor(df_adjusted$variable, levels = c("RMSE", "fittingTime", "memSize", "interp_fidelity"),
-                               labels = c("Accuracy", "Speed", "Compactness", "Fidelity/Interpretability"))
-df_adjusted$model <- factor(df_adjusted$model, levels = c("naive","seasonalNaive","simpleLinear",
-                                                          "ARIMA","ARIMAX","SARIMA"), 
-                            labels = c("Naive","Seasonal Naive","Linear Regression",
-                                       "ARIMA","ARIMAX","SARIMA"))
+                               labels = c("Accuracy", "Computational speed", "Compactness", "Fidelity/Interpretability"))
+df_adjusted$model <- factor(df_adjusted$model, levels = c("seasonalNaive","naive","simpleLinear",
+                                                          "ARIMA","SARIMA","ARIMAX"), 
+                            labels = c("Cyclic Naive","Naive","Linear Regression",
+                                       "ARIMA","SARIMA","ARIMAX"))
 
-p <- ggplot(df_adjusted, aes(x = model, y = value,
+# This removes memSize - do this further back sometime!
+df_adjusted <- df_adjusted[!df_adjusted$variable == "Compactness", ]
+
+p <-  ggplot(df_adjusted, aes(x = model, y = value,
                          fill = model)) +
   geom_bar(stat = "identity") + 
   facet_grid(variable ~ .) +
   guides(fill = FALSE) + 
   theme(axis.title.y=element_blank(),
         axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) + 
-  scale_fill_brewer()
+        axis.ticks.y=element_blank()) 
 p + labs(x = "", y = "")
 ggsave(filename = paste0(pFile, "modelSummary.png"))
 ggsave(filename = paste0(pFile, "modelSummary.pdf"))
