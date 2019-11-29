@@ -145,4 +145,4 @@ allHouseSummary <- DFsummary %>%
   group_by(model) %>%
   summarise(RMSE = mean(RMSE), fittingTime = mean(fittingTime),
             memSize = mean(memSize))
-saveRDS(allHouseSummary, file = paste0(dFile, "AllModelSummaryStats.rds"))
+saveRDS(allHouseSummary, file = paste0(dFile, "allModelSummaryStats.rds"))
