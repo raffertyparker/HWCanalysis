@@ -52,13 +52,20 @@ Some research combines the computational efficiency of the single-volume well-mi
 A common theme within the literature regarding the utilision of hot water cylinders for the purpose of demand side management is the necessity of accurately forecasting hot water demand. An accurate demand forecast allows for more efficient energy storage and demand response capabilites, and may lessen any negative effects (running out of hot water) to the end user.
 
 Forecasting literature may be broadly classified using two seperate attributes; (i) forecasting period, and (ii) forecasting method.
-Forecasting period can be further seperated into three catagories[@MatDaut2017]. Short term forecasting is for predictions less than one week in advance, medium term is for predictions between one week and one year, and long term, which is for predictions spanning longer than one year.
+Forecasting period can be further seperated into three catagories[@Ahmad2014]. Short term load forecasting (STLF) is usually used to refer to predictions of less than 24 hours, although it can refer to forecast periods of up to one week. Medium term load forecasting (MTLF) refers to predictions between one week and one year. Long term load forecasting (LTLF) is for predictions spanning longer than one year.
 Forecasting methods can also be broadly seperated into two catagories[@MatDaut2017]; (i) conventional, and (ii) AI. 
 Conventional methods are those that rely either on regression analysis, or on stochastic time series techniques such as seasonal/trend decomposition or Markov chain Monte Carlo algorithms to make predictions.
-Artificial Intelligence (AI) methods are those that use more complex techniques such as artificial neural networks (ANN) or support vector machines (SVM) to make predictions.
+Artificial Intelligence (AI) methods are those that use more complex techniques from the field of machine learning such as artificial neural networks (ANN) or support vector machines (SVM) to make predictions.
 
-Gelažanskas and Gamage[@Gelazanskas2015] explore a number of statistical forecasting methods to predict domestic hot water electricity use including exponential smoothing, seasonal autoregressive moving average, and a combination of them. These models were all found to outperform benchmark models such as mean, naive, and seasonal naive, with seasonal decomposition being the most important technique for forecast accuracy. _Need to expand upon how the models are developed, (based on historical data etc)._
+Gelažanskas and Gamage[@Gelazanskas2015] explore a number of statistical forecasting methods to predict domestic hot water electricity use including exponential smoothing, seasonal autoregressive moving average, and a combination of these two. These models were all found to outperform benchmark models such as mean, naive, and seasonal naive, with seasonal decomposition being the most important technique for forecast accuracy. _Need to expand upon how the models are developed, (based on historical data etc)._
 
+After confirming the importance of accurate DHW forecasts for effective demand response, the authors in [@Lomet2015] propose the use of an ARMA model fitted to volumetric DHW consumption data for this purpose.  
+
+Aki, Wakui and Yokoyama[@Aki2016] also use volumetric DHW data, however they opt for support vector regression (SVR) forecasting methods using a 'ground-up' approach of seperating the data into estimated end-uses, such as bathing, kitchen etc.
+
+[@Denis2019] considers the ability of forecasting to assist in reducing thermal losses from DHW tanks by controlling the operation of the device such that only the necessary amount of hot water is stored in the tank at once. An ARIMA model is utilised along with the TRNSYS energy simulation software. Energy reductions of up to 12.8% were demonstrated.
+
+Dennis
 
 
 _Include more forecast-specific papers._
