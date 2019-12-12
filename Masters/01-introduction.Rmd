@@ -30,37 +30,62 @@ For this reason, the ability to store only as much hot water as will be required
 
 Time series data is that which involves measurements of variables sequentially or at fixed intervals of time[@Cowpertwait2009].
 This data may then be processed, analysed and extrapolated in a manner that produces predictions of future events or occurrences, a process known as 'forecasting'. 
+When working with time series data for the purpose of testing the accuracy of different forecasting methods, it is good practice to separate the dataset into two subests, training and validating, with the training data being a sequential subset of data occurring before the validating data. This helps avoid the problem of 'overfitting', where, in the process of optimising for increased accuracy, forecasting models incorporate anomolies in the data as important variables.
 There are number of different methods of forecasting time series data.
 Although the distinction is subtle, these methods may be broadly separated into two catagories; (i) conventional, and (ii) artificial intelligence (AI)[@MatDaut2017].
 
-# Conventional forecasting methods
+### Conventional forecasting methods
 
 Conventional methods may again be broadly separated into two separate techniques.
 
 [^Data in general can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and the electricity demand of other appliances).]
 
-One conventional forecasting method utilises data of separate but related (explanatory) variables and makes predictions based on basic statistical relationships between them. This is known as regression analysis, and may be utilised for time series forecasting in the following manner:
+One conventional forecasting method utilises data of separate but related (explanatory) variables and makes predictions based on basic statistical relationships between them. These are often referred to as _causal_ models[@Hong2016]. Regression analysis is a causal model commonly used in electricity forecasting, and may be understood as follows:
 If there is the ability to know (or sufficiently accurately predict) the value(s) of the independant variable(s) at a particular future time, then a forecast for the dependent variable may be calculated at that same time based on the usual relationship between them.
-In the context of electricity demand forecasting, relevant predictable independent variables may be things such as public holidays, or (accurately forecasted) weather conditions[@Wei2018].
+In the context of electricity demand forecasting, relevant predictable independent variables may be social factors such as public holidays, or (accurately forecasted) weather conditions[@Wei2018].
 However if there is no obtainable value(s) for the independent variable(s) at the future time for which a prediction is required, more subtle techniques must be employed. 
-One option is to establish a relationship between the value(s) of the independent variables and the following values of the dependent variable. In the context of DHW electricity demand forecasting, this may be the relationship between the electricity demand of other appliances, and following values of DHW electricity demand.
+One option is to establish a relationship between the value(s) of the independent variables and the following values of the dependent variable. In the context of DHW electricity demand forecasting, this may be the relationship between the electricity demand of other appliances, and subsequent values of DHW electricity demand.
 
 Another conventional forecasting method utilises the fundamental properties of only the time series data of the variable being predicted.
 This may be through separating the data into individual components, namely trend, cycles and 'noise'. 
 In the context of DHW electricity time series data, the trend would be a gradual increase (or decrease) in average hot water use over long periods of time, the cycles would be average daily use patterns such as morning and evening peaks previously mentioned, and the noise is essentially any deviation of the data from the trend and cycle components (people not actually using hot water according to strict mathematical relationships).
 Additionally, forecasts may be made by understanding the relationships between a variable and its previous values. Autoregression (AR) and moving average (MA) are two commonly utilised techniques to obtain these relationships. In the context of DHW forecasting this method may be best interpreted as an understanding of the lengths of time a water heater element will typically remain on (or off) for. 
 
-_Include MCMC? a couple of papers utilise it but I believe it's better suited to scenarios than forecasts_
+_Include MCMC? a couple of papers utilise it but I believe it's better suited to modelling/scenarios than forecasts_
 
-# AI forecasting methods
+### AI forecasting methods
 
 Artificial Intelligence (AI) methods are those that use more complex techniques from the field of machine learning for forecasting.
-These methods can be considered separate from their conventional counterparts by their ability to process and establish relationships between data in a more autonomous fashion, relying on algorithms and large amounts of computational power as opposed to the statistics and human intuition required for conventional forecasting.
-While AI methods now generally obtain more accurate predictions than conventional methods[CITE], their computational expense can be a hindrance to large-scale adoption, as it generally involves a time-consuming process using expensive and energy-intensive computers.
-Despite this, utilising machine learning for the purpose of electricity demand forecasting is a vast and highly active research area.
+These methods can be considered separate from their conventional counterparts by their ability to process and establish relationships between data in a more autonomous fashion. 
+In general, AI methods rely more on algorithms and large amounts of computational power than conventional forecasting methods, while conventional methods rely more on human intuition and statistics than AI methods.
 Two commonly used techniques in this field are those of artificial neural networks (ANN) and support vector machines (SVM).
+ANNs attempt to mimic biological learning mechanisms by processing a set of training data through clusters of artificial neurons, each of which individually recieve (numerical) inputs, assign them certain weights, and then output the weighted value into other artificial neurons, which perform the same task, until eventually producing a final output.
+The weights assigned by each neuron are then iteratively adjusted in order to minimise the error of the output.
 
-## Related work
+While Hippert, Pedreira, and Souza[@Hippert2014] state in 2001 that ANNs do not outperform conventional forecasting methods in accuracy, a more recent analysis from Raza and Khosravi[@Raza2015] in 2015 claims the contrary.
+Despite this recent claim to superiority in forecast accuracy, the computational expense of training ANNs can be a hindrance to large-scale adoption, as it generally involves a time-consuming process using expensive and energy-intensive computers.
+While still an active research area, Figure \@ref(fig:ANNinDF) indicates that research in ANNs for electricity demand forecasting may have peaked, and now be diminishing.
+```{r ANNinDF, fig.cap="Documents in SCOPUS containing keywords: artificial AND neural AND network AND electricity AND demand AND forecasting"}
+knitr::include_graphics(paste0(pFile, "artificial_neural_network_electricity_demand_forecasting.png"))
+```
+
+This may be due to increasing interest in an alternative AI forecasting method for electricity demand forecasting, that of support vector machines (SVM).
+Support vector machines classify datapoints by mapping them in hyperspace and separating them according to which side of a hyperplane they fall on, with the position of the classifying hyperplanes being constructed iteratively in order to maximise the perpendicular distance between each hyperplane and the closest samples on either side of it (refer to Figure \@ref(fig:SVM_example).
+Support vector machines may be used in electricity forecasting XXXXXXXXXXXXXXXXXXXXXXXXXx
+_up to here_
+
+```{r SVM_example, fig.cap="Example demonstrating the classifying mechanism of a SVM. Image by Larhmam - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=73710028"}
+knitr::include_graphics(paste0(pFile, "SVM_margin.png"))
+```
+
+This method is far less computationally expensive to train than ANNs, and has no indication of a reduction in research interest.
+
+```{r SVMinDF, fig.cap="Documents in SCOPUS containing keywords: support AND vector AND network AND electricity AND demand AND forecasting"}
+knitr::include_graphics(paste0(pFile, "support_vector_electricity_demand_forecasting.png"))
+```
+
+
+### Related work
 
 _The following simply lists articles. I need to instead catagorise and order the literature. Be careful not to use difficult terms or concepts without first introducing them._
 
