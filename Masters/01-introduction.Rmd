@@ -9,28 +9,33 @@ pFile <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did 
 
 ## Demand side management
 
-Total electricity demand varies throughout time, with daily demand patterns in New Zealand generally exhibiting two peaks, one in the morning and one in the evening[@TranspowerNZ2015]. _Distinguish between local network and national peaks, as well as daily peaks from extreme events and seasonal peaks?_ Electricity supply must match this fluctuating demand, require underutilised generation and transmission infrustructure to be available on demand, a costly and inefficient situation[@Strbac2008]. This is likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015].
-_Expand on this - why peaks matter, costs, etc, with references_
-Demand side management is the process of adjusting demand to meet supply, and may play a vital role in the transition to a low-carbon electricity grid. Many electricity using devices can have their use times shifted on a daily scale with limited impact to the end user (a property referred to as "flexibility"). Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and thermostatically controlled appliances including heat pumps, and the focus of this thesis, electric hot water cylinders (HWCs).
+Total electricity demand varies throughout time, with daily demand patterns in New Zealand generally exhibiting two peaks, one in the morning and one in the evening[@TranspowerNZ2015].
+
+_Distinguish between local network and national peaks, as well as daily peaks from extreme events and seasonal peaks?_ 
+
+As electrical energy cannot be stored, electricity supply must match this fluctuating demand, requiring underutilised generation and transmission infrustructure to be available on demand, a costly and inefficient situation[@Strbac2008]. 
+In New Zealand, every additional kW of peak time demand is estimated to require up to $200/year in additional infrastructure costs[@Jack].
+The challenges associated with supplying electricity in order to effectively meet demand are likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015].
+Demand side management is the process of adjusting demand to meet supply, and may play a vital role in the transition to a low-carbon electricity grid. Many electricity using devices can have their use times shifted on a daily scale with limited impact to the end user (a property referred to as "flexibility"). Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and thermostatically controlled appliances including heat pumps, as well as the focus of this thesis, electric hot water cylinders (HWCs).
 The ability of the HWC to store and retain up to 10kWh of energy in the form of heat renders them perfect candidates for control, and could be considered one of the most “flexible” appliances in New Zealand households[@Stephenson2017].
 
 ## Why predict hot water electricity demand
 
-In New Zealand, residential electricity usage contributes around half of peak demand[@ElectricityCommission2007] and residential hot water use is around 30% of residential energy used[@Pollard2002]. The tendency of people showering or bathing either before leaving the house or in the evenings means that weekday residential hot water usage often occurs during network peaks in demand. A study by the Household Energy End Use Project (HEEP) showed that hot water usage makes up to 36% of residential peak demand [@Pollard2002] and data from the GREEN Grid project suggesting it may be up to to 50%[@Jack2018]. 
+In New Zealand, residential electricity usage contributes around half of peak demand[@ElectricityCommission2007] and residential hot water use is around 30% of residential energy used[@Pollard2002]. The tendency of people showering or bathing either before leaving the house or in the evenings means that weekday residential hot water usage often occurs during network peaks in demand. A study by the Household Energy End Use Project (HEEP) showed that hot water usage makes up to 36% of residential peak demand [@Pollard2002] and data from the GREEN Grid project suggesting it may be up to 50%[@Jack]. 
 In New Zealand, electric hot water cylinders (HWCs) are very common, with 91% of households having electricity as an energy source for water heating[@Pollard2002]. 
 While control of hot water cylinders for DSM objectives is possible without demand forecasting, the ability to accurately predict future demand allows more finely-tuned control that may be catered to the use patterns of individual households, allowing a greater range of control without negative effects to the end-user[@Lomet2015].
 An additional benefit of hot water demand forecasting is that of reducing thermal losses[@Denis2019]. 
-Hot water cylinders under normal usage conditions have a tendency to 'stratify' their contents into distict bodies of water, namely a hot upper layer of water and a cool lower layer of water, separated by a negligible sized, intermediate temperature thermocline[@JackDew2018].
-The household residents may use hot water with no noticeable changes in temperature until the hotter top layer suddenly runs out, causing the unpleasant 'cold water event' (CWE), familar to many who live in a household with heavy hot water use.
-For households with moderate to low hot water use however, their hot water cylinder may be keeping a far greater amount of water hot than they would expect to use.
+Hot water cylinders under normal usage conditions have a tendency to 'stratify' their contents into distict bodies of water, namely a hot upper layer of water and a cool lower layer of water, separated by a thin thermocline[@JackDew2018].
+The household residents may use hot water with no noticeable changes in temperature until the hotter top layer suddenly runs out, causing the unpleasant 'cold water event', familar to many who live in a household with heavy hot water use.
+For those households with moderate to low hot water demand however, their hot water cylinder may be keeping a far greater amount of water hot than they would expect to use.
 As no insulation is perfect, any object that is hotter than its surroundings will suffer from heat loss, with the amount of heat lost being proportional to the difference in temperature between the body and the surroundings. 
+Thus, all else being held equal, a warmer body loses more energy to it's surroundings than a cooler one.
 For this reason, the ability to store only as much hot water as will be required by the household (with the remainder of the tank being left as cooler water) has the potential to significantly reduce hot water electricity consumption[@Denis2019]. 
 
 ## Forecasting overview
 
-Time series data is that which involves measurements of variables sequentially or at fixed intervals of time[@Cowpertwait2009].
+_Time series_ data is that which involves measurements of variables sequentially or at fixed intervals of time[@Cowpertwait2009].
 This data may then be processed, analysed and extrapolated in a manner that produces predictions of future events or occurrences, a process known as 'forecasting'. 
-When working with time series data for the purpose of testing the accuracy of different forecasting methods, it is good practice to separate the dataset into two subests, training and validating, with the training data being a sequential subset of data occurring before the validating data. This helps avoid the problem of 'overfitting', where, in the process of optimising for increased accuracy, forecasting models incorporate anomolies in the data as important variables.
 There are number of different methods of forecasting time series data.
 Although the distinction is subtle, these methods may be broadly separated into two catagories; (i) conventional, and (ii) artificial intelligence (AI)[@MatDaut2017].
 
@@ -38,16 +43,17 @@ Although the distinction is subtle, these methods may be broadly separated into 
 
 Conventional methods may again be broadly separated into two separate techniques.
 
-[^Data in general can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and the electricity demand of other appliances).]
+[^1]: Data in general can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research we use time and the electricity demand of other appliances).
 
-One conventional forecasting method utilises data of separate but related (explanatory) variables and makes predictions based on basic statistical relationships between them. These are often referred to as _causal_ models[@Hong2016]. Regression analysis is a causal model commonly used in electricity forecasting, and may be understood as follows:
+One conventional forecasting method utilises data of separate but related (explanatory[^1]) variables and makes predictions based on basic statistical relationships between them. These are often referred to as _causal_ models[@Hong2016]. Regression analysis is a causal model commonly used in electricity forecasting, and may be understood as follows:
 If there is the ability to know (or sufficiently accurately predict) the value(s) of the independant variable(s) at a particular future time, then a forecast for the dependent variable may be calculated at that same time based on the usual relationship between them.
 In the context of electricity demand forecasting, relevant predictable independent variables may be social factors such as public holidays, or (accurately forecasted) weather conditions[@Wei2018].
 However if there is no obtainable value(s) for the independent variable(s) at the future time for which a prediction is required, more subtle techniques must be employed. 
 One option is to establish a relationship between the value(s) of the independent variables and the following values of the dependent variable. In the context of DHW electricity demand forecasting, this may be the relationship between the electricity demand of other appliances, and subsequent values of DHW electricity demand.
 
 Another conventional forecasting method utilises the fundamental properties of only the time series data of the variable being predicted.
-This may be through separating the data into individual components, namely trend, cycles and 'noise'. 
+This method is referred to as _time series analysis_.
+On important technique used in time series analysis is the separation of the data into individual components, namely trend, cycles and 'noise'. 
 In the context of DHW electricity time series data, the trend would be a gradual increase (or decrease) in average hot water use over long periods of time, the cycles would be average daily use patterns such as morning and evening peaks previously mentioned, and the noise is essentially any deviation of the data from the trend and cycle components (people not actually using hot water according to strict mathematical relationships).
 Additionally, forecasts may be made by understanding the relationships between a variable and its previous values. Autoregression (AR) and moving average (MA) are two commonly utilised techniques to obtain these relationships. In the context of DHW forecasting this method may be best interpreted as an understanding of the lengths of time a water heater element will typically remain on (or off) for. 
 
@@ -59,35 +65,36 @@ Artificial Intelligence (AI) methods are those that use more complex techniques 
 These methods can be considered separate from their conventional counterparts by their ability to process and establish relationships between data in a more autonomous fashion. 
 In general, AI methods rely more on algorithms and large amounts of computational power than conventional forecasting methods, while conventional methods rely more on human intuition and statistics than AI methods.
 Two commonly used techniques in this field are those of artificial neural networks (ANN) and support vector machines (SVM).
+
 ANNs attempt to mimic biological learning mechanisms by processing a set of training data through clusters of artificial neurons, each of which individually recieve (numerical) inputs, assign them certain weights, and then output the weighted value into other artificial neurons, which perform the same task, until eventually producing a final output.
-The weights assigned by each neuron are then iteratively adjusted in order to minimise the error of the output.
+The weights assigned by each neuron are then iteratively adjusted in order to minimise the error of the final output.
 
 While Hippert, Pedreira, and Souza[@Hippert2014] state in 2001 that ANNs do not outperform conventional forecasting methods in accuracy, a more recent analysis from Raza and Khosravi[@Raza2015] in 2015 claims the contrary.
 Despite this recent claim to superiority in forecast accuracy, the computational expense of training ANNs can be a hindrance to large-scale adoption, as it generally involves a time-consuming process using expensive and energy-intensive computers.
 While still an active research area, Figure \@ref(fig:ANNinDF) indicates that research in ANNs for electricity demand forecasting may have peaked, and now be diminishing.
-```{r ANNinDF, fig.cap="Documents in SCOPUS containing keywords: artificial AND neural AND network AND electricity AND demand AND forecasting"}
+```{r ANNinDF, out.width='100%', fig.cap="Documents in SCOPUS containing keywords: artificial AND neural AND network AND electricity AND demand AND forecasting"}
 knitr::include_graphics(paste0(pFile, "artificial_neural_network_electricity_demand_forecasting.png"))
 ```
 
-This may be due to increasing interest in an alternative AI forecasting method for electricity demand forecasting, that of support vector machines (SVM).
-Support vector machines classify datapoints by mapping them in hyperspace and separating them according to which side of a hyperplane they fall on, with the position of the classifying hyperplanes being constructed iteratively in order to maximise the perpendicular distance between each hyperplane and the closest samples on either side of it (refer to Figure \@ref(fig:SVM_example).
-Support vector machines may be used in electricity forecasting XXXXXXXXXXXXXXXXXXXXXXXXXx
-_up to here_
+This may be due to increasing interest in an alternative AI forecasting method for electricity demand forecasting, that of support vector machines (SVMs).
+Support vector machines classify data points by mapping them in hyperspace and distinguising between them according to which side of a hyperplane they fall on, with the position of the classifying hyperplanes being constructed iteratively in order to maximise the perpendicular distance between each hyperplane and the closest samples on either side of it (refer to Figure \@ref(fig:SVM_example). Non-linear partitions can be constructed using a kernel function.
+Support vector machines may be used in electricity forecasting by automating the process of discovering, catagorising and quantifying various relationships within the data, such as those previously described as part of time series analysis and causal modelling[@Wei2018].
 
-```{r SVM_example, fig.cap="Example demonstrating the classifying mechanism of a SVM. Image by Larhmam - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=73710028"}
-knitr::include_graphics(paste0(pFile, "SVM_margin.png"))
+
+```{r SVMexample, out.width='100%', fig.cap="Example demonstrating the classifying mechanism of a SVM. Image by Larhmam - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=73710028"}
+knitr::include_graphics(paste0(pFile, "SVMmargin.png"))
 ```
 
-This method is far less computationally expensive to train than ANNs, and has no indication of a reduction in research interest.
+This method is far less computationally expensive to train than ANNs, and has no indication of a reduction in research interest in the context of electricity demand forecasting, as can be seen in Figure \@ref(fig:SVMinDF).
 
-```{r SVMinDF, fig.cap="Documents in SCOPUS containing keywords: support AND vector AND network AND electricity AND demand AND forecasting"}
+```{r SVMinDF, out.width='100%', fig.cap="Documents in SCOPUS containing keywords: support AND vector AND network AND electricity AND demand AND forecasting"}
 knitr::include_graphics(paste0(pFile, "support_vector_electricity_demand_forecasting.png"))
 ```
 
 
 ### Related work
 
-_The following simply lists articles. I need to instead catagorise and order the literature. Be careful not to use difficult terms or concepts without first introducing them._
+_The following simply lists articles. I need to instead catagorise and order the literature. Be careful not to use difficult terms or concepts without having first introduced them._
 
 _Key things to aim for in the lit review: (i) Demonstrating that I know the literature, and (ii) Identifying the gap I intend to fill with this research._
 
@@ -103,7 +110,7 @@ Yu, Jia, Murphy-Hoye, Pratt and Tong (2013) modelled demand-side management of v
 
 O'Shaghnessy, Cutler, Ardani and Margolis (2018) used the U.S. National Renewable Energy Laboratory's Renewable Energy Optimisation (REOpt) and Building Energy Optimisation (BEOpt) models to mimimise the lifecycle cost of energy for a household through optimal configuration of PV, battery storage, smart domestic water heater, and smart AC unit. The household thermal storage devices (electric water heater, AC unit) were controlled through adjustment of the thermostat set-points through the day to take advantage of the daytime PV output. It was found that under current pricing, load-shifting through the use of smart AC units and smart domestic water heaters is a more cost effective method of increasing self-consumption of solar PV than the installation of batteries.
 
-Other research focused solely on demand response of electric water heaters, usually employing more sophisticated thermal models which allow for greater understanding of potential impacts on service. XXXXXXXXXXXXXXXXXXXXXXXXXX
+Other research focused solely on demand response of electric water heaters, usually employing more sophisticated thermal models which allow for greater understanding of potential impacts on service. _XXXXXXXXXXXXXXXXXXXXXXXXXX_
 
 Sepulveda, Paull, Morsi, Li, Diduch and Chang (2010) utilised a fully-mixed thermal model to investigate the potential of heterogeneous control of hot water cylinders using a binary particle swarm optimisation algorithm for the purpose of reducing grid peaks. Their direct load control modelling suggested an average reduction in peak-time electricity use of between 500W-750W per household.
 

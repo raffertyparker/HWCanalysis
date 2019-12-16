@@ -37,8 +37,6 @@ All data processing and modelling was conducted using the `R` programming langua
 A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009]. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$.  A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$ _May not be necessary to include if we only consider k = 1_.
 The difference between an observed value and the value predicted by the model is known as the _residual_. 
 
-Data can be thought to be made up of dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research, time and the electricity demand of other appliances). 
-
 ## Introduction to methods and models
 
 This section outlines a broad introduction to the various models used either implicitly or explicitly in this analysis. Refer to [@Cowpertwait2009] for further information.
@@ -127,49 +125,6 @@ A seasonal ARIMA model may also introduce additional autoregressive and moving a
 \Theta_P(B^s)\theta_p(B)(1-B^s)^D(1-B)^d x_t = \Phi_Q(B^s)\phi_q(B)w_t
 \end{equation}
 
-### VAR
-
-Vector Autoregression (VAR) is a model that utilises the same predictive method as the ARIMA model, with the addition of (at least) one additional variable. 
-This gives two time series', $\{x_t\}$ and $\{y_t\}$, which, for a VAR(1) process, can be expressed as
-\begin{equation}
-    x_t = \theta_{11}x_{t-1} + \theta_{12}y_{t-1} + w_{x,t}
-    (\#eq:VAR1)
-\end{equation}
-\begin{equation}
-    y_t = \theta_{21}x_{t-1} + \theta_{22}y_{t-1} + w_{y,t}
-    (\#eq:VAR2)
-\end{equation}
-
-where $\{w_{x,t}\}$ and $\{w_{y,t}\}$ are bivariate white noise and $\phi_{i,j}$ are model parameters.
-
-Using matrix notation, equations \@ref(eq:VAR1) and \@ref(eq:VAR2) can be written as
-\begin{equation}
-\bf{Z}_t = \bf{\Theta}\bf{Z}_{t-1} + \bf{w}_t
-(\#eq:VAR)
-\end{equation}
-where 
-\begin{equation*}
-    \bf{Z}_t = \begin{pmatrix}x_t \\ y_t \end{pmatrix}
-\end{equation*}
-\begin{equation*}
-\bf{\Theta} = \begin{pmatrix}\theta_{11} & \theta_{12}\\ \theta_{21} & \theta_{22}\end{pmatrix}
-\end{equation*}
-and
-\begin{equation*}
-\bf{w}_t = \begin{pmatrix}w_{x,t} \\ w_{y,t}\end{pmatrix}
-\end{equation*}.
-
-Equation \@ref(eq:VAR) can be expressed using the backshift operator as 
-\begin{equation}
-(\bf{I} - \bf{\Theta}B)\bf{Z}_t = \bf{\Phi}(B)\bf{Z}_{t} + \bf{w}_t
-(\#eq:VARbs)
-\end{equation}
-
-where $\bf{\Phi}$ is a matrix polynomial of order 1 and $\bf{I}$ is a 2 x 2 identity matrix.
-
-For this research, our additional variable is all other electricity use. We may reasonably assume that for many houses, the consumption of hot water use would correspond closely to other electricity use. The more obvious example is that electricity use, with the exception of thermostatic electric heating and appliances set to timers, would tend not to occur when residents are away from home or sleeping. In addition, we may expect hot water electricity use to lag (or lead) other electricity use. Consider a resident waking up, putting down some toast and boiling the kettle, then getting into the shower.
-Our VAR model hopes to capture the relationship between hot water use and other electricity use in order to provide additional accuracy to the ARIMA model.
-
 ### Logistic regression
 
 The models previously mentioned assume the dependent variables are continuous and have no upper or lower bounds. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
@@ -200,11 +155,11 @@ Physical fidelity is a measure of how closely the model approximates the physica
 
 Another important consideration for research purposes is interpretation of results. Model interpretability is a measure of how well we can infer fundamental behavioural properties (cycles, trends, correllations) from the model. Models that are easy to interpret are valuable for understanding the human behaviour behind hot water use, as well as for building simulations for further research.
 For a model to score highly in this metric, its parameters need to be easily obtainable, and preferably composed of succinct equations. 
-Models that simply output large matrices score poorly.
+Models that simply output large arrays score poorly.
 
 ### Computational efficiency
 
-For research purposes, the computational expense of modelling the electricity demand of a small number of households isn't of much concern. 
+For research purposes, the computational expense of modelling the electricity demand of a small number of households may not be of much concern. 
 When considering industry use however, computational efficiency becomes much more important.
 In order to make the real-time predictions necessary to effectively participate in demand response markets, models for thousands, or even hundreds of thousands of households need to be updated at least half-hourly, potentially more often, with reasonable speed. 
 In addition to processing expense, the amount of storage space each model requires is also worth consideration when considering large numbers of households.

@@ -164,7 +164,7 @@ plot(decomp.HW)
 ```
 
 ```{r stl_gg, include = FALSE, eval=FALSE}
-
+#This is a great package that seperates out the cycle, trend, and noise, and plots them. Needs some work to run nicely
 #df_xts <- as.xts(df) 
 #frequency(dt$HWelec) <- time3[1]
 
@@ -182,19 +182,19 @@ ggplot(dt, aes(x = datetime, y = HWelec)) +
    stat_stl(s.window = "Periodic")
 
 ################################
-library(ggseas)
-load("~/HWCanalysis/Masters/data_new/rf_13_at_1.Rda")
-s$r_dateTimeNZ <- lubridate::with_tz(s$r_dateTime, tz = "Pacific/Auckland")
+#library(ggseas)
+#load("~/HWCanalysis/Masters/data_new/rf_13_at_1.Rda")
+#s$r_dateTimeNZ <- lubridate::with_tz(s$r_dateTime, tz = "Pacific/Auckland")
 
 
-ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
-      method = "stl", s.window = 7) +
-   geom_line() +
-   labs(x = "   n  ", colour = "") +
-   scale_y_continuous("Power(W)", label = comma) +
-   ggtitle("Seasonal decomposition of electricity demand") +
-   theme(legend.position = c(0.17, 0.92))
+#ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
+#      method = "stl", s.window = 7) +
+#   geom_line() +
+#   labs(x = "   n  ", colour = "") +
+#   scale_y_continuous("Power(W)", label = comma) +
+#   ggtitle("Seasonal decomposition of electricity demand") +
+#   theme(legend.position = c(0.17, 0.92))
 
 ```
 
-_This is a great package that seperates out the cycle, trend, and noise, and plots them. Needs some work to run nicely_
+
