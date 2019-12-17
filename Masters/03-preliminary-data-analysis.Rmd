@@ -1,23 +1,24 @@
 # Preliminary data analysis {#data-prelim}
 _NOTE: need to mention throught this chapter where and why the preliminary analysis links to the methods_
 
-This chapter explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preperation process, then uses methods to compare and visualise cycles and correllations within relevant variables. The analysis draws upon a broader overview of the data available at https://cfsotago.github.io/GREENGridData/.
+This chapter explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preparation process, then uses methods to compare and visualise cycles and correllations within relevant variables. The analysis draws upon a broader overview of the data available at https://cfsotago.github.io/GREENGridData/.
 
 ## Initial data cleaning
 Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process (see https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19 for more information). 
-Data files from the remaining households are unzipped and processed using the `GREENGridData` package [@R-GREENGridData]. Total electricity is imputed from the submeters using the script `imputeTotalPower.R` (obtained from the `GREENGridData` github repository). From this output, we extract imputed total electricity demand and hot water electricity demand using `GREENGridData::extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
-During the preliminary data exploration, a number of households in the dataset were found to have characteristics that deemed them unsuitable for this analysis, and were removed.
-Households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have seperate hot water metering. 
-Households `rf_23` and `rf_24` had hot water controlled by either a timer or a home energy management system, in order to maximise self-consumption of their solar PV.
+Data files from the remaining households are unzipped and processed using the `GREENGridData` package[@R-GREENGridData]. Total electricity is imputed from the submeters using the script `imputeTotalPower.R` (obtained from the `GREENGridData` github repository). From this output, we extract imputed total electricity demand and hot water electricity demand using `GREENGridData::extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
+During the preliminary data exploration, a number of households in the dataset were found to have characteristics that deemed them unsuitable for this analysis, and were removed. These are as follows:
+
+Households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have separate hot water metering. 
+Households `rf_23` and `rf_24` had hot water controlled by either a timer or a home energy management system in order to maximise self-consumption of their solar PV.
 Household `rf_11` had a heat-pump hot water system, which rather than a typical on/off element, instead had constant electricity draw of around 54W.  
 Household `rf_17a` had extremely low hot water electricity values, indicating a problem with the sensor. 
 Households `rf_27`, `rf_01`, `rf_15b`,  had periods of days, weeks, or even months where no hot water electricity was used, interspersed with (somewhat) normal usage. 
 In addition, household `rf_31` only collected zero values for hot water electricity after 26th of February 2016. This household was cropped so as to only contain values before this date.
 
-The remaining 32 households were combined into one data table. Hot water electricity is then subtracted from total electricity, giving hot water electricity, and other electricity. 
-As much analysis would be carried out for "half hour" data, another datatable was constructed which took averages of the one minute electricity values over each half hour. 
+The remaining households were combined into one data table, and hot water electricity is subtracted from total electricity, giving two separate columns: hot water electricity, and other electricity. 
+As much analysis would be carried out for "half hour" data, another datatable was then constructed which took averages of the one minute electricity values over each half hour. 
 
-Refer to the script `processing.R` (see appendix) to view the processing code.
+Refer to the script `processing.R` (see Appendix) to view the processing code.
 ```{r load_pkg, include = FALSE}
 # List of packages required for this analysis
 pkg <- c("dplyr", "ggplot2", "knitr", "bookdown", "devtools")
@@ -164,7 +165,7 @@ plot(decomp.HW)
 ```
 
 ```{r stl_gg, include = FALSE, eval=FALSE}
-#This is a great package that seperates out the cycle, trend, and noise, and plots them. Needs some work to run nicely
+#This is a great package that separates out the cycle, trend, and noise, and plots them. Needs some work to run nicely
 #df_xts <- as.xts(df) 
 #frequency(dt$HWelec) <- time3[1]
 

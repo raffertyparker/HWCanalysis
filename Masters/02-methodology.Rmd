@@ -1,8 +1,8 @@
 # Methodology {#methodology}
 
-_Need to broadly describe different approaches - it may be better to introduce ARIMA first then introduce AR, MA and random walks as special cases of ARIMA. These models will be restated (with model parameters) in results chapters_
+This chapter begins by giving an introduction to the origin of our dataset, as well as noting some necessary preliminary cleaning. It goes on to provide a more theoretical background as to the nature of our data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
 
-This chapter begins by giving a broad introduction to the origin of our dataset, as well as noting some necessary preliminary cleaning. It goes on to provide a more theoretical background as to the nature of our data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
+All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. _it's not yet, but will be_
 
 <!-- Required to number equations in HTML files 
 <script type="text/x-mathjax-config">
@@ -26,16 +26,16 @@ _MISSING DATA: explain what steps were taken (or not taken) to deal with holes i
 knitr::kable(head(DT))
 ```
 
-For the purposes of the current project, the data was cleaned and processed until it was in the format shown in Table (\#tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the local (New Zealand) datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data.
-Chapter \@ref(half-hour) is concerned with constructing models that accurately represent the data storage and transmission characteristics of current smart meters in New Zealand, in particular by using electricity demand data that has been averaged over half hour intervals. For this analysis, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
-
-As this work is focussed on forecasting hot water electricity usage, we are concerned with predictability and patterns within our data over time, thus we utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] was used extensively to inform the overall process.
-All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. _it's not yet, but will be_
+For the purposes of the current project, the data was cleaned and processed until it was in the format shown in Table \@ref(tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the local (New Zealand) datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data.
+The bulk of this research occurs in Chapter \@ref(half-hour), whereby models are constructed that accurately represent the data storage and transmission characteristics of _current_ smart meters in New Zealand. These analyses use electricity demand data that has been averaged over half hour intervals, with no additional data sources. For these analyses, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
 
 ## Time series overview and notation
 
-A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009]. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the model of $\{x_t\}$.  A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$ _May not be necessary to include if we only consider k = 1_.
-The difference between an observed value and the value predicted by the model is known as the _residual_. 
+As this work is focussed on forecasting hot water electricity usage, we are concerned with predictability and patterns within our data over time, thus we extensively utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] provided a guideline to the overall process.
+A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009]. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical data values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the _model_ of $\{x_t\}$.  A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
+The difference between an observed value and the value predicted by the model is formally known as the _residual_, and can be intuitively understood as the error in the value predicted by the model.
+The residual sum of squares (RSS) is the sum of the squares of all the residuals over the times considered.
+Many models are fitted algorithmically in order to minimise the RSS.
 
 ## Introduction to methods and models
 
@@ -50,15 +50,16 @@ x_t = x_{t+1} + w_t
 (\#eq:randomWalk)
 \end{equation}
 where $\{w_t\}$ is a white noise series. 
-Random walk models are more commonly used in simulations. When used in simulations, a random walk model will artificially generate white noise to simulate a potential evolution of the variable in time.
+Random walk models are more commonly used in simulations than forecasts. When used in simulations, a random walk model will artificially generate white noise to simulate a potential evolution of the variable in time.
 Due to their simplicity and ease of computation they are sometimes used in forecasting as a 'benchmark' model, by which other models may be compared. For this reason, they are referred to as 'naive' models.
 When used for forecasting, this model assumes that the mean of the white noise is equal to zero, ($\{\overline w_t\} = 0$), and consequently that the dependant variable (hot water electricity demand, in our case) of the next timestep can be best predicted by the demand of the current timestep. 
 _show figure demonstrating_
 
 ### Simple linear regression
 
-Simple linear regression is a common forecasting model prized for its simplicity in interpretation and computation.
-A special case of a linear model is the simple linear regression, which is represented by a straight line. This is represented by the equation
+Linear modelling is a common forecasting method prized for its simplicity in interpretation and computation.
+A special case of a linear model is the simple linear regression, which fits a straight line through data in order to minimise the RSS. 
+This line can be represented by the equation
 \begin{equation}
 x_t = \alpha_0 + \alpha_1 t
 (\#eq:simpleLinearRegression)
@@ -79,7 +80,7 @@ where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equatio
 \begin{equation}
 x_t = (1 + \beta_1 B + \beta_2 B^2 + ... + \beta_q B^q)w_t = \phi_qBw_t
 \end{equation}
-where $B$ is the backshift operator, $Bx_t = x_{t-1}$, and $\phi_q$ is a polynomial of order 2.
+where $B$ is the backshift operator, i.e. $Bx_t = x_{t-1}$, and $\phi_q$ is a polynomial of order 2.
 
 ### Autoregression
 
@@ -102,11 +103,10 @@ A prediction is then given by
 
 Differencing a time series $\{x_t\}$ is a method of removing trends, where, for example with a random walk process, the difference is white noise $x_t - x_{t-1} = w_t$.
 More generally, a time series $\{x_t\}$ is referred to as _integrated_ of order $d$ (denoted $I(d)$) if the $d$th difference of $\{x_t\}$ is white noise.
-_elaborate on this slightly_.
 The random walk model is the special case $I(1)$.
 
 ### ARIMA
-_Perhaps abandon IMA part and just do seasonal AR_
+
 An Autoregressive Moving Average (ARMA) process of order $(p,q)$ combines autoregression with the moving average process, adding the two together in the form 
 \begin{equation}
 x_t = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q}
@@ -134,9 +134,6 @@ This is particularly pronounced when considering data at 1 minute resolution. At
 knitr::include_graphics(paste0(pFile, "oneDay.pdf"))
 ```
 
-### Generalised additive models
-
-Generalised additive models goes here
 
 ## Metrics
 
@@ -161,5 +158,5 @@ Models that simply output large arrays score poorly.
 
 For research purposes, the computational expense of modelling the electricity demand of a small number of households may not be of much concern. 
 When considering industry use however, computational efficiency becomes much more important.
-In order to make the real-time predictions necessary to effectively participate in demand response markets, models for thousands, or even hundreds of thousands of households need to be updated at least half-hourly, potentially more often, with reasonable speed. 
+In order to make the real-time predictions necessary to effectively participate in demand response markets, models for thousands, or even hundreds of thousands of households need to be updated regularly, with reasonable speed. 
 In addition to processing expense, the amount of storage space each model requires is also worth consideration when considering large numbers of households.
