@@ -76,7 +76,7 @@ ggsave(paste0(pFile, "simpleLinear/rf_13_scatterplot.pdf"))
 
 
 fit1 <- lm(DT_hh$HWelec[DT_hh$linkID == house]~DT_hh$nonHWshift[DT_hh$linkID == house])
-ggplotRegression(mdl)
+ggplotRegression(fit1)
 
 p <- ggplot(data = linearRelData, aes(x = nonHW, y = HWminusOne)) +
   geom_point() + geom_smooth(method="lm") +
