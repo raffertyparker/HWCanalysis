@@ -104,12 +104,13 @@ p + coord_flip()
 
 ## Autocovariance of hot water use
 
+_Consider putting this in the methodology_
 We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising cyclical behaviour of data, and is defined as
 
 \begin{equation}
-\gamma_k = E[(x_t - \mu)(x_{t+k} - \mu)]
+\gamma_k = E[(x_t - \mu)(x_{t+k} - \mu)] ,
 \end{equation}
-where $k$ is the lag value and $\mu$ is the mean of both $x_t$ and $x_{t+k}$.
+where $k$ is the lag value, $E$ is the expected value operator, and $\mu$ is the mean of both $x_t$ and $x_{t+k}$.
 <!--
 ![Autocovariance of all houses.](~/HWCanalysis/Masters/plots/acf_all_houses.png)
 -->
@@ -134,10 +135,11 @@ Table \@ref(tab:frequencyAnalysis) shows that while some houses have "expected" 
 
 ## Cross covarience of hot water electricity use with non hot water electricity use
 
+_Put this in methodology too, just include the figure and a brief discussion_
 In a similar fashion to the autocovariance function, the cross-covariance function of two variables $x, y$ is given by
 
 \begin{equation}
-\gamma_k(x,y) = \operatorname{E}[(x_{t+k} - \mu_x)(y_t - \mu_y)]
+\gamma_k(x,y) = \operatorname{E}[(x_{t+k} - \mu_x)(y_t - \mu_y)] ,
 \end{equation}
 where variable $x$ lags variable $y$ by lag $k$[@Cowpertwait2009].
 

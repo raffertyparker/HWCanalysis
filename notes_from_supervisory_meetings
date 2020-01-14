@@ -1,7 +1,24 @@
-09/10/10
+13/1/20
+
+Move some AI stuff to methodology
+Currently reads like somebody chose the methods and I used them. Need to clarify how I decided what models to use (i.e. need to make clear WHY SVM is better than NN for this data). This could be in lit review or may need it's own chapter
+Could draw a 'family tree' of methods, indicating whether they have been used for this type of forecasting or not, and which I have decided to use. Map the landscape of models somehow
+Could split aims into two: (i) determine what methods to use, and (ii) apply them to obtain results as accurate as possible
+Describe process of sorting through existing work to choose the models I have chosen
+Put one minute analysis as 'further work'
+Include results (systematically)
+Include 'problem description' in introduction, perhaps by elaborating in DSM section
+Describe what has been done already in this field, then how we are going to improve on this with data science methods
+Interest over time in data science methods is too specific; show broader interest. The specific methods may be able to be used in a different section
+Elaborate on why specific methods are used and why some are not
+Don't include methodology in results
+Describe TSA before models
+Revert data to messy form, run models again
+
+
+09/10/19
 
 Move on from methodology and try get some results to present in Nov
-Mention in
 
 02/10/19
 

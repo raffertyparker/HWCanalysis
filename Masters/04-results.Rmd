@@ -1,4 +1,4 @@
-# Modelling half-hour electricity demand {#half-hour}
+# Results {#results}
 <!--
 ```{r setup2, include=FALSE}
 knitr::opts_chunk$set(echo=TRUE, engine.path = list(python = '/anaconda/bin/python'))
@@ -48,7 +48,7 @@ Figure \@ref(fig:hhElementPlot) may be compared with Figure \@ref(fig:elementPlo
 
 In our naive model we assume no drift, and only attempt to predict one (half hour) time step onto the future. From Equation \@ref(eq:randomWalk), we get 
 \begin{equation}
-\hat x_{t+1} = x_t
+\hat x_{t+1} = x_t .
 \end{equation}
 
 ```{r randomWalk, out.width='100%', fig.cap="Actual electricity use and naive model approximation over one day for four households"}
@@ -67,7 +67,7 @@ While simple linear regression is a useful method of analysing data that has a r
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
 The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
 
-```{r linearRelations, echo=FALSE, fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household rf_06"}
+```{r linearRelations, out.width='100%', echo=FALSE, fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household rf_06"}
 knitr::include_graphics(paste0(pFile, "rf_13LinearPlot.pdf"))
 ```
 
@@ -137,7 +137,7 @@ _This needs moving to methodology_
 We now explore forecasts using a vector autoregression model. 
 The model is of the following form:
 \begin{equation}
-\bf{y}_t = A_1 \bf{y}_{t-1} + … + A_p \bf{y}_{t-p} + CD_t + \bf{u}_t
+\bf{y}_t = A_1 \bf{y}_{t-1} + … + A_p \bf{y}_{t-p} + CD_t + \bf{u}_t ,
 \end{equation}
 where $\bf{y}_t$ is a $K \times 1$ vector of endogenous variables and $u_t$ assigns a spherical disturbance term of the same dimension. The coefficient matrices $A_1, …, A_p$ are of dimension $K \times K$. 
 
@@ -150,7 +150,7 @@ For our data, we utilise the cyclical values previously determined using frequen
 The optimal lag term can be determined using the VARselect function, which optimises lag values by minimising the Bayesian information criterion using the formula
 
 \begin{equation}
-SC(n) = \ln \det(\tilde{\sum}_u(n)) + \frac{\ln(T)}{T}
+SC(n) = \ln \det(\tilde{\sum}_u(n)) + \frac{\ln(T)}{T} ,
 \end{equation}
 
 where $\tilde{\sum}_u (n) = T^{-1} \sum_{t=1}^T \bf{\hat{u}}_t \bf{\hat{u}}_t'$ and n assigns the lag order.

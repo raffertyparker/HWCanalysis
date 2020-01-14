@@ -27,9 +27,13 @@ knitr::kable(head(DT))
 ```
 
 For the purposes of the current project, the data was cleaned and processed until it was in the format shown in Table \@ref(tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the local (New Zealand) datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data.
-The bulk of this research occurs in Chapter \@ref(half-hour), whereby models are constructed that accurately represent the data storage and transmission characteristics of _current_ smart meters in New Zealand. These analyses use electricity demand data that has been averaged over half hour intervals, with no additional data sources. For these analyses, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
+The results of this research are demonstrated in Chapter \@ref(results), whereby models are constructed that accurately represent the data storage and transmission characteristics of _current_ smart meters in New Zealand. These analyses use electricity demand data that has been averaged over half hour intervals, with no additional data sources. For these analyses, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
 
-## Time series overview and notation
+## Methods for preliminary data analysis
+
+In any data analysis, there are initial processes that should be undertaken in order to get a general overview of the data. This allows for an informed opinion to be made as to the best techniques to achieve the desired objectives of the analysis.
+
+### Time series overview and notation
 
 As this work is focussed on forecasting hot water electricity usage, we are concerned with predictability and patterns within our data over time, thus we extensively utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] provided a guideline to the overall process.
 A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009]. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical data values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the _model_ of $\{x_t\}$.  A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
@@ -37,7 +41,10 @@ The difference between an observed value and the value predicted by the model is
 The residual sum of squares (RSS) is the sum of the squares of all the residuals over the times considered.
 Many models are fitted algorithmically in order to minimise the RSS.
 
-## Introduction to methods and models
+_PUT PRELIMINARY DATA ANALYSIS METHODOLOGY HERE_
+
+
+## Introduction to time series models
 
 This section outlines a broad introduction to the various models used either implicitly or explicitly in this analysis. Refer to [@Cowpertwait2009] for further information.
 
@@ -46,7 +53,7 @@ This section outlines a broad introduction to the various models used either imp
 A time series $\{x_t\}$ is known as a 'random walk' if 
 
 \begin{equation}
-x_t = x_{t+1} + w_t
+x_t = x_{t+1} + w_t ,
 (\#eq:randomWalk)
 \end{equation}
 where $\{w_t\}$ is a white noise series. 
@@ -61,7 +68,7 @@ Linear modelling is a common forecasting method prized for its simplicity in int
 A special case of a linear model is the simple linear regression, which fits a straight line through data in order to minimise the RSS. 
 This line can be represented by the equation
 \begin{equation}
-x_t = \alpha_0 + \alpha_1 t
+x_t = \alpha_0 + \alpha_1 t .
 (\#eq:simpleLinearRegression)
 \end{equation}
 
@@ -73,12 +80,12 @@ _show figure demonstrating?_
 
 A q-order moving average process, $MA(q)$ is defined as
 \begin{equation}
-x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q}
+x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q} ,
 (\#eq:MA1)
 \end{equation}
 where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(eq:MA1) can be expressed as
 \begin{equation}
-x_t = (1 + \beta_1 B + \beta_2 B^2 + ... + \beta_q B^q)w_t = \phi_qBw_t
+x_t = (1 + \beta_1 B + \beta_2 B^2 + ... + \beta_q B^q)w_t = \phi_qBw_t ,
 \end{equation}
 where $B$ is the backshift operator, i.e. $Bx_t = x_{t-1}$, and $\phi_q$ is a polynomial of order 2.
 
@@ -86,7 +93,7 @@ where $B$ is the backshift operator, i.e. $Bx_t = x_{t-1}$, and $\phi_q$ is a po
 
 A time series $x_t$ is an autoregressive process of order $p$ (referred to as $AR(p)$) if it can be represented as
 \begin{equation}
-x_t = \alpha_1x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t
+x_t = \alpha_1x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t ,
 (\#eq:AR)
 \end{equation}
 
@@ -95,9 +102,9 @@ where $\{w_t\}$ is white noise and $\alpha_i$ are model parameters, $\alpha_p \n
 A prediction is then given by
 
 \begin{equation}
-\hat x_{t} = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p}
+\hat x_{t} = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} .
 (\#eq:ARmodel)
-\end{equation}.
+\end{equation}
 
 ### Integrated model
 
@@ -107,14 +114,14 @@ The random walk model is the special case $I(1)$.
 
 ### ARIMA
 
-An Autoregressive Moving Average (ARMA) process of order $(p,q)$ combines autoregression with the moving average process, adding the two together in the form 
+An Autoregressive Moving Average (ARMA) process of order $(p,q)$ combines autoregression with the moving average process, adding the two together. This results in 
 \begin{equation}
-x_t = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q}
+x_t = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q} .
 (\#eq:ARMA)
 \end{equation}
-This may be expressed in terms of the backward shift operator in polynomial form
+This may be expressed in terms of the backward shift operator in polynomial form as
 \begin{equation}
-\theta (B) x_t = \phi (B) w_t
+\theta (B) x_t = \phi (B) w_t .
 (\#eq:ARMApolyform)
 \end{equation}
 The previously described processes are frequently combined into what as known as an Autoregressive Integrated Moving Average.
@@ -122,11 +129,12 @@ A time series $\{x_t\}$ is referred to as an $ARIMA(p,d,q)$ process if, when dif
 In a similar manner to how trends can be removed through differencing at lag 1, seasonal effects within data (such as daily use patterns) can be removed by differencing at lag $s$, where $s$ is the length of the season.
 A seasonal ARIMA model may also introduce additional autoregressive and moving average terms at lag $s$, giving a model of the form $ARIMA(p,d,q)(P,D,Q)_s$, expressed using the backward shift operator as
 \begin{equation}
-\Theta_P(B^s)\theta_p(B)(1-B^s)^D(1-B)^d x_t = \Phi_Q(B^s)\phi_q(B)w_t
+\Theta_P(B^s)\theta_p(B)(1-B^s)^D(1-B)^d x_t = \Phi_Q(B^s)\phi_q(B)w_t .
 \end{equation}
 
 ### Logistic regression
 
+_Probably delete this section as I won't be using it_
 The models previously mentioned assume the dependent variables are continuous and have no upper or lower bounds. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
 This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot) for an example of this behaviour.
 
@@ -138,6 +146,7 @@ knitr::include_graphics(paste0(pFile, "oneDay.pdf"))
 ## Metrics
 
 Each model will be compared against one another using the following metrics. 
+_Note that these metrics should have been introduced in the introduction_
 
 ### Accuracy
 

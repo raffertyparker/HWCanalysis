@@ -1,23 +1,35 @@
 # Introduction
 
 _Needs to clearly outline WHY we want to predict hot water_
+Format
+
+Problem: One solution to the variability of electricity demand and supply problems is DSM, but current methods not sophisticated
+New approach: The growing field of data science along with the availability of electricity data and methods of analysing it could be used to help with more effective DSM
+My thesis: (ii) Explores a variety of models to forecast hot water demand; (ii) Evaluates the appropriateness of a selection of these models against one another using various metrics
 
 ```{r loadFiles, include=FALSE}
 dFile <- "~/HWCanalysis/Masters/data/"   # Data folder
 pFile <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did not like '~' notation)
 ```
 
+
 ## Demand side management
+_THIS NEEDS TO BE MUCH LONGER, and paint a more clear picture of the 'problem' I am trying to solve_
 
-Total electricity demand varies throughout time, with daily demand patterns in New Zealand generally exhibiting two peaks, one in the morning and one in the evening[@TranspowerNZ2015].
+Total electricity demand varies throughout time, with average daily demand patterns in New Zealand generally exhibiting two peaks, one in the morning and one in the evening[@TranspowerNZ2015]. In addition, times of extreme weather or social factors can cause (often localised) extreme demand fluctuations, sometimes causing significant disruption to networks _elaborate and cite_.
 
-_Do I still need to distinguish between local network and national peaks, as well as daily peaks from extreme events and seasonal peaks?_ 
+_Need to distinguish between local network and national peaks, as well as daily peaks from extreme events and seasonal peaks_ 
 
 As electrical energy cannot be stored, electricity supply must match this fluctuating demand, requiring underutilised generation and transmission infrustructure to be available on demand, a costly and inefficient situation[@Strbac2008]. 
 In New Zealand, every additional kW of peak time demand is estimated to require up to $200/year in additional infrastructure costs[@Jack].
 The challenges associated with supplying electricity in order to effectively meet demand are likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015].
-Demand side management (DSM) is the process of adjusting demand to meet supply, and may play a vital role in the transition to a low-carbon electricity grid. Many electricity using devices can have their use times shifted on a daily scale with limited impact to the end user (a property referred to as "flexibility"). Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and thermostatically controlled appliances including heat pumps, as well as the focus of this thesis, electric hot water cylinders (HWCs).
+Demand side management (DSM) is the process of adjusting demand to meet supply, and may play a vital role in the transition to a low-carbon electricity grid. 
+_Discuss current DSM practices including instantaneous reserves markets here_
+
+_Now introduce IOT and smart control here_
+Many electricity using devices can have their use times shifted on a daily scale with limited impact to the end user (a property referred to as "flexibility"). Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and thermostatically controlled appliances including heat pumps, as well as the focus of this thesis, electric hot water cylinders (HWCs).
 The ability of the HWC to store and retain up to 10kWh of energy in the form of heat renders them perfect candidates for DSM, and could be considered one of the most “flexible” appliances in New Zealand households[@Stephenson2017].
+In addition to assisting DSM objectives, smart control of hot water cylinders can improve their efficiency by only heating as much water as is required by the household.
 
 ## Why predict hot water electricity demand
 
@@ -25,7 +37,7 @@ The ability to predict usage patterns allows hot water cylinder elements to be c
 
 ### Enhancing control for DSM objectives
 
-Due to domestic electricity consumption patterns corresponding to appliance usage soon after waking in the morning, and soon after returning home in the evening, residential electricity demand is a key contributor to network demand peaks.
+Residential electricity demand is a key contributor to network demand peaks.
 In New Zealand, it is estimated that residential electricity usage contributes around half of peak demand[@ElectricityCommission2007] and residential hot water use is around 30% of residential energy used[@Pollard2002]. 
 A study by the Household Energy End Use Project (HEEP) showed that hot water usage makes up to 36% of residential peak demand[@Pollard2002], with other research suggesting it may be up to 50%[@Jack]. 
 In New Zealand, electric hot water cylinders (HWCs) are very common, with 91% of households having electricity as an energy source for water heating[@Pollard2002]. 
@@ -47,13 +59,11 @@ _Time series_ data is that which involves measurements of variables sequentially
 This data may then be processed, analysed and extrapolated in a manner that produces predictions of future events or occurrences, a process known as 'forecasting'. 
 There are number of different methods of forecasting time series data.
 Although the distinction is subtle, these methods may be broadly separated into two catagories; (i) conventional, and (ii) artificial intelligence (AI)[@MatDaut2017].
+Forecasting may also be boradly classified by the length of time into the future the forecast is predicting[@Ahmad2014]. Short term load forecasting (STLF) is usually used to refer to predictions of less than 24 hours, although it can refer to forecast periods of up to one week. Medium term load forecasting (MTLF) refers to predictions between one week and one year. Long term load forecasting (LTLF) is for predictions spanning longer than one year.
 
 ### Conventional forecasting methods
 
 Conventional methods may again be separated into two distinct techniques.
-
-[^1]: Multivariate data can be thought to be made up of both dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research we use time and the electricity demand of other appliances).
-
 The first, referred to as _causal_ modelling[@Hong2016], utilises data of separate but related (explanatory[^1]) variables and makes predictions based on basic statistical relationships between them. Regression analysis is a causal model commonly used in electricity forecasting, and may be understood as follows:
 If there is the ability to know (or sufficiently accurately predict) the value(s) of the independant variable(s) at a particular future time, then a forecast for the dependent variable may be calculated at that same time based on the causal relationship between them.
 In the context of electricity demand forecasting, relevant predictable independent variables may be social factors such as public holidays, or (accurately forecasted) weather conditions[@Wei2018].
@@ -65,9 +75,15 @@ On important technique used in time series analysis is the separation of the dat
 In the context of DHW electricity time series data, the trend would be a gradual increase (or decrease) in average hot water use over long periods of time, the cycles would be average daily use patterns such as morning and evening peaks previously mentioned, and the noise is any deviation of the data from the trend and cycle components (people not actually using hot water according to strict mathematical relationships).
 Additionally, forecasts may be made by understanding the relationships between a variable and its previous values. Autoregression (AR) and moving average (MA) are two commonly utilised techniques to obtain these relationships. In the context of DHW forecasting this method may be best interpreted as an understanding of the lengths of time a water heater element will typically remain on (or off) for. 
 
-_Include MCMC? a couple of papers utilise it but I believe it's better suited to modelling/scenarios than forecasts and I won't be using it_
+[^1]: Multivariate data can be thought to be made up of both dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research we use time and the electricity demand of other appliances).
 
 ### AI forecasting methods
+
+```{r ANNinDF, out.width='100%', fig.cap="Documents in SCOPUS containing keywords: artificial neural network electricity demand forecasting"}
+knitr::include_graphics(paste0(pFile, "artificial_neural_network_electricity_demand_forecasting.png"))
+```
+
+_Need to provide a clearer picture of the strengths and weaknesses of these forecasting methods_
 
 Artificial Intelligence (AI) methods are those that use more complex techniques from the field of machine learning for forecasting.
 These methods can be considered separate from their conventional counterparts by their ability to process and establish relationships between data in a more autonomous fashion. 
@@ -80,27 +96,24 @@ The weights assigned by each neuron are then iteratively adjusted in order to mi
 While Hippert, Pedreira, and Souza[@Hippert2014] state in 2001 that ANNs do not outperform conventional forecasting methods in accuracy, a more recent analysis from Raza and Khosravi[@Raza2015] in 2015 claims the contrary.
 Despite this recent claim to superiority in forecast accuracy, the computational expense of training ANNs can be a hindrance to large-scale adoption, as it generally involves a time-consuming process using expensive and energy-intensive computers.
 While still an active research area, Figure \@ref(fig:ANNinDF) indicates that research in ANNs for electricity demand forecasting may have peaked, and now be diminishing.
-```{r ANNinDF, include=FALSE, out.width='100%', fig.cap="Documents in SCOPUS containing keywords: artificial AND neural AND network AND electricity AND demand AND forecasting"}
-knitr::include_graphics(paste0(pFile, "artificial_neural_network_electricity_demand_forecasting.png"))
-```
-
 This may be due to increasing interest in an alternative AI forecasting method for electricity demand forecasting, that of support vector machines (SVMs).
 Support vector machines classify data points by mapping them in hyperspace and distinguising between them according to which side of a hyperplane they fall on, with the position of the classifying hyperplanes being constructed iteratively in order to maximise the perpendicular distance between each hyperplane and the closest samples on either side of it (refer to Figure \@ref(fig:SVMexample). Non-linear partitions can also be constructed using a kernel function.
 Support vector machines may be used in electricity forecasting by automating the process of discovering, catagorising and quantifying various relationships within the data, such as those previously described as part of time series analysis and causal modelling[@Wei2018].
-
+This method is far less computationally expensive to train than ANNs, and research interest in the context of electricity demand forecasting is still growing, as can be seen in Figure \@ref(fig:SVMinDF).
 
 ```{r SVMexample, out.width='100%', fig.cap="Example demonstrating the classifying mechanism of a SVM. Image by Larhmam - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=73710028"}
 knitr::include_graphics(paste0(pFile, "SVMmargin.png"))
 ```
 
-This method is far less computationally expensive to train than ANNs, and has no indication of a reduction in research interest in the context of electricity demand forecasting, as can be seen in Figure \@ref(fig:SVMinDF).
-
-```{r SVMinDF, out.width='100%', fig.cap="Documents in SCOPUS containing keywords: support AND vector AND network AND electricity AND demand AND forecasting"}
+```{r SVMinDF, out.width='100%', fig.cap="Documents in SCOPUS containing keywords: support vector network electricity demand forecasting"}
 knitr::include_graphics(paste0(pFile, "support_vector_electricity_demand_forecasting.png"))
 ```
 
+_Consider replacing these SCOPUS charts with a more broad search term relevent to my topic_
 
-## Related work
+_Include a subsection on metrics here_
+
+## Relevant literature
 
 _Key things to aim for in the lit review: (i) Demonstrating that I know the literature, and (ii) Identifying the gap I intend to fill with this research. Be careful not to use difficult terms or concepts without having first introduced them._
 
@@ -108,7 +121,7 @@ There is a large and active body of research that explores different methods of 
 
 ### Control for efficiency gains or DSM objectives
 
-_The following simply lists articles. I may need to catagorise and order a bit more. In addition, some may need to be discarded, in particular those that control appliances other than HWCs, and have no forecasting component. Others possibly need simplifying, or otherwise have uncommon terms introduced prior to this section. In particular, it might be best to just describe ARIMA methods in terms of "conventional time series" etc rather than name them explicitly_
+_The following simply lists articles. I may need to catagorise and order a bit more. Some may need simplifying, or otherwise have uncommon terms introduced prior to this section. In particular, it might be best to just describe ARIMA methods in terms of "conventional time series" etc rather than name them explicitly_
 
 Ramchurn, Vytelingum, Rogers and Jennings, (2011) model households with generic storage capacity under a homeostatic control mechanism which uses linear optimisation to minimise consumption of high-carbon electricity by shifting electricity use over daily timescales in order to match predicted renewable energy availability. Reduction in residential carbon emissions of up to 25% were demonstrated, as were consumer savings of up to 14.5% under a carbon-based pricing mechanism. 
 
@@ -132,13 +145,12 @@ Roux, Apperly and Booysen (2018) also use a two-volume model for their heuristic
 
 Some research combines the computational efficiency of the single-volume well-mixed model with the physical fidelity of a multi-volume model by utilising both models for different aspects of the simulation/optimisation/control process. The control algorithm utilised by Kepplinger, Huber and Petrasch (2014) uses a single-volume well-mixed model in order to construct a cost-optimised binary switch function under real-time electricity prices using the hot water demand predicted using a kth nearest neighbour data mining algorithm. This optimised binary switch function is input along with the electrical power used by the physical hot water cylinder into a multi-volume thermal model that is used to estimate future temperatures inside the physical cylinder. These predictive temperatures are returned to the original optimisation algorithm to check that they are between the minimum and maximum temperature constraints. 
 
-### Forecasting to improve control objectives
+### Forecasting to improve smart-control objectives
 
 A common theme within the literature regarding smarter control of hot water cylinders is the necessity of accurately forecasting hot water demand. An accurate demand forecast allows for more efficient energy storage and demand response capabilites, and may lessen any negative effects (running out of hot water) to the end user.
+While much work has been done on medium to long term electricity demand forecasting, this thesis is concerned only with short term forecasts, and as such there is a strong emphasis on literature relating to short term forecasting.
 
-Forecasting literature may be broadly classified using two separate attributes; (i) forecasting period, and (ii) forecasting method.
-Forecasting period can be further separated into three catagories[@Ahmad2014]. Short term load forecasting (STLF) is usually used to refer to predictions of less than 24 hours, although it can refer to forecast periods of up to one week. Medium term load forecasting (MTLF) refers to predictions between one week and one year. Long term load forecasting (LTLF) is for predictions spanning longer than one year.
-As this thesis is concerned only with short term forecasts, no literature relating to medium or long term forecasts is included.
+_Add forecast length to each paper_
 
 Gelažanskas and Gamage[@Gelazanskas2015] explore a number of statistical forecasting methods to predict domestic hot water electricity use including exponential smoothing, seasonal autoregressive moving average, and a combination of these two. These models were all found to outperform benchmark models such as mean, naive, and seasonal naive, with seasonal decomposition being the most important technique for forecast accuracy. _Need to expand upon how the models are developed, (based on historical data etc)._
 
@@ -148,19 +160,18 @@ Aki, Wakui and Yokoyama[@Aki2016] also use volumetric DHW data, however they opt
 
 [@Denis2019] considers the ability of forecasting to assist in reducing thermal losses from DHW tanks by controlling the operation of the device such that only the necessary amount of hot water is stored in the tank at once. An ARIMA model is utilised along with the TRNSYS energy simulation software. Overall energy reductions of up to 17.4% were demonstrated under this control scenario.
 
-_Make sure introduction has provided sufficient information that the reader will understand the research aims in next subsection._
+_Make sure introduction has provided sufficient information that the reader will understand the research aims in next subsection. By the time I get here it should be clear exactly what the problem is about and that I am trying a new approach to solve the problem_
 
 ## Aims
 
-This project analyses and models residential electricity demand data in order to determine forecastability of residential hot water electricity use from smart meters with separately metered hot water, as is commonly encountered in New Zealand. This would assist in controlling hot water electricity for demand response and/or efficiency improvements by reducing negative effects on service. In addition, it may provide the means for hot water cylinders to participate in half-hour ahead demand response markets _(do i need to introduce these first?)_ by providing the ability to bid an estimated capacity for load-shedding according to forecasted demand. It is an exploratory analysis and examines a number of different forecasting methods, which are compared to one another relevant metrics in the conclusion.
+This project analyses and models residential electricity demand data in order to determine forecastability of residential hot water electricity use from smart meters with separately metered hot water, as is commonly encountered in New Zealand. This would assist in controlling hot water electricity for demand response and/or efficiency improvements by reducing negative effects on service. In addition, it may provide the means for hot water cylinders to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted demand. It is an exploratory analysis and examines a number of different forecasting methods _state which ones, and why they were chosen over others_, which are compared to one another relevant metrics _at least hint at metrics before this_ in the conclusion.
 
 ## Thesis structure
 
 The main body of analysis is broadly broken into four sections. 
 Chapter \@ref(methodology) introduces the models utilised in the context of electricity demand, and describes the metrics by which the models are compared to one another.
 Chapter \@ref(data-prelim) explains the cleaning and preparatory process, and then provides a broad overview of various relevant patterns and attributes of the data. 
-Chapter \@ref(half-hour) explores a number of statistical models to forecast hot water electricity demand of each household using half-hour averaged data. This is currently the form which is stored and transmitted by smart meters in New Zealand currently. 
-Chapter \@ref(one-min) uses similar models adapted for a one minute frequency, with forecasts predicting a "binary" probabilistic outcome of element on/element off, as this provides closer approximation to the physical process of electricity use of a hot water cylinder.
+Chapter \@ref(results) demonstrates the effectiveness of a number of statistical models to forecast hot water electricity demand of each household using half-hour averaged data. This is currently the form which is stored and transmitted by smart meters in New Zealand currently. 
 The exploratory techniques and predictive models utilised are all described and discussed immediately proceeding the results of their forecasts, as this provides tangible examples to assist in their comprehension.
 Each forecasting model used is then compared to one another by a number or relevant metrics. These comparative results are provided in the Conclusion (Chapter \@ref(conclusion)).
 
