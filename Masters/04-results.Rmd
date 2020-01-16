@@ -67,8 +67,8 @@ While simple linear regression is a useful method of analysing data that has a r
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
 The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
 
-```{r linearRelations, out.width='100%', echo=FALSE, fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household rf_06"}
-knitr::include_graphics(paste0(pFile, "rf_13LinearPlot.pdf"))
+```{r linearRelations, out.width='100%', fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household rf06"}
+knitr::include_graphics(paste0(pFile, "rf06LinearPlot.pdf"))
 ```
 
 Figure \@ref(fig:linearRelations) shows a simple linear regression of current non hot water electricity demand with the following half-hour's hot water electricity demand. This is shown to demonstrate the ability to use current electricity demand to predict hot water electricity demand over the next half hour. Note the low $R^2$ value suggesting that, in it's current form, this model would be rather inadequate at forecasting demand.
@@ -119,7 +119,9 @@ _I might as well include a moving average model. It is easy to impliment and wou
 
 ## ARIMA model
 
-Some[@Cui2016] forecasting of electricity hot water use has been done using autoregressive moving average (ARIMA) models. We explore this briefly in order to make comparisons with other techniques.
+Some[@Cui2016] forecasting of electricity hot water use has been done using autoregressive moving average (ARIMA) models.
+_include plots and results_
+_rerun results with a max.p = 50 to facilitate seasonal differencing_
 
 ```{r ARIMA, eval = FALSE}
 AA <- auto.arima(dt$HWelec, max.p = 50)
@@ -129,7 +131,7 @@ HWarima <- arima(dt$HWelec, seasonal = time3, method = "CSS")
 plot(AA)
 
 ```
-_NOTE it is important to show the benefits of progressing to VAR from ARIMA somewhere_
+_Show parameters of autoarima_
 
 ## Vector Autoregression
 
