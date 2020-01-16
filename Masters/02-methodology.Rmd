@@ -146,7 +146,6 @@ knitr::include_graphics(paste0(pFile, "oneDay.pdf"))
 ## Metrics
 
 Each model will be compared against one another using the following metrics. 
-_Note that these metrics should have been introduced in the introduction_
 
 ### Accuracy
 

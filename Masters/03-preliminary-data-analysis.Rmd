@@ -102,6 +102,10 @@ p <- ggplot2::ggplot(DT, aes(x = linkID, y = HWelec, group = linkID)) +
 p + coord_flip()
 ```
 
+## Stationarity
+
+_Test for stationarity here_
+
 ## Autocovariance of hot water use
 
 _Consider putting this in the methodology_
