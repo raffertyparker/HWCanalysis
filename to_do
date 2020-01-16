@@ -1,25 +1,19 @@
-################## TO DO ##################
+﻿################## TO DO ##################
 
+Create STL + ARIMA and SVM models
 Include nomenclature at beginning (after list of tables?)
 Split preliminary data analysis into Methodology and Results
 Draw Demand side management/Data science ven diagram, indicate the catagories which overlap
 Draw family tree/landscape of models, indicate if they have been used for elec data and which I have decided to use
-Revert data to messy form, run models again, include results (systematically)
-Complete SVM analysis
+Unless I automated the data selction process, need to revert data to messy form, run models again, include results (systematically)
 Move AI stuff to methodology
 
 Currently reads like somebody chose the methods and I used them. Need to clarify how I decided what models to use (i.e. need to make clear WHY SVM is better than NN for this data). This could be in lit review or may need it's own chapter
 Split aims into two: (i) determine what methods to use, and (ii) apply them to obtain results as accurate as possible
 Describe process of sorting through existing work to choose the models I have chosen
-Put one minute analysis as 'further work'
-Include 'problem description' in introduction, perhaps by elaborating in DSM section
-Describe what has been done already in this field, then how we are going to improve on this with data science methods
 Interest over time in data science methods is too specific; show broader interest. The specific methods may be able to be used in a different section
-Elaborate on why specific methods are used and why some are not
 Don't include methodology in results
 Describe TSA before models
-
-
 
 WRITE UP ALL MODELS CONSIDERED SO FAR
 COMPLETE FORECASTING SECTION OF LIT REVIEW
