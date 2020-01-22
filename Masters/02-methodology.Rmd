@@ -29,9 +29,10 @@ knitr::kable(head(DT))
 For the purposes of the current project, the data was cleaned and processed until it was in the format shown in Table \@ref(tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the local (New Zealand) datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data.
 The results of this research are demonstrated in Chapter \@ref(results), whereby models are constructed that accurately represent the data storage and transmission characteristics of _current_ smart meters in New Zealand. These analyses use electricity demand data that has been averaged over half hour intervals, with no additional data sources. For these analyses, a new dataframe was constructed whereby the electricity power was averaged over each half hour time step.
 
-## Methods for preliminary data analysis
+## Preliminary data analysis
 
 In any data analysis, there are initial processes that should be undertaken in order to get a general overview of the data. This allows for an informed opinion to be made as to the best techniques to achieve the desired objectives of the analysis.
+This section explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preparation process, then uses methods to compare and visualise cycles and correllations within relevant variables. The analysis draws upon a broader overview of the data available at https://cfsotago.github.io/GREENGridData/.
 
 ### Time series overview and notation
 
@@ -41,12 +42,220 @@ The difference between an observed value and the value predicted by the model is
 The residual sum of squares (RSS) is the sum of the squares of all the residuals over the times considered.
 Many models are fitted algorithmically in order to minimise the RSS.
 
-_PUT PRELIMINARY DATA ANALYSIS METHODOLOGY HERE_
+
+### Initial data cleaning
+Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process (see https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19 for more information). 
+Data files from the remaining households are unzipped and processed using the `GREENGridData` package[@R-GREENGridData]. Total electricity is imputed from the submeters using the script `imputeTotalPower.R` (obtained from the `GREENGridData` github repository). From this output, we extract imputed total electricity demand and hot water electricity demand using `GREENGridData::extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
+During the preliminary data exploration, a number of households in the dataset were found to have characteristics that deemed them unsuitable for this analysis, and were removed. These are as follows:
+
+Households `rf_07`, `rf_09`, `rf_10`, `rf_17b`, `rf_19`, `rf_21`, `rf_26`, `rf_28`, `rf_41`, `rf_43`, `rf_47` did not have separate hot water metering. 
+Households `rf_23` and `rf_24` had hot water controlled by either a timer or a home energy management system in order to maximise self-consumption of their solar PV.
+Household `rf_11` had a heat-pump hot water system, which rather than a typical on/off element, instead had constant electricity draw of around 54W.  
+Household `rf_17a` had extremely low hot water electricity values, indicating a problem with the sensor. 
+Households `rf_27`, `rf_01`, `rf_15b`,  had periods of days, weeks, or even months where no hot water electricity was used, interspersed with (somewhat) normal usage. 
+In addition, household `rf_31` only collected zero values for hot water electricity after 26th of February 2016. This household was cropped so as to only contain values before this date.
+
+The remaining households were combined into one data table, and hot water electricity is subtracted from total electricity, giving two separate columns: hot water electricity, and other electricity. 
+As much analysis would be carried out for "half hour" data, another datatable was then constructed which took averages of the one minute electricity values over each half hour. 
+
+Refer to the script `processing.R` (see Appendix) to view the processing code.
+```{r load_pkg, include = FALSE}
+# List of packages required for this analysis
+pkg <- c("dplyr", "ggplot2", "knitr", "bookdown", "devtools")
+# Check if packages are not installed and assign the
+# names of the packages not installed to the variable new.pkg
+new.pkg <- pkg[!(pkg %in% installed.packages())]
+# If there are any packages in the list that aren't installed,
+# install them
+if (length(new.pkg))
+  install.packages(new.pkg, repos = "http://cran.rstudio.com")
+# Load packages (thesisdown will load all of the packages as well)
+library(thesisdown)
+```
+
+```{r setup1, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(GREENGridData)
+library(ggplot2)
+library(ggpmisc)
+#library(vars)
+library(dplyr)
+library(TSA)
+library(forecast)
+library(knitr)
+library(scales)
+library(lubridate)
+library(xts)
+```
+
+```{r load1minHouse, include = FALSE}
+# Choose which househould we want to examine
+# Available houses:
+# "06","08","13","22","24","25","27","29","30","31","32",
+# "33","34","35","36","37","38","40","42","44","45"
+
+#house <- "13" 
+mins <- "1"  
+
+# Daily and weekly cycles created from mins
+
+if (as.numeric(mins) == 1) {
+  dayCycle <- 60*24
+  weekCycle <- 60*24*7
+  linearLag <- -30
+  hourCorrection <- 60
+  dtName <- "DT"
+} else if (as.numeric(mins) == 30) {
+  dayCycle <- 2*24
+  weekCycle <- 2*24*7
+  linearLag <- -1
+  hourCorrection <- 2
+  dtName <- "DTqh"
+} else {
+    print("Check minute sample rate (only 1 and 30 currently available)")
+}
+
+load(paste0(dFile, dtName, ".Rda"))
+```
+
+### Data summary
+
+See Table \@ref(tab:summary1) for the mean values of hot water electricity and other electricity for each household.
+```{r summary1, echo=FALSE}
+DT %>%
+  group_by(linkID) %>%
+  select(c(HWelec, nonHWelec)) %>%
+  summarise_each(funs = mean)
+```
+
+```{r averagePlot, out.width='100%', echo=FALSE, fig.cap="Average daily demand of hot water electricity for each household"}
+knitr::include_graphics(paste0(pFile, "averages/averageDemand.pdf"))
+```
+
+Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks. Also of note is the large variation in average demand. 
+
+```{r HWboxplot, out.width='100%', include=FALSE, fig.cap="Box plot of hot water electricity demand for each household"}
+# put this as its own script
+p <- ggplot2::ggplot(DT, aes(x = linkID, y = HWelec, group = linkID)) +
+  geom_boxplot()
+p + coord_flip()
+```
+
+### Stationarity
+
+_Test for stationarity here_
+
+### Autocovariance of hot water use
+
+_Consider putting this in the methodology_
+We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising cyclical behaviour of data, and is defined as
+
+\begin{equation}
+\gamma_k = E[(x_t - \mu)(x_{t+k} - \mu)] ,
+\end{equation}
+where $k$ is the lag value, $E$ is the expected value operator, and $\mu$ is the mean of both $x_t$ and $x_{t+k}$.
+<!--
+![Autocovariance of all houses.](~/HWCanalysis/Masters/plots/acf_all_houses.png)
+-->
+
+```{r autocovariance, out.width='100%', fig.cap="Autocovariance of all households"}
+knitr::include_graphics(paste0(pFile, "acfAllHouses.pdf"))
+```
+
+The results are interpreted by plotting $\gamma_k$ against the lag values. Figure \@ref(fig:autocovariance) indicates that our houses are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals. In addition, some houses display a third daily cycle, or a weekly cycle (peaks increasing again towards the end of the plot). 
+
+While autocovariance plots are valuable for preliminary data analysis, models that incorporate these cycles need more precise numerical values of these cycles. One method of obtaining usable cycle periods is through frequency analysis.
+
+```{r frequencyAnalysis, out.width='100%', fig.cap = "Three dominant cycle periods for each household, as determined using frequency analysis"}
+load(file=paste0(dFile, "freq_DF.Rda"))
+knitr::kable(freq_DF, 
+      col.names = c("Household", "Dominance", "Frequency (hours)"), longtable = TRUE)
+```
+
+Frequency analysis offers us the ability to automate the process of determining cycles in our data. Through the TSA package 'periodogram' we can extract the most dominant cycle frequencies within our data. These may then be input into later models that have the option of seasonality.  _Do I need to describe technique this package uses to do this? Should I include the periodogram (plot) itself?_
+
+Table \@ref(tab:frequencyAnalysis) shows that while some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many have more erratic patterns, with some being over a year in duration. This is an interesting insight, however it poses a challenge for building "one size fits all" predictive models for our households.
+
+### Cross covarience of hot water electricity use with non hot water electricity use
+
+_Put this in methodology too, just include the figure and a brief discussion_
+In a similar fashion to the autocovariance function, the cross-covariance function of two variables $x, y$ is given by
+
+\begin{equation}
+\gamma_k(x,y) = \operatorname{E}[(x_{t+k} - \mu_x)(y_t - \mu_y)] ,
+\end{equation}
+where variable $x$ lags variable $y$ by lag $k$[@Cowpertwait2009].
+
+Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use at lags of around half an hour.
+
+```{r crossCovariance, out.width='100%', fig.cap="Crosscovariance of all households"}
+knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
+```
+
+### Seasonality
+
+Residential electricity usage would be expected to display high seasonality, corresponding to daily (and weekly) behavioural patterns of the household residents.
+There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using loess', whereby loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
+Most models are fitted to the data such that the model minimises the sum of the square of each residual (referred to as RSS, residual sum of squares).
+Models that are advanced enough to effectively take into consideration data attributes such as trend and cyclic effects (known as 'seasonality') have a residual time series that approximates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean. 
+
+```{r stl, include = FALSE, eval=FALSE}
+# Needs editing to work with DT
+
+#df$times <- as.POSIXct(df$times) # may not be necessary if set up correctly
+ts.HW <- ts(dt$HWelec, frequency = 48)
+#ts.HW <- ts(dt$HWelec, frequency = 48*7)
+decomp.HW <- decompose(ts.HW)
+plot(decomp.HW)
+```
+
+```{r stl_gg, include = FALSE, eval=FALSE}
+#This is a great package that separates out the cycle, trend, and noise, and plots them. Needs some work to run nicely
+#df_xts <- as.xts(df) 
+#frequency(dt$HWelec) <- time3[1]
+
+#stat_stl(ts.HW, s.window = "Periodic")
+HWstl <-  stl(ts.HW, s.window = "periodic")
+#plot(HWstl)
+######
+
+s_df <- tsdf(ts.HW)
+ggplot(ap_df, aes(x = x, y = y)) +
+   stat_stl(s.window = 60)
+
+# periodic if fixed seasonality; doesn't work well:
+ggplot(dt, aes(x = datetime, y = HWelec)) +
+   stat_stl(s.window = "Periodic")
+
+################################
+#library(ggseas)
+#load("~/HWCanalysis/Masters/data_new/rf_13_at_1.Rda")
+#s$r_dateTimeNZ <- lubridate::with_tz(s$r_dateTime, tz = "Pacific/Auckland")
 
 
-## Introduction to time series models
+#ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
+#      method = "stl", s.window = 7) +
+#   geom_line() +
+#   labs(x = "   n  ", colour = "") +
+#   scale_y_continuous("Power(W)", label = comma) +
+#   ggtitle("Seasonal decomposition of electricity demand") +
+#   theme(legend.position = c(0.17, 0.92))
 
-This section outlines a broad introduction to the various models used either implicitly or explicitly in this analysis. Refer to [@Cowpertwait2009] for further information.
+```
+
+## Model selection
+
+Every forecasting model has unique strengths and weaknesses that render it more or less suitable to different applications.
+In the context of forecasting residential hot water electricity demand, there are a number of considerations that have led to some models being selected for further investigation, while others are passed over without consideration.
+This work attempts to make predictions based only on data that would be available from any smart meter with a separately metered hot water cylinder, as is commonly available in New Zealand today. For this reason, causal models that rely on the availability of external data are not investigated further.
+As this work is concerned mainly with making predictions only half an hour into the future, time series methods that attempt to uncover longer-term trends in averages are also not relevant.
+Throughout this process I have placed strong emphasis on allowing reproducibility. 
+For this reason, any forecasting methods that required high capacity computational resources in order to successfully execute were not considered. 
+
+## Introduction to selected models
+
+This section outlines a broad introduction to the various models selected for use either implicitly or explicitly in this analysis. Refer to [@Cowpertwait2009] for further information.
 
 ### Naive model
 
@@ -58,9 +267,9 @@ x_t = x_{t+1} + w_t ,
 \end{equation}
 where $\{w_t\}$ is a white noise series. 
 Random walk models are more commonly used in simulations than forecasts. When used in simulations, a random walk model will artificially generate white noise to simulate a potential evolution of the variable in time.
-Due to their simplicity and ease of computation they are sometimes used in forecasting as a 'benchmark' model, by which other models may be compared. For this reason, they are referred to as 'naive' models.
-When used for forecasting, this model assumes that the mean of the white noise is equal to zero, ($\{\overline w_t\} = 0$), and consequently that the dependant variable (hot water electricity demand, in our case) of the next timestep can be best predicted by the demand of the current timestep. 
-_show figure demonstrating_
+When used in forecasting however, this model assumes that the mean of the white noise is equal to zero, ($\{\overline w_t\} = 0$), and consequently that the dependant variable (hot water electricity demand, in our case) of the next timestep can be best predicted by the demand of the current timestep. _show figure demonstrating?_
+Due to their simplicity and ease of computation they are sometimes used in forecasting in this context as a 'benchmark' model, by which other models may be compared. For this reason, they are referred to as 'naive' models.
+
 
 ### Simple linear regression
 
@@ -73,7 +282,7 @@ x_t = \alpha_0 + \alpha_1 t .
 \end{equation}
 
 For time-series forecasting, simple linear regression can fit a line to historical values of the dependent (or 'response') variable in order to predict future values. While this useful for determining general trends over time, they cannot capture any regular shorter term fluctuations of time series data (referred to as 'seasonality'). 
-Another way of utilising simple linear regression for forecasting is by introducing a seperate predictor variable. For our data, we seperate electricity demand into hot water, and other appliances. Simple linear regression is a foundational method of exploring how the demand of other appliances at time $t$ can be used to predict hot water electricity demand at a time $t + k$.
+Another way of utilising simple linear regression for time series forecasting is in the form of a causal model by introducing a seperate predictor variable. For our data, we seperate electricity demand into hot water, and other appliances. Simple linear regression is a foundational method of exploring how the demand of other appliances at time $t$ can be used to predict hot water electricity demand at a time $t + k$.
 _show figure demonstrating?_
 
 ### Moving average
@@ -91,7 +300,7 @@ where $B$ is the backshift operator, i.e. $Bx_t = x_{t-1}$, and $\phi_q$ is a po
 
 ### Autoregression
 
-A time series $x_t$ is an autoregressive process of order $p$ (referred to as $AR(p)$) if it can be represented as
+A time series $x_t$ is an autoregressive process of order $p$ ($p \in \Z $) (referred to as $AR(p)$) if it can be represented as
 \begin{equation}
 x_t = \alpha_1x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t ,
 (\#eq:AR)
@@ -109,7 +318,7 @@ A prediction is then given by
 ### Integrated model
 
 Differencing a time series $\{x_t\}$ is a method of removing trends, where, for example with a random walk process, the difference is white noise $x_t - x_{t-1} = w_t$.
-More generally, a time series $\{x_t\}$ is referred to as _integrated_ of order $d$ (denoted $I(d)$) if the $d$th difference of $\{x_t\}$ is white noise.
+More generally, a time series $\{x_t\}$ is referred to as _integrated_ of order $d$ (denoted $I(d)$, where $d \in \Z$) if the $d$th difference of $\{x_t\}$ is white noise.
 The random walk model is the special case $I(1)$.
 
 ### ARIMA
@@ -126,11 +335,28 @@ This may be expressed in terms of the backward shift operator in polynomial form
 \end{equation}
 The previously described processes are frequently combined into what as known as an Autoregressive Integrated Moving Average.
 A time series $\{x_t\}$ is referred to as an $ARIMA(p,d,q)$ process if, when differenced $d$ times, it becomes an $ARMA(p,q)$ process.
+Autoregression and moving average processes may then be considered individually as special cases of an ARIMA process, $ARIMA(p,0,0)$ and $ARIMA(0,0,q)$ respectively.
+Values for $p,d,q$ are selected in order to best fit the data while minimising computational expense. Larger values of $p,q,d$ tend to increase accuracy, while taking longer to compute.
+The process of selecting optimal values for $p,d,q$ can be automated through minimising the Akaike Information Criterion (AIC)[@Akaike1974],
+
+\begin{equation}
+AIC = -2 x log-likelihood + 2 x n parameters
+(\#eq:AIC)
+\end{equation}.
+
+The R function `auto.arima`[CITE] automatically selects the parameters $p,d,q$ that minimise the AIC (with inputs for maximum values necessary as constraints) specific to the particular data being modelled.
+
+As each household has different usage patterns and characteristics, these values differ for each household.
+The optimal parameters for each household are provided in the appendix.
+_explain how these parameters are automatically selected_
+
+<!--
 In a similar manner to how trends can be removed through differencing at lag 1, seasonal effects within data (such as daily use patterns) can be removed by differencing at lag $s$, where $s$ is the length of the season.
 A seasonal ARIMA model may also introduce additional autoregressive and moving average terms at lag $s$, giving a model of the form $ARIMA(p,d,q)(P,D,Q)_s$, expressed using the backward shift operator as
 \begin{equation}
 \Theta_P(B^s)\theta_p(B)(1-B^s)^D(1-B)^d x_t = \Phi_Q(B^s)\phi_q(B)w_t .
 \end{equation}
+-->
 
 ### Logistic regression
 
