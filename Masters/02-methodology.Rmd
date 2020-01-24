@@ -2,15 +2,25 @@
 
 This chapter begins by giving an introduction to the origin of our dataset, as well as noting some necessary preliminary cleaning. It goes on to provide a more theoretical background as to the nature of our data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
 
-All data processing and modelling was conducted using the `R` programming language, and significant consideration has been given to facilitating reproducibility of results. The code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. _it's not yet, but will be_
-
+All data processing and modelling was conducted using the `R` programming language.
+In particular, data extraction and processing used the packages `GREENGridData`[@R-GREENGridData], `dplyr`[@R-dplyr] and `data.table`[R-data.table]. Time series manipulation and analysis used packages `lubridate`[@R-lubridate], `TSA`[@R-TSA], and `xts`[@R-xts]. Plots were created using the packages `ggplot2`[@R-ggplot2] and `ggplotmisc`[@R-ggpmisc]. 
+Significant consideration has been given to facilitating reproducibility of results, and all code is publically available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. _it's not yet, but will be_
+```{r filepaths}
+if (!exists("dFile")){
+  dFile <- "~/HWCanalysis/Masters/data/" 
+}
+if (!exists("pFile")){
+  pFile <- "/home/parra358/HWCanalysis/Masters/plots/"
+}
+```
 <!-- Required to number equations in HTML files 
+-->
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   TeX: { equationNumbers: { autoNumber: "AMS" } }
 });
 </script>
--->
+
 ```{r loadDTandpc_rm, include=FALSE}
 # This loads percentage of data removed
 load(paste0(dFile, "pc_rm"))
@@ -148,7 +158,6 @@ _Test for stationarity here_
 
 ### Autocovariance of hot water use
 
-_Consider putting this in the methodology_
 We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising cyclical behaviour of data, and is defined as
 
 \begin{equation}
@@ -167,19 +176,14 @@ The results are interpreted by plotting $\gamma_k$ against the lag values. Figur
 
 While autocovariance plots are valuable for preliminary data analysis, models that incorporate these cycles need more precise numerical values of these cycles. One method of obtaining usable cycle periods is through frequency analysis.
 
-```{r frequencyAnalysis, out.width='100%', fig.cap = "Three dominant cycle periods for each household, as determined using frequency analysis"}
-load(file=paste0(dFile, "freq_DF.Rda"))
-knitr::kable(freq_DF, 
-      col.names = c("Household", "Dominance", "Frequency (hours)"), longtable = TRUE)
-```
+
 
 Frequency analysis offers us the ability to automate the process of determining cycles in our data. Through the TSA package 'periodogram' we can extract the most dominant cycle frequencies within our data. These may then be input into later models that have the option of seasonality.  _Do I need to describe technique this package uses to do this? Should I include the periodogram (plot) itself?_
 
-Table \@ref(tab:frequencyAnalysis) shows that while some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many have more erratic patterns, with some being over a year in duration. This is an interesting insight, however it poses a challenge for building "one size fits all" predictive models for our households.
+While some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many have more erratic patterns, with some being over a year in duration (refer to Table \@ref(tab:frequencyAnalysis) provided in the appendix). This is an interesting insight, however it poses a challenge for building "one size fits all" predictive models for our households.
 
 ### Cross covarience of hot water electricity use with non hot water electricity use
 
-_Put this in methodology too, just include the figure and a brief discussion_
 In a similar fashion to the autocovariance function, the cross-covariance function of two variables $x, y$ is given by
 
 \begin{equation}
@@ -187,11 +191,20 @@ In a similar fashion to the autocovariance function, the cross-covariance functi
 \end{equation}
 where variable $x$ lags variable $y$ by lag $k$[@Cowpertwait2009].
 
-Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use at lags of around half an hour.
+Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use, usually at lags of around half an hour.
 
 ```{r crossCovariance, out.width='100%', fig.cap="Crosscovariance of all households"}
 knitr::include_graphics(paste0(pFile, "ccfAllHouses.pdf"))
 ```
+
+We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. 
+
+While Table \@ref(tab:ccvMaxLagTable) and Figure \@ref(fig:ccvMaxLagPlot) show that many houses have their maximum values at the boundary (30 minutes), around half have their maximum cross-correlations occurring at longer timescales.
+
+```{r ccvMaxLagPlot, out.width='100%', fig.cap="Lag at maximum correllation for each household (bin width 30 minutes)"}
+knitr::include_graphics(paste0(pFile, "maxXcorAllHouses.pdf"))
+```
+
 
 ### Seasonality
 
@@ -300,7 +313,7 @@ where $B$ is the backshift operator, i.e. $Bx_t = x_{t-1}$, and $\phi_q$ is a po
 
 ### Autoregression
 
-A time series $x_t$ is an autoregressive process of order $p$ ($p \in \Z $) (referred to as $AR(p)$) if it can be represented as
+A time series $x_t$ is an autoregressive process of order $p$ (where $p \in \mathbb{Z}$) (referred to as $AR(p)$) if it can be represented as
 \begin{equation}
 x_t = \alpha_1x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t ,
 (\#eq:AR)
@@ -318,7 +331,7 @@ A prediction is then given by
 ### Integrated model
 
 Differencing a time series $\{x_t\}$ is a method of removing trends, where, for example with a random walk process, the difference is white noise $x_t - x_{t-1} = w_t$.
-More generally, a time series $\{x_t\}$ is referred to as _integrated_ of order $d$ (denoted $I(d)$, where $d \in \Z$) if the $d$th difference of $\{x_t\}$ is white noise.
+More generally, a time series $\{x_t\}$ is referred to as _integrated_ of order $d$ (denoted $I(d)$, where $d \in \mathbb{Z}$) if the $d$th difference of $\{x_t\}$ is white noise.
 The random walk model is the special case $I(1)$.
 
 ### ARIMA
@@ -330,7 +343,7 @@ x_t = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta
 \end{equation}
 This may be expressed in terms of the backward shift operator in polynomial form as
 \begin{equation}
-\theta (B) x_t = \phi (B) w_t .
+\theta (\bf{B}) x_t = \phi (\bf{B}) w_t .
 (\#eq:ARMApolyform)
 \end{equation}
 The previously described processes are frequently combined into what as known as an Autoregressive Integrated Moving Average.
@@ -340,42 +353,63 @@ Values for $p,d,q$ are selected in order to best fit the data while minimising c
 The process of selecting optimal values for $p,d,q$ can be automated through minimising the Akaike Information Criterion (AIC)[@Akaike1974],
 
 \begin{equation}
-AIC = -2 x log-likelihood + 2 x n parameters
+AIC = -2\times \text{log-likelihood} + 2\times \text{number of parameters}
 (\#eq:AIC)
 \end{equation}.
 
-The R function `auto.arima`[CITE] automatically selects the parameters $p,d,q$ that minimise the AIC (with inputs for maximum values necessary as constraints) specific to the particular data being modelled.
+The R function `auto.arima`[@RobJ.Hyndman2008] automatically selects the parameters $p,d,q$ that minimise the AIC specific to the particular data being modelled. This is done iteratively according to the algorithm outlined in ref[@RobJ.Hyndman2008]. Inputs for maximum values are necessary in order to bound processing time.
 
-As each household has different usage patterns and characteristics, these values differ for each household.
+As each household has different usage patterns and characteristics, values for these parameters differ for each household.
 The optimal parameters for each household are provided in the appendix.
-_explain how these parameters are automatically selected_
 
-<!--
 In a similar manner to how trends can be removed through differencing at lag 1, seasonal effects within data (such as daily use patterns) can be removed by differencing at lag $s$, where $s$ is the length of the season.
 A seasonal ARIMA model may also introduce additional autoregressive and moving average terms at lag $s$, giving a model of the form $ARIMA(p,d,q)(P,D,Q)_s$, expressed using the backward shift operator as
 \begin{equation}
-\Theta_P(B^s)\theta_p(B)(1-B^s)^D(1-B)^d x_t = \Phi_Q(B^s)\phi_q(B)w_t .
+\Theta_P(\bf{B}^s)\theta_p(\bf{B})(1-\bf{B}^s)^D(1-\bf{B})^d x_t = \Phi_Q(\bf{B}^s)\phi_q(\bf{B})w_t .
 \end{equation}
--->
 
+<!--
 ### Logistic regression
 
 _Probably delete this section as I won't be using it_
 The models previously mentioned assume the dependent variables are continuous and have no upper or lower bounds. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
 This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot) for an example of this behaviour.
+-->
 
 ```{r elementPlot, echo=FALSE, out.width='100%', fig.cap="Hot water electricity use over a day for one household"}
 knitr::include_graphics(paste0(pFile, "oneDay.pdf"))
 ```
 
+### Support vector machines
+
+Support vector machines classify data points by mapping them in hyperspace and distinguising between them according to which side of a hyperplane they fall on, with the position of the classifying hyperplanes being constructed iteratively in order to maximise the perpendicular distance between each hyperplane and the closest samples on either side of it (refer to Figure \@ref(fig:SVMexample) for a linear example). 
+
+
+```{r SVMexample, out.width='100%', fig.cap="Example demonstrating the classifying mechanism of a SVM. Image by Larhmam - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=73710028"}
+knitr::include_graphics(paste0(pFile, "SVMmargin.png"))
+```
+
+Non-linear partitions can also be constructed using a kernel function. The process of training a non-linear SVM can be stated mathematically as follows:
+Given instances $\bf{x}_i, i= 1, . . . , l$ with labels $y_i \in \{1,-1\}$, solve the following quadratic optimization problem:
+\begin{equation*}
+  \begin{aligned}
+    \underset{\bf{\alpha}}{\text{min}} \quad & f(\bf{\alpha}) =\frac{1}{2}\bf{\alpha}^TQ\bf{\alpha}-\bf{e}^T\bf{\alpha} \\
+    \text{subject to} \quad & 0\leq \bf{\alpha}_i\leq C, i= 1, . . . , l, \\
+    & y^T\bf{\alpha}= 0,
+  \end{aligned}
+\end{equation*}
+where $\bf{e}$ is the vector of all ones, $C$ is the upper bound of all variables, $Q$ is an $l$ by $l$ symmetric matrix with $Q_{ij} = y_i y_jK(\bf{x}_i,\bf{x}_j)$, and $K(\bf{x}_i,\bf{x}_j)$ is the kernel function[@Fan2005].
+
+
+Support vector machines were created using the `e1071` package[@e1071] using training algorithms detailed in Fan, Chen and Lin(2005)[@Fan2005].
 
 ## Metrics
 
-Each model will be compared against one another using the following metrics. 
+There are a number of different considerations that must be made when comparing models for the process of electricity demand forecasting. This section outlines those considered relevant to this work.
 
 ### Accuracy
 
-This is determined by the root mean square (RMS) of the residuals, averaged over each house, with lower values indicating higher accuracy.
+Perhaps the most important consideration in forecasting is the accuracy of the model. For this work, model accuracy is determined by the root mean square (RMS) of the residuals, averaged over each house, with lower values indicating higher accuracy.
 
 ### Physical fidelity
 

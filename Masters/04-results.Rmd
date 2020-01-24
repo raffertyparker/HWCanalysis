@@ -36,7 +36,7 @@ In our case, this may be obtained through taking the average hot water electrici
 ```{r hhElementPlot, out.width='100%', fig.cap="Half-hour averaged hot water electricity use over one day"}
 knitr::include_graphics(paste0(pFile, "oneDay30min.pdf"))
 ```
-Figure \@ref(fig:hhElementPlot) may be compared with Figure \@ref(fig:elementPlot) in Chapter \@ref(methodology) to see the smooting effect of half-hour averaging.
+Figure \@ref(fig:hhElementPlot) may be compared with Figure \@ref(fig:elementPlot) in Chapter \@ref(methodology) to see the smoothing effect of half-hour averaging.
 
 ## Naive model
 
@@ -91,28 +91,6 @@ Interpretability is high, as the output can be understood by the simple equation
 Notably, this model has lower RMSE's than the Naive model.
 In addition, this model lends itself to being utilised as an input into more complex models that take other parameters into consideration. 
 
-_Consider moving much of this optimal lag time part to the previous chapter_
-We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. 
-
-Table \@ref(tab:ccvMaxLagTable) and the corresponding Figure \@ref(fig:ccvMaxLagPlot) have been constructed by taking the maximum cross covarience value for each house, restricted to lag values above 30 minutes, as this is the minimum lag after which these predictions may be useful for participation in demand response markets in New Zealand.
-
-```{r loadCCVdata, echo=FALSE}
-load(paste0(dFile, "ccv_max.Rda"))
-maxCor <- maxCor[, c(2,1,3)]
-```
-
-```{r ccvMaxLagTable, echo=FALSE}
-kable(maxCor,
-      col.names =  c("Household", "Lag", "Cross covariance"))
-```
-
-
-While Table \@ref(tab:ccvMaxLagTable) and Figure \@ref(fig:ccvMaxLagPlot) show that many houses have their maximum values at the boundary (30 minutes), around half have their maximum cross-correlations occurring at longer timescales.
-
-```{r ccvMaxLagPlot, out.width='100%', fig.cap="Lag at maximum correllation for each household (bin width 30 minutes)"}
-knitr::include_graphics(paste0(pFile, "maxXcorAllHouses.pdf"))
-```
-
 ## Moving average
 
 _I might as well include a moving average model. It is easy to impliment and would be a good segue into ARIMA_ 
@@ -133,165 +111,6 @@ plot(AA)
 ```
 _Show parameters of autoarima_
 
-## Vector Autoregression
-
-_This needs moving to methodology_
-We now explore forecasts using a vector autoregression model. 
-The model is of the following form:
-\begin{equation}
-\bf{y}_t = A_1 \bf{y}_{t-1} + … + A_p \bf{y}_{t-p} + CD_t + \bf{u}_t ,
-\end{equation}
-where $\bf{y}_t$ is a $K \times 1$ vector of endogenous variables and $u_t$ assigns a spherical disturbance term of the same dimension. The coefficient matrices $A_1, …, A_p$ are of dimension $K \times K$. 
-
-Our model is fitted using the function VAR within the package vars, which estimates the vector autoregression model using ordinary least squares. 
-
-The model is constructed using inputs of hot water demand and non hot water demand, along with the integers of time steps that correspond to any cyclical effects (referred to as 'seasonality'), and the number of steps by which to lag the model by.
-
-For our data, we utilise the cyclical values previously determined using frequency analysis as the "seasonal" input.
- 
-The optimal lag term can be determined using the VARselect function, which optimises lag values by minimising the Bayesian information criterion using the formula
-
-\begin{equation}
-SC(n) = \ln \det(\tilde{\sum}_u(n)) + \frac{\ln(T)}{T} ,
-\end{equation}
-
-where $\tilde{\sum}_u (n) = T^{-1} \sum_{t=1}^T \bf{\hat{u}}_t \bf{\hat{u}}_t'$ and n assigns the lag order.
-
-A separate analysis on our data was carried out using this function, with the maximum lag to consider set to 200 for computational punctuality. While the optimal lag varied somewhat for each household, a fixed value to input for each household was desired in order to simplify analysis that involved multiple houses. The value was ultimately fixed at 50 as this was the median optimal $SC(n)$ lag for the houses considered. _Note this seems to be a larger value than traditionally used_
-
-```{r VARModelling, include=FALSE, eval = FALSE }
-#install.packages("remotes")
-#remotes::install_github("DavZim/varsExtra")
-library(varsExtra) # refer to previous two lines for installation
-
-# Note that when built using 1 minute data, this model is only useful
-# for prediction 1 minute into the future. 
-
-# This may be overcome using the forecast() function, however it may not be
-# physically accurate as I don't believe smart meters currently log with this frequency
-dt2 <- dt[ , 2:3]
-var1 <- vars::VAR(dt2, p = 50, season = 24, type = "none") # Create model with cyclical effects determined previously using frequency analysis
-
-#p <- ggfy(var1) # Plot adjusted below
-#p
-#ggsave("sdexample.png")
-
-# NOTE removing the season input from the model often makes it slightly more accurate.
-# this is very strange, investigate further!
-```
-
-
-```{r ggfyPrep,  include=FALSE, eval = FALSE}
-vals <- var1$datamat %>%
-  dplyr::as_tibble() %>%
-  dplyr::select(-dplyr::matches("\\.l[0-9]+")) %>%
-  dplyr::mutate(type = "data", t = 1:n()) %>%
-  tidyr::gather(key = "var", value = "value", -type, -t)
-
-ypred <- lapply(1:length(var1$varresult), function(i) {
-  dplyr::tibble(value = as.numeric(fitted(var1$varresult[[i]]))) %>%
-    dplyr::mutate(type = "fitted",
-                  t = 1:n(),
-                  var = names(var1$varresult)[i])
-}) %>% dplyr::bind_rows()
-
-resid <- lapply(1:length(var1$varresult), function(i) {
-  dplyr::tibble(value = as.numeric(resid(var1$varresult[[i]]))) %>%
-    dplyr::mutate(type = "residuals",
-                  t = 1:n(),
-                  var = names(var1$varresult)[i])
-}) %>% dplyr::bind_rows()
-
-vardf <- dplyr::bind_rows(vals, ypred, resid) %>%
-  dplyr::select(var, type, t, value) %>%
-  dplyr::arrange(var, type)
-
-# NOTE: dplyr::filter method of selection was dropping every second variable
-df3 <- vardf[vardf$var == "HWelec", ]
-df3 <- df3[df3$type != "residuals", ]
-
-tv <- as.POSIXct(dt$datetime)
-timeV <- tail(tv,length(tv) - 50)
-
-dfSimp <- cbind(df3, timeV)
-
-dfSimp$datehour <- cut(dfSimp$timeV, breaks="hour") 
-dfSimp$datehour <- gsub(".* ", "", as.character(dfSimp$datehour))
-
-```
-
-```{r zoomedIn,eval = FALSE,  include=FALSE, fig.cap="Behaviour of data and VAR model over 48 hours"}
-
-# select bounds of t to "zoom in" on a section of the plot
-p <- dfSimp %>%
-dplyr::filter(t >=24, t < 48*2+24) %>%
-ggplot(aes(x = t, y = value, color = type,
-                             linetype = type)) + geom_line()
-p+labs(x = "Time", y = "Power (W)")
- scale_x_datetime(labels = time_format("%H:%M"))
-
-# for reference 
-
-#p <- ggplot(data <- avDT, aes(x = hour, y = value, color = variable,
-#                              linetype = variable)) +
-#  geom_line() 
-#p + labs(x = "Hour of day", y = "Average power (W)", colour = "", linetype = "") + 
-#  scale_x_datetime(labels = date_format_tz())
-
-#time_format("%H:%M")
-```
-
-```{r VARACF,eval = FALSE,  include=FALSE, fig.cap="Autocovariance of VAR model"}
-
-dfFitted <- vardf %>%
-dplyr::filter(type == "fitted" & var == "HWelec")
-
-
-p <- ggAcf(x = dfFitted$value, lag.max = weekCycle/2, type = "correlation",
-    plot = TRUE, na.action = na.pass)
-p + labs(x = "Lag (half hours)", y = "Autocovariance", title = "")
-
-```
-
-```{r hourlyAverages,eval = FALSE, include=FALSE, fig.cap="Hourly averages of hot water use"}
-
-library(data.table)
-
-dfSimp <- data.table(dfSimp)
-avData <- dfSimp[type=="data",list(avg=mean(value)),by=datehour]
-colnames(avData) <- c("hour", "data")
-avModel <-dfSimp[type=="fitted",list(avg=mean(value)),by=datehour]
-colnames(avModel) <- c("hour", "model")
-
-avDT <- melt(as.data.table(cbind(avData, avModel$model)))
-avDT$hour <- as.POSIXct(avDT$hour, format= "%H")
-
-avDT <- avDT[order(avDT$hour),,drop=FALSE]
-levels(avDT$variable) <- c('data', 'fitted')
-
-avDT$variable <- as.character(avDT$variable)
-#avDT$variable <- as.factor(avDT$variable)
-
-# work-around to fix time display
-# may not be necessary once my comp time is fixed
-
-# Source: http://stackoverflow.com/a/11002253/496488
-# Put in your local timezone
-#date_format_tz <- function(format = "%H:%M", tz = "UTC") {
-#  function(x) format(x, format, tz=tz)
-#}
-
-#labels = date_format_tz
-
-# Need to fix 
-
-p <- ggplot(data <- avDT, aes(x = hour, y = value, color = variable,
-                              linetype = variable)) +
-  geom_line() 
-p + labs(x = "Hour of day", y = "Average power (W)", colour = "", linetype = "") + 
-  scale_x_datetime(labels = time_format("%H:%M"))
-
-```
 
 ```{r frequencyPlot, eval = FALSE, include=FALSE, fig.cap="Frequency of power observations"}
 p <- ggplot(dfSimp, aes(x = value, fill = type)) +
