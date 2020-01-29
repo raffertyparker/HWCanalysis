@@ -1,0 +1,57 @@
+`r if(knitr:::is_latex_output()) '\\appendix'`
+
+`r if(!knitr:::is_latex_output()) '# (APPENDIX) Appendix {-}'` 
+
+<!--
+If you feel it necessary to include an appendix, it goes here.
+-->
+
+
+# Appendix {#appendix}
+
+## Relevant code
+
+This includes all of the R chunks of code that were hidden throughout the document (using the `include = FALSE` chunk tag) to help with readibility and/or setup.
+
+**In the main Rmd file**
+
+```{r ref.label='include_packages', results='hide', echo = TRUE}
+```
+
+**In Chapter \@ref(ref-labels):**
+
+```{r ref.label='include_packages_2', results='hide', echo = TRUE}
+```
+
+## Autocovariance lag
+
+
+```{r frequencyAnalysis, out.width='100%', fig.cap = "Three dominant cycle periods for each household, as determined using frequency analysis"}
+load(file=paste0(dFolder, "freq_DF.Rda"))
+knitr::kable(freq_DF, 
+      col.names = c("Household", "Dominance", "Frequency (hours)"), longtable = TRUE)
+```
+
+
+## Cross-covariance lag
+
+Table \@ref(tab:ccvMaxLagTable) and the corresponding Figure \@ref(fig:ccvMaxLagPlot) in Chapter \@ref(methodology) have been constructed by taking the maximum cross covarience value for each house, restricted to lag values above 30 minutes, as this is the minimum lag after which these predictions may be useful for participation in demand response markets in New Zealand.
+
+```{r loadCCVdata, echo=FALSE}
+load(paste0(dFolder, "ccv_max.Rda"))
+maxCor <- maxCor[, c(2,1,3)]
+```
+
+```{r ccvMaxLagTable, echo=FALSE}
+kable(maxCor,
+      col.names =  c("Household", "Lag", "Cross covariance"))
+```
+
+It can be seen that many households have optimal lags greater than one hour. To reduce computatonal time and model complexity, only half-hour and one-hour lags were considered in this analysis. Household-specific lag values of external regressors could be incorporated into the model as further work.
+
+
+## Modelling parameters
+
+Include a table of ARIMA parameters selected (that minimise AIC).
+
+
