@@ -1,10 +1,11 @@
-# Enter filepaths here
+# This is where we define paths to appropriate folders
 
 # path to scripts folder
-sFile <- "~/HWCanalysis/Masters/scripts/"
+sFolder <- "~/HWCanalysis/scripts/"
 
 # path to data folder
-dFile <- "~/HWCanalysis/Masters/data/" 
+dFolder <- "~/HWCanalysis/data/" 
 
 # path to plot folder
-pFile <- "/home/parra358/HWCanalysis/Masters/plots/"  # (laTeX did not like '~' notation)
+#pFolder <- "/home/parra358/HWCanalysis/plots/"  # (laTeX did not like '~' notation: if knitting fails change this accordingly)
+pFolder <- "~/HWCanalysis/plots/" 
