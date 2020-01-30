@@ -23,45 +23,49 @@ My_Theme = theme(
 
 theme_set(theme_minimal())
 
-modelName <- "seasonalNaive"
+#modelName <- "naive" # For manual creation 
+models <- c("naive", "seasonalNaive", "ARIMA", "ARIMAX", "SARIMA", "simpleLinear")
 fourHouses <- c("rf_06", "rf_13", "rf_22", "rf_40") 
 
-for (house in fourHouses){ # Load appropriate models
-  ifelse(file.exists(paste0(dFile, "models/", modelName, "/", house, "_model.rds")),
-         assign(paste0(house, "_model"), 
-                readRDS(paste0(dFile, "models/", modelName, "/", house, "_model.rds"))),
-         assign(paste0(house, "_model"), 
-                readRDS(paste0(dFile, "models/", modelName, "/", house, "_validated_model.rds")))
-         )
-}
-
-for (house in fourHouses){
-  assign("pMdl", as.data.table(get(paste0(house, "_model"))$x))
-  names(pMdl) <- c("dateTime_nz", "Actual")
-  ifelse("fitted.values" %in% names(get(paste0(house, "_model"))), 
-         pMdl$Predicted <- as.numeric(get(paste0(house, "_model"))$fitted.values),
-         pMdl$Predicted <- as.numeric(get(paste0(house, "_model"))$fitted))
-  pMdl$linkID <- house
-  startTime <- lubridate::as_datetime(paste(as.character( # startTime is midnight on first day of next month
-    rollback(pMdl$dateTime_nz[1] + dweeks(5), roll_to_first = TRUE, preserve_hms = FALSE)), "00:00:00"), 
-    tz = 'Pacific/Auckland')
-  pMdl <- data.table(pMdl)
-  pMdl <- pMdl[!is.na(pMdl$Predicted)] 
-  pMdl <- pMdl[pMdl$dateTime_nz %within% interval(startTime, startTime + days(1)), ]
+for (modelName in models){
+  for (house in fourHouses){ # Load appropriate models
+    ifelse(file.exists(paste0(dFile, "models/", modelName, "/", house, "_model.rds")),
+           assign(paste0(house, "_model"), 
+                  readRDS(paste0(dFile, "models/", modelName, "/", house, "_model.rds"))),
+           assign(paste0(house, "_model"), 
+                  readRDS(paste0(dFile, "models/", modelName, "/", house, "_validated_model.rds")))
+           )
+  }
   
-  ifelse(house == fourHouses[1], 
-         plotDT <- pMdl,
-         plotDT <- rbind(plotDT, pMdl))
+  for (house in fourHouses){
+    assign("pMdl", as.data.table(get(paste0(house, "_model"))$x))
+    names(pMdl) <- c("dateTime_nz", "Actual")
+    ifelse("fitted.values" %in% names(get(paste0(house, "_model"))), 
+           pMdl$Predicted <- as.numeric(get(paste0(house, "_model"))$fitted.values),
+           pMdl$Predicted <- as.numeric(get(paste0(house, "_model"))$fitted))
+      pMdl$linkID <- house
+    startTime <- lubridate::as_datetime(paste(as.character( # startTime is midnight on first day of next month
+      rollback(pMdl$dateTime_nz[1] + dweeks(5), roll_to_first = TRUE, preserve_hms = FALSE)), "00:00:00"), 
+      tz = 'Pacific/Auckland')
+    pMdl <- data.table(pMdl)
+    pMdl <- pMdl[!is.na(pMdl$Predicted)] 
+    pMdl <- pMdl[pMdl$dateTime_nz %within% interval(startTime, startTime + days(1)), ]
+    
+    ifelse(house == fourHouses[1], 
+           plotDT <- pMdl,
+           plotDT <- rbind(plotDT, pMdl))
+  }
+
+  plotDT <- melt(plotDT, id.vars = c("dateTime_nz", "linkID"))
+  #plotDT <- arrange(plotDT, dateTime_nz)
+  
+  p <- ggplot(data = plotDT, aes(x = dateTime_nz)) +
+    geom_line(aes(y = value, colour = variable)) +
+    facet_wrap(~linkID, ncol = 1, scales = "free") +
+    labs(y = "Power (W)", x = "Time", colour = "", title = '')
+  # facet_wrap(. ~ linkID, scales = "free")
+  p
+  ggsave(filename = paste0(pFile, modelName, "/fourHouses.pdf"))
+  p + My_Theme
+  ggsave(filename = paste0(pFile, modelName, "/fourHouses.png"))
 }
-
-plotDT <- melt(plotDT, id.vars = c("dateTime_nz", "linkID"))
-#plotDT <- arrange(plotDT, dateTime_nz)
-
-p <- ggplot(data = plotDT, aes(x = dateTime_nz)) +
-  geom_line(aes(y = value, colour = variable), size = 1.5) +
-  facet_wrap(~linkID, ncol = 1, scales = "free") +
-  labs(y = "Power (W)", x = "Time", colour = "", title = '')
-#facet_wrap(. ~ linkID, scales = "free")
-ggsave(filename = paste0(pFile, modelName, "/fourHouses.pdf"))
-p + My_Theme
-ggsave(filename = paste0(pFile, modelName, "/fourHouses.png"))
