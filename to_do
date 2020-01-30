@@ -1,24 +1,19 @@
 ################## TO DO ##################
 
-Expand upon forecasting lit in lit review
 Complete results chapter
-Rerun models with original data
+Expand upon forecasting lit in lit review
 Include nomenclature at beginning (after list of tables?)
 Draw family tree/landscape of models, indicate if they have been used for elec data and which I have decided to use
-Describe process of sorting through existing work to choose the models I have chosen
+Elaborate on the process of sorting through existing work to choose the models I have chosen
 Interest over time in data science methods is too specific; show broader interest. The specific methods may be able to be used in a different section
-Split project into folders "data", "scripts", "report" etc (remove reference to Masters)
-Adjust filepaths in filepaths.R accordingly and source this file (rather than state filepaths each time)
 Look at variance etc of DFsummary
-Try to plot weighting coefficients and pull out code of how VAR model gets them
-so we may use this for our GAM model
-Can try break using a sine function, no need to use our data
-bats - SHOULD BE ABLE TO SPECIFY SEASONAL PERIODS
-Discuss missing data in methodology (probably only necessary if cleaned data used)
 Make weekly profile plot
+Make plot demonstrating other elec turning on before HW elec
 Add other elec (dotted line) to linear model plot
 Redo ccv plot
-Look for patents/papers by Iván Castro
 Become familiar with Kalman filter
 Explain/reference frequency analysis/periodogram/stl
 Tidy ARIMA.R
+bats - SHOULD BE ABLE TO SPECIFY SEASONAL PERIODS
+Try to plot weighting coefficients and pull out code of how VAR model gets them
+so we may use this for our GAM model
