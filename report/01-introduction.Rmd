@@ -25,7 +25,7 @@ There are currently a range of mechanisms in place to ensure that the supply of 
 
 The process of adjusting demand to meet supply is referred to as demand side management (DSM). The challenges associated with supplying electricity in order to effectively meet demand are likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015]. Demand side management is thus likely to have an increasing role in the transition to a low-carbon electricity grid. 
 
-As the ability to rapidy increase generation or decrease load is of value to the network, this is reflected by the ability to monetize this capacity through various electricity markets.
+The grid benefits in being able to rapidy increase generation or decrease load is reflected by the ability to monetize this capacity through various electricity markets.
 The 'instantaneous reserves' (IR) markets are national markets concerned with stabilising the grid alternating current (AC) frequency during times of severe demand peaks or grid emergencies.
 _List FIR and SIR seperately_
 Electricity generators that are running under capacity, and electricity consumers with a large enough load, may sell their ability to increase supply or decrease demand in half-hour ahead markets.
@@ -50,7 +50,7 @@ There have been proposals[@NewZealandElectricityCommission2009] that a market-ba
 Electricity company Flick in New Zealand is already providing this, offering customers with compatible smart-meters the spot-market electricity price (with additional base costs). An app that displays the current spot price is provided to customers, with the intention being that consumers attempt to reduce demand during times of comparatively high prices.
 While this method of 'deliberate' demand response is well intentioned, studies of consumer response to changes in electricity price indicate that prices generally have little effect on consumption patterns when relying on consumers to deliberately alter their electricity consumption[@Lawson2011a; @Okajima2013; @Filippini2011].
 One solution is to automate the scheduling of appliances in order to take advantage of price differentials. 
-With the rapid rise of 'internet of things' technology, whereby devices are interconnected and offer the ability to be controlled remotely, there is the ability to remotely and autonomously schedule flexible devices in order to minimise operations costs or more effectively utilise renewable electricity sources.
+With the rapid rise of 'internet of things' technology, whereby devices are interconnected and offer the ability to be controlled remotely, there is the ability to automatically schedule flexible devices in order to minimise operations costs or more effectively utilise renewable electricity sources.
 Many electricity using devices can have their use times shifted on a daily scale with limited impact to the end user (a property referred to as 'flexibility'). Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders (HWCs). Flexibile devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand (for example into times where electricity is cheaper) with minimal impact to the end user.
 
 
@@ -111,7 +111,7 @@ Additionally, forecasts may be made by understanding the relationships between a
 
 ### AI forecasting methods
 
-```{r ANNinDF, out.width='100%', fig.cap="Documents in SCOPUS containing keywords: artificial neural network electricity demand forecasting"}
+```{r ANNinDF, out.width='100%', include=FALSE, fig.cap="Documents in SCOPUS containing keywords: artificial neural network electricity demand forecasting"}
 knitr::include_graphics(paste0(pFolder, "artificial_neural_network_electricity_demand_forecasting.png"))
 ```
 
@@ -120,8 +120,6 @@ Artificial Intelligence (AI) methods are those that use more complex techniques 
 These methods can be considered separate from their conventional counterparts by their ability to process and establish relationships between data in a more autonomous fashion. 
 In general, AI methods rely more on algorithms and large amounts of computational power than conventional forecasting methods, while conventional methods rely more on human intuition and statistics than AI methods.
 Two commonly used AI techniques in the field of electricity demand forecasting are those of artificial neural networks (ANN) and support vector machines (SVM).
-
-_Consider moving much of this section (below here) to methodology_
 
 ANNs attempt to mimic biological learning mechanisms by processing a set of training data through clusters of artificial neurons, each of which individually recieve (numerical) inputs, assign them certain weights, and then output the weighted value into other artificial neurons, which perform the same task, until eventually producing a final output.
 The weights assigned by each neuron are then iteratively adjusted in order to minimise the error of the final output.
@@ -132,13 +130,14 @@ Thus to facilitate reproducibility of results, ANN methods were not included wit
 
 An alternative AI method that is gaining in popularity for use in electricity demand forecasting is that of support vector machines (SVMs).
 Support vector machines may be used in electricity forecasting by automating the process of discovering, catagorising and quantifying various relationships within the data, such as those previously described as part of time series analysis and causal modelling[@Wei2018].
-This method is less computationally expensive to train than ANNs, and better suited to solving non-linear problems such as those encountered in cyclic time series data[@Ahmad2014]. Perhaps for these reasons, research interest of SVMs in the context of electricity demand forecasting is still growing, as can be seen in Figure \@ref(fig:SVMinDF).
+This method is less computationally expensive to train than ANNs, and better suited to solving non-linear problems such as those encountered in cyclic time series data[@Ahmad2014]. 
+<!--
+_Perhaps for these reasons, research interest of SVMs in the context of electricity demand forecasting is still growing, as can be seen in Figure \@ref(fig:SVMinDF). remove?_
+-->
 
-
-
-
-```{r SVMinDF, out.width='100%', fig.cap="Documents in SCOPUS containing keywords: support vector network electricity demand forecasting"}
-knitr::include_graphics(paste0(pFolder, "support_vector_electricity_demand_forecasting.png"))
+```{r SVMinDF, include=FALSE, out.width='100%', fig.cap="Documents in SCOPUS containing keywords: support vector network electricity demand forecasting"}
+# latex does NOT like this image for some reason. Either grab again or remove all reference.
+knitr::include_graphics(paste0(pFolder, "SVelecDemandForecasting.png"))
 ```
 
 _Consider replacing these SCOPUS charts with a more broad search term relevent to my topic_
@@ -174,7 +173,7 @@ Roux, Apperly and Booysen (2018) also use a two-volume model for their heuristic
 
 Some research combines the computational efficiency of the single-volume well-mixed model with the physical fidelity of a multi-volume model by utilising both models for different aspects of the simulation/optimisation/control process. The control algorithm utilised by Kepplinger, Huber and Petrasch (2014) uses a single-volume well-mixed model in order to construct a cost-optimised binary switch function under real-time electricity prices using the hot water demand predicted using a kth nearest neighbour data mining algorithm. This optimised binary switch function is input along with the electrical power used by the physical hot water cylinder into a multi-volume thermal model that is used to estimate future temperatures inside the physical cylinder. These predictive temperatures are returned to the original optimisation algorithm to check that they are between the minimum and maximum temperature constraints. 
 
-### Forecasting to improve smart-control objectives
+### Demand forecasting literature
 
 A common theme within the literature regarding smarter control of appliances is the necessity of accurately forecasting demand. An accurate demand forecast allows for more efficient energy storage and demand response capabilites, and may lessen any negative effects to the end user.
 While much work has been done on medium to long term electricity demand forecasting, this thesis is concerned only with short term forecasts, and as such there is a strong emphasis on literature relating to short term forecasting.
@@ -205,10 +204,10 @@ It is an exploratory analysis with high regard given to reproduciblity, under th
 
 ## Thesis structure
 
-The main body of analysis is broadly broken into four sections. 
+The main body of analysis is broadly broken into three sections. 
 Chapter \@ref(methodology) explains the data cleaning and preparatory process, and then provides a broad overview of various relevant patterns and attributes of the data. It goes on to introduce the models utilised in the context of electricity demand, and describe the metrics by which the models are compared to one another.
 Chapter \@ref(results) demonstrates the effectiveness of a number of statistical models to forecast hot water electricity demand of each household using half-hour averaged data. This is currently the form which is stored and transmitted by smart meters in New Zealand currently. 
 Each forecasting model used is then compared to one another by a number or relevant metrics. These comparative results are provided in the Conclusion (Chapter \@ref(conclusion)). Potential further work is also detailed in this section.
 
-Relevant code and model parameters are provided in the appendix.
+Relevant tables, including model parameters and some data attributes are provided in the appendix.
 
