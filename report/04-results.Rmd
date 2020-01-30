@@ -30,13 +30,8 @@ DFsummary <- readRDS(paste0(dFolder, "allModelSummaryStats.rds"))
 dfSummary <- readRDS(paste0(dFolder, "allHouseModelStats.rds"))
 ```
 This chapter uses a selection of models fitted to our half hour averaged data in order to forecast the demand of the following half hour.
+This has the additional effect of smoothing the demand data such that it may be closer to approximating a continuous variable. 
 
-While a more sophisticated model that provides a binary on/off output will be considered in Chapter \@ref(one-min), this project hopes to "build up" the sophistication of the modelling from more mathematically simple techniques.
-In our case, this may be obtained through taking the average hot water electricity demand over each half-hour within the data. This smooths the demand data such that it may be closer to approximating to be a continuous variable. 
-```{r hhElementPlot, out.width='100%', fig.cap="Half-hour averaged hot water electricity use over one day"}
-knitr::include_graphics(paste0(pFolder, "oneDay30min.pdf"))
-```
-Figure \@ref(fig:hhElementPlot) may be compared with Figure \@ref(fig:elementPlot) in Chapter \@ref(methodology) to see the smoothing effect of half-hour averaging.
 
 ## Naive model
 
@@ -98,6 +93,9 @@ _I might as well include a moving average model. It is easy to impliment and wou
 ## ARIMA model
 
 Some[@Cui2016] forecasting of electricity hot water use has been done using autoregressive moving average (ARIMA) models.
+As each household has different usage patterns and characteristics, optimal values for these parameters differ for each household.
+The optimal parameters for each household which minimise the AIC (refer to Section \@ref(ARIMAmethodology)) are provided in the appendix.
+
 _include plots and results_
 _rerun results with a max.p = 50 to facilitate seasonal differencing_
 
