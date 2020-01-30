@@ -5,8 +5,6 @@
 # be unsuitable for this project. For more information see the
 # file "suitable_houses.txt"
 
-# NOTE this process has changed dramatically since using the UKDS dataset.
-
 # BEFORE THIS SCRIPT WILL WORK YOU MUST:
 
 # Download and extract the files
@@ -19,9 +17,10 @@
 
 # THIS SCRIPT THEN:
 # Removes houses 07, 09, 10, 17b, 19, 21, 23, 26, 28, 41, 43, 46, 47
-# Combines hot water elec and total in new datatable
+# Combines hot water elec and total in new data table
 # Subtracts hot water from total
-# Creates some further summary data which may be unnecessary for the main analysis
+# Cleans 'holes' from some further households 
+# Creates summary data tables
 
 library(data.table)
 library(lubridate)
@@ -36,6 +35,7 @@ if (!exists("pFile")){
   pFile <- "~/HWCanalysis/plots/" 
 }
 
+# If different extraction dates are used these need to be changed accordingly
 p <- fread(paste0(dFile, "mputed_2010-01-01_2020-01-01_observations.csv.gz"))
 q <- fread(paste0(dFile, "ater_2010-01-01_2020-01-01_observations.csv.gz"))
 
@@ -66,16 +66,14 @@ save(houses, file = paste0(dFile, "houses.Rda"))
 # Reorder columns
 setcolorder(DT, neworder = 
               c("linkID","r_dateTime","dateTime_nz","HWelec","nonHWelec"))
-# Remove rows with NA values
-#DT <- na.omit(DT)
+
 # Remove HW elec from all elec
 DT$nonHWelec <- DT$nonHWelec - DT$HWelec
 save(DT, file = paste0(dFile, "DT_no_houses_removed.Rda"))
-#load(paste0(dFile,"DT_no_houses_removed.Rda"))
 
-
-# This gives the datetime as the START of each 30 min average
+# This gives the datetime as the start of each 30 min average
 DT[, hHour := hms::trunc_hms(dateTime_nz, 30*60)]
+
 # Now we create the half-hour average data.table
 # this is done as the 1min DT was causing the machine to hang
 # when attempting to generate plots
@@ -97,7 +95,8 @@ p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) +
   facet_wrap(~linkID, ncol = 4)
 p + labs(x = "Date", y = "Power (W)", 
          title = "")
-ggsave(filename = paste0(pFile, "prelim/allHouses.png"))
+#ggsave(filename = paste0(pFile, "prelim/allHouses.png"))
+ggsave(filename = paste0(pFile, "prelim/allHousesHolesRemoved.pdf"))
 
 for (house in houses){
   q <- DT[linkID == house]
@@ -188,7 +187,6 @@ for (house in houses) {
 #DT_hh <- as.data.table(DT_hh)
 #setcolorder(DT_hh, c("hHour", "min", "day", "linkID","nonHWelec" ,"HWelec"))
 
-
 missingValues <- as.data.frame(missingValues)
 names(missingValues) <- c("household", "NAs", "percent")
 write_csv(missingValues, paste0(dFile, "missingValues.csv"))
@@ -217,35 +215,11 @@ DT$min <- gsub('.{3}$', '', DT$min)
 
 save(DT, file = paste0(dFile, "DT.Rda"))
 
-
-
-#load(paste0(dFile,"DT_hh.Rda"))
-
-# This gives the datetime as the START of each 15 min average
-#DT[, qHour := hms::trunc_hms(dateTime_nz, 15*60)]
-
-# This creates the quarter-hour average data.table
-
-#DT_qh <- DT %>% 
-#  group_by(linkID, qHour) %>% 
-#  summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
-
-#save(DT_qh, file = paste0(dFile, "DT_qh.Rda"))
-
-
-
 # Now we create the half-hour average data.table
 
 DT_hh <- DT %>% 
   group_by(linkID, hHour) %>% 
   summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
-
-#DT_hh$day <- weekdays(DT_hh$hHour)
-#DT_hh$min <- gsub(".* ","", as.character(DT_hh$hHour))
-#DT_hh$min <- gsub('.{3}$', '', DT_hh$min)
-
-#DT_hh <- as.data.table(DT_hh)
-#setcolorder(DT_hh, c("hHour", "min", "day", "linkID","nonHWelec" ,"HWelec"))
 
 DT_hh <- as.data.table(DT_hh)
 setcolorder(DT_hh, c("hHour", "linkID","nonHWelec" ,"HWelec"))
@@ -289,9 +263,6 @@ to.replace <- names(which(sapply(DT_hh, is.logical)))
 for (var in to.replace) DT_hh[, (var):= as.numeric(get(var))]
 head(DT_hh)
 
-
-
-
 # This seperates data into training and test (fitting and validating)
 for (house in unique(DT_hh$linkID)){
   assign(paste0(house, "_at_30_min"), DT_hh[linkID == house])
@@ -306,7 +277,6 @@ for (house in unique(DT_hh$linkID)){
 # The remainder of this script is generally unnecessary for the main body
 # of analysis carried out in this thesis, but provided the means to 
 # determine how to carry out the initial processing occurring above
-
 
 # This creates a summary of each house
 
