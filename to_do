@@ -11,6 +11,7 @@ Make weekly profile plot
 Make plot demonstrating other elec turning on before HW elec
 Add other elec (dotted line) to linear model plot
 Redo ccv plot
+Clone github repository and rerun to check reproducibility
 Become familiar with Kalman filter
 Explain/reference frequency analysis/periodogram/stl
 Tidy ARIMA.R
