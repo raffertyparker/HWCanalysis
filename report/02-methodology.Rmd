@@ -45,7 +45,7 @@ This section explores our dataset for the purpose of ascertaining any patterns a
 
 ### Time series overview and notation
 
-As this work is concerned with predictability and patterns within our data over time, we extensively utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] provided a guideline to the overall process.
+As this work is concerned with predictability and patterns within our data over time, we extensively utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] provides a good overview to the overall process.
 
 A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009]. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical data values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the _model_ of $\{x_t\}$.  A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
 The difference between an observed value and the value predicted by the model is formally known as the _residual_, and can be intuitively understood as the error in the value predicted by the model.
@@ -54,7 +54,7 @@ Many models are fitted algorithmically in order to minimise the RSS.
 
 
 ### Initial data cleaning
-Some of the houses in the original dataset are not suited to this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process (see https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19 for more information). 
+Some of the houses in the original dataset are not suited to the purposes of this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process (see https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19 for more information). 
 Data files from the remaining households are unzipped and processed using the `GREENGridData` package[@R-GREENGridData]. Total electricity is imputed from the submeters using the script `imputeTotalPower.R` (obtained from the `GREENGridData` github repository). From this output, we extract imputed total electricity demand and hot water electricity demand using `GREENGridData::extractCircuitFromCleanGridSpy1min.R`. The outputs from this script then require some further cleaning and processing to be suitable for our analysis.
 During the preliminary data exploration, a number of households in the dataset were found to have characteristics that deemed them unsuitable for this analysis, and were removed. These are as follows:
 
@@ -82,9 +82,11 @@ knitr::include_graphics(paste0(pFolder, "prelim/allHousesHolesRemoved.pdf"))
 ```
 
 Smaller holes in data were dealt with by inserting zero values of electricity power where necessary. Zero values were selected as opposed to using averages or other methods to reflect the 'on/off' nature of the HWC element at 1 minute timescales. This technique facilitates further analysis at this level of granularity.
+
+_Seperate this out. Half hour smoothing is important enough to be discussed on its own, not just ran into from another topic_
 As many missing values were only up to a few minutes in sequence, any effects on further analysis should be partially 'smoothed' with the further processing into half hour granularity. 
 This 'smoothing' of data into half hour granularity was obtained by averaging electricity power over each half hour time step, to reflect the data storage and transmission characteristics of current smart meters in New Zealand. 
-The effect of this smoothing may be seen by comparing Figure \@ref(fig:elementPlot) with Figure \@ref(fig:hhElementPlot).
+The effect of this smoothing may be seen by comparing Figure \@ref(fig:elementPlot) with Figure \@ref(fig:hhElementPlot). _These plots are too large, try to join them together perhaps (subplot (a) and (b))_
 
 ```{r elementPlot, out.width='100%', fig.cap="Hot water electricity use at 1 minute over one day"}
 knitr::include_graphics(paste0(pFolder, "oneDay.pdf"))
@@ -95,8 +97,8 @@ knitr::include_graphics(paste0(pFolder, "oneDay30min.pdf"))
 ```
 
 
-Data processing code can be viewed at `https://github.com/raffertyparker/HWCanalysis/blob/master/scripts/processing.R`.
-
+Data processing code can be found in at `~/HWCanalysis/scripts/processing.R`.
+_Consider making a flow chart of data processing sequence_
 
 ```{r load_pkg, include = FALSE}
 # List of packages required for this analysis
@@ -161,18 +163,15 @@ load(paste0(dFolder, dtName, ".Rda"))
 ### Data summary
 
 See Table \@ref(tab:summary1) for the mean values of hot water electricity and other electricity for each household.
-```{r summary1, echo=FALSE}
-DT %>%
-  group_by(linkID) %>%
-  select(c(HWelec, nonHWelec)) %>%
-  summarise_each(funs = mean)
+```{r means1, echo=FALSE}
+load(paste0(dFolder, "meansDT.Rda"))
 ```
 
 ```{r averagePlot, out.width='100%', echo=FALSE, fig.cap="Average daily demand of hot water electricity for each household"}
 knitr::include_graphics(paste0(pFolder, "averages/averageDemand.pdf"))
 ```
 
-Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. Also of note is the large variation in average demand. 
+Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. Also of note is the large variation in average demand, varying from `r round(min(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r round(max(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`).
 
 ```{r HWboxplot, out.width='100%', include=FALSE, fig.cap="Box plot of hot water electricity demand for each household"}
 # put this as its own script
@@ -311,6 +310,12 @@ where $\{w_t\}$ is a white noise series.
 Random walk models are more commonly used in simulations than forecasts. When used in simulations, a random walk model will artificially generate white noise to simulate a potential evolution of the variable in time.
 When used in forecasting however, this model assumes that the mean of the white noise is equal to zero, ($\{\overline w_t\} = 0$), and consequently that the dependant variable (hot water electricity demand, in our case) of the next timestep can be best predicted by the demand of the current timestep. _show figure demonstrating?_
 Due to their simplicity and ease of computation they are sometimes used in forecasting in this context as a 'benchmark' model, by which other models may be compared. For this reason, they are referred to as 'naive' models.
+
+### Seasonal naive model
+
+In a similar manner to the naive model, the seasonal naive model makes a prediction from a single prior obesrvation.
+The seasonal naive model however makes the assumption that for cyclic data, the most likely value of the the next timestep is that of the same time one cycle prior.
+For data that displays weekly seasonality, for eample that of residential electricity demand, a seasonal naive model would predict that hot water demand is the same as it was the same time one week prior.
 
 
 ### Simple linear regression

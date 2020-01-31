@@ -18,7 +18,6 @@ source(paste0(filepathsPath, "/filepaths.R"))
 
 
 ## Demand side management
-_This needs to be longer, and paint a clear picture of the 'problem' I am trying to solve_
 
 Temporal variation in electricity demand occurs at a variety of timescales in an electricity grid. As electrical energy cannot be stored, electricity supply must match this fluctuating demand, requiring underutilised generation and transmission infrastructure to be available on demand, a costly and inefficient situation[@Strbac2008]. 
 There are currently a range of mechanisms in place to ensure that the supply of electricity balances with the varying demand[@Strbac2008], and that currents do not exceed transmission and distribution infrastructure constraints[@TranspowerNZ2015].
@@ -56,9 +55,9 @@ Many electricity using devices can have their use times shifted on a daily scale
 
 ## Predicting electricity demand
 
-The ability to predict usage patterns allows devices to be controlled according to the usage patterns of individual houses. This is beneficial for demand side management objectives as it would provide additional capacity for control while reducing negative effects on service.[@Gelazanskas2015] It may also provide the means to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted shedable demand. 
+The ability to predict usage patterns allows devices to be controlled according to the usage patterns of individual houses. This is beneficial for demand side management objectives as it would provide additional capacity for control while reducing negative effects on service[@Gelazanskas2015]. It may also provide the means to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted shedable demand. 
 In addition, scheduling thermal appliances such as hot water cylinders to fit forecasted demand patterns can facilitate improvements in energy efficiency[@Denis2019].
-With the roll-out of smart meters in New Zealand, there is now the ability to collect and process essentially 'real-time' data on hot water electricity consumption. 
+With the roll-out of smart meters in New Zealand, there is now the ability to collect and process essentially 'real-time' data on hot water electricity consumption for individual consumers. 
 This would allow ripple control (or a similar system) to be personalised to individual household useage patterns, providing the ability to suppress the element operation more or less frequently according to whether the household had low or high hot water consumption, respectively.
 
 ### Enhancing control for DSM objectives

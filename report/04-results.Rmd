@@ -1,45 +1,18 @@
 # Results {#results}
 <!--
+This chunk was necessary when using python for some models, however it is probably no longer necessary
 ```{r setup2, include=FALSE}
 knitr::opts_chunk$set(echo=TRUE, engine.path = list(python = '/anaconda/bin/python'))
 ```
 -->
-```{r load30minHouse, eval = FALSE, include=FALSE}
-# Choose which househould we want to examine
-# Available houses:
-# "06","08","13","22","24","25","27","29","30","31","32",
-# "33","34","35","36","37","38","40","42","44","45"
-
-# House 30 has NAs in HW column
-house <- "13"
-
-load(paste0("~/HWCanalysis/Masters/data_old/house_",
-            house, "_at_30.Rda"))
-
-if (!exists("dFolder")){
-  dFolder <- "~/HWCanalysis/Masters/data/" 
-}
-
-load(paste0(dFolder, "DT_hh.Rda"))
-
-```
 
 ```{r loadSummaryStats}
-
 DFsummary <- readRDS(paste0(dFolder, "allModelSummaryStats.rds"))
 dfSummary <- readRDS(paste0(dFolder, "allHouseModelStats.rds"))
 ```
 This chapter uses a selection of models fitted to our half hour averaged data in order to forecast the demand of the following half hour.
-This has the additional effect of smoothing the demand data such that it may be closer to approximating a continuous variable. 
-
 
 ## Naive model
-
-```{r loadRWdata}
-# Should be unnecessary now
-#load(paste0(dFolder, "models/randomWalk/procTime.Rda"))
-#load(paste0(dFolder, "models/randomWalk/sdResRW.Rda"))
-```
 
 In our naive model we assume no drift, and only attempt to predict one (half hour) time step onto the future. From Equation \@ref(eq:randomWalk), we get 
 \begin{equation}
@@ -52,9 +25,9 @@ knitr::include_graphics(paste0(pFolder, "randomWalk/fourHouses.pdf"))
 
 As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistantly 'missing' the actual values.
 
-The random walk model has RMSE ranging between between `min(dfSummary$RMSE[dfSummary$model == "naive"])`W and `max(dfSummary$RMSE[dfSummary$model == "naive"])`W, with the average being `DFsummary$RMSE[DFsummary$model == "naive"]`W.
+The random walk model has RMSE ranging between between `r min(dfSummary$RMSE[dfSummary$model == "naive"])`W and `r max(dfSummary$RMSE[dfSummary$model == "naive"])`W, with the average being `r DFsummary$RMSE[DFsummary$model == "naive"]`W.
 
-The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is also high, as the output can be understood by the simple equation $\hat x_{t+1} = x_t$. The computational time to fit models to each household varied between `min(dfSummary$fittingTime[dfSummary$model == "naive"])`s and `max(dfSummary$fittingTime[dfSummary$model == "naive"])`s, with the average taking `DFsummary$fittingTime[DFsummary$model == "naive"]`s.
+The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, although no illumination as to underlying behavioural properties are provided by this model. The computational time to fit models to each household varied between `r min(dfSummary$fittingTime[dfSummary$model == "naive"])`s and `r max(dfSummary$fittingTime[dfSummary$model == "naive"])`s, with the average taking `r DFsummary$fittingTime[DFsummary$model == "naive"]`s.
 
 ## Linear regression of hot water electricity against lagged other electricity
 
@@ -78,17 +51,13 @@ Household `rf_30` shows a model which appears to be very unresponsive to the dat
 This indicates that for some households, a correlation lag of greater than 30 mins may increase accuracy. 
 Households `rf_42` and `rf_44` show a more accurate model result, however due to the presence of a non-zero y intercept these models will always consistantly overestimate hot water electricity whenever the true value is zero.
 
-The simple linear regression model has RMSE ranging between between `r min(dfSummary$RMSE[dfSummary$model == "simpleLinear"])`W and `r max(dfSummary$RMSE[dfSummary$model == "simpleLinear"])`W, with the average being `r DFsummary$RMSE[DFsummary$model == "simpleLinear"]`W.
+The simple linear regression model has RMSE ranging between between `r round(min(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "simpleLinear"], 2)`W.
 
 The model does not accurately capture zero values, and is significantly smoother than the actual data, however no negative values are present. It therefore scores low to moderate for physical fidelity. 
-Interpretability is high, as the output can be understood by the simple equation $\hat x_{t+1} = \alpha_0 + \alpha_1 w_t$, where $w_t$ is non hot water electricity at time $t$.  The computational time to fit models to each household varied between `r min(dfSummary$fittingTime[dfSummary$model == "simpleLinear"])`s and `r max(dfSummary$fittingTime[dfSummary$model == "simpleLinear"])`s, with the average taking `r DFsummary$fittingTime[DFsummary$model == "simpleLinear"]`s.
+Interpretability is high, as the output can be understood by the simple equation $\hat x_{t+1} = \alpha_0 + \alpha_1 w_t$, where $w_t$ is non hot water electricity at time $t$.  The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "simpleLinear"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "simpleLinear"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "simpleLinear"], 2)`s.
 
 Notably, this model has lower RMSE's than the Naive model.
 In addition, this model lends itself to being utilised as an input into more complex models that take other parameters into consideration. 
-
-## Moving average
-
-_I might as well include a moving average model. It is easy to impliment and would be a good segue into ARIMA_ 
 
 ## ARIMA model
 
