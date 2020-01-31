@@ -71,7 +71,7 @@ options(scipen=999)
 Sys.setenv(TZ='UTC')
 
 # Set the time period I want to get the per-house totals for ----
-start_time <- as.POSIXct("2015-07-01 00:00", tz="Pacific/Auckland")
+start_time <- as.POSIXct("2010-01-01 00:00", tz="Pacific/Auckland")
 end_time <- as.POSIXct("2020-01-01 00:00", tz="Pacific/Auckland")
 
 start_exec <- Sys.time()

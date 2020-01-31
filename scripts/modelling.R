@@ -18,6 +18,7 @@
   library(data.table)
   library(ggplot2)
   library(dplyr)
+  library(e1071)
   
   load(paste0(dFile, "houses.Rda"))
   
@@ -52,7 +53,6 @@
     ts_val <- as.xts(dt_val)
     dt_fit$dow <- weekdays(dt_fit$hHour)
     dt_val$dow <- weekdays(dt_val$hHour)
-
     
     Model <- "SVM"  
     fitTime <- system.time(

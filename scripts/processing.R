@@ -278,17 +278,14 @@ for (house in unique(DT_hh$linkID)){
 # of analysis carried out in this thesis, but provided the means to 
 # determine how to carry out the initial processing occurring above
 
-# This creates a summary of each house
+# This creates a table of average power values of each house
 
-summary_DT <- NULL
-for (i in houses){
-  load(paste0(dFile, i, "_at_1.Rda"))
-  p <- s %>%
-    group_by(circuit, linkID) %>%
-    summarise(meanW = mean(powerW))
-  summary_DT <- bind_rows(summary_DT, p)
-}
-save(summary_DT, file = paste0(dFile, "summary_DT.Rda"))
+meansDT <- DT_hh %>%
+  group_by(linkID) %>%
+  select(c(HWelec, nonHWelec)) %>%
+  summarise_each(funs = mean)
+
+save(meansDT, file = paste0(dFile, "meansDT.Rda"))
 
 # This gives all houses with PV
 

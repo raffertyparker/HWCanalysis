@@ -1,6 +1,7 @@
 # This takes model outputs and plots a day worth
 plotModel <- function(ModelData, ModelName){
   require(lubridate)
+  theme_set(theme_minimal())
   pMdl <- as.data.table(ModelData$x)
   names(pMdl) <- c("Time", "Actual")
   ifelse("fitted" %in% names(ModelData), pMdl$Fitted <- ModelData$fitted,
