@@ -4,7 +4,7 @@ Bookdown version of hot water electricity demand forecasting undertaken for my M
 
 The report should be fully reproducible by carrying out the following:  
 * Fork and/or clone this repository  
-* Download UKDS data and extract into `~/HWCanalysis/powerData/`  
+* Download [UKDS data](http://reshare.ukdataservice.ac.uk/853334/) and extract into `~/HWCanalysis/powerData/`  
 * Define paths to where to store any generated plots ("pFolder") in `filepaths.R` (this appears to be unavoidable as LaTeX does not like the "~" notation)  
 * Run `INITIALISE.R` to execute necessary scripts in the correct order  
 * Delete households `rf_15` and `rf_17` as per GREENGrid github instructions  
