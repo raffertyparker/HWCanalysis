@@ -6,6 +6,8 @@ Include nomenclature at beginning (after list of tables?)
 Draw family tree/landscape of models, indicate if they have been used for elec data and which I have decided to use
 Elaborate on the process of sorting through existing work to choose the models I have chosen
 Interest over time in data science methods is too specific; show broader interest. The specific methods may be able to be used in a different section
+Rerun SARIMA and ARIMAX models with additional xregs
+Include a separate ARIMA with max.p & max.q = 60
 Look at variance etc of DFsummary
 Make weekly profile plot
 Make plot demonstrating other elec turning on before HW elec
