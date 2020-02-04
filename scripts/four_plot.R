@@ -2,11 +2,11 @@
 # Needs model in the environment to be named according to household (rf_XX)
 # Quite a 'manual' process to change parameters but it will do for now
 
-if (!exists("dFile")){
-  dFile <- "~/HWCanalysis/data/" 
+if (!exists("dFolder")){
+  dFolder <- "~/HWCanalysis/data/" 
 }
-if (!exists("pFile")){
-  pFile <- "~/HWCanalysis/plots/" 
+if (!exists("pFolder")){
+  pFolder <- "~/HWCanalysis/plots/" 
 }
 
 library(data.table)
@@ -23,17 +23,17 @@ My_Theme = theme(
 
 theme_set(theme_minimal())
 
-#modelName <- "naive" # For manual creation 
-models <- c("naive", "seasonalNaive", "ARIMA", "ARIMAX", "SARIMA", "simpleLinear")
+modelName <- "SVM" # For manual creation 
+#models <- c("naive", "seasonalNaive", "ARIMA", "ARIMAX", "SARIMA", "simpleLinear")
 fourHouses <- c("rf_06", "rf_13", "rf_22", "rf_40") 
 
 for (modelName in models){
   for (house in fourHouses){ # Load appropriate models
-    ifelse(file.exists(paste0(dFile, "models/", modelName, "/", house, "_model.rds")),
+    ifelse(file.exists(paste0(dFolder, "models/", modelName, "/", house, "_model.rds")),
            assign(paste0(house, "_model"), 
-                  readRDS(paste0(dFile, "models/", modelName, "/", house, "_model.rds"))),
+                  readRDS(paste0(dFolder, "models/", modelName, "/", house, "_model.rds"))),
            assign(paste0(house, "_model"), 
-                  readRDS(paste0(dFile, "models/", modelName, "/", house, "_validated_model.rds")))
+                  readRDS(paste0(dFolder, "models/", modelName, "/", house, "_validated_model.rds")))
            )
   }
   
@@ -65,7 +65,7 @@ for (modelName in models){
     labs(y = "Power (W)", x = "Time", colour = "", title = '')
   # facet_wrap(. ~ linkID, scales = "free")
   p
-  ggsave(filename = paste0(pFile, modelName, "/fourHouses.pdf"))
+  ggsave(filename = paste0(pFolder, modelName, "/fourHouses.pdf"))
   p + My_Theme
-  ggsave(filename = paste0(pFile, modelName, "/fourHouses.png"))
+  ggsave(filename = paste0(pFolder, modelName, "/fourHouses.png"))
 }
