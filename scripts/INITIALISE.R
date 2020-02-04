@@ -14,3 +14,5 @@ source(paste0(sFile, "freq_analysis.R")) # Calculates the frequency analysis
 source(paste0(sFile, "linear_plot_one_house.R")) # Creates linear regression plots
 source(paste0(sFile, "average_demand.R")) # Creates average demand plots
 source(paste0(sFile, "modelling.R")) # Creates the models
+source(paste0(sFile, "four_plot.R")) # Creates model comparison plots of 4 households
+source(paste0(sFile, "four_plot_SVM.R")) # Creates SVM plot of 4 households
