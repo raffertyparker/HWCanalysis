@@ -4,13 +4,13 @@
 
 
 if (!exists("dFile")){
-  dFile <- "~/HWCanalysis/Masters/data/" 
+  dFile <- "~/HWCanalysis/data/" 
 }
 if (!exists("pFile")){
-  pFile <- "~/HWCanalysis/Masters/plots/" 
+  pFile <- "~/HWCanalysis/plots/" 
 }
 if (!exists("sFile")){
-  sFile <- "~/HWCanalysis/Masters/scripts/" 
+  sFile <- "~/HWCanalysis/scripts/" 
 }
 
 source(paste0(sFile, "plot_model.R"))
@@ -19,6 +19,7 @@ library(xts)
 library(data.table)
 library(ggplot2)
 library(dplyr)
+library(e1071)
 
 load(paste0(dFile, "houses.Rda"))
 
@@ -58,10 +59,10 @@ house <- houses[1]
   fitTime <- system.time(
     fitSVM <- svm(HWelec ~ dHour + nonHWshift1 + nonHWshift2
                   + HWshift1 + HWshift2 + dow, dt_fit))[3]
-  dir.create(paste0(dFile, "models/", Model,"/"), showWarnings = FALSE)
-  saveRDS(fitSVM, file = paste0(dFile, "models/", Model,"/", house, "_fitted_model.rds"))
+  dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
+  saveRDS(fitSVM, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
   predicted_values <- predict(fitSVM, dt_val)
-  SVMresidual <- dt_val$HWelec[2:nrow(dt_val)] - predicted_values
+  SVMresidual <- dt_val$HWelec[3:nrow(dt_val)] - predicted_values
   plotModelSVM(dt_val, predicted_values)
   sVec <- data.frame(model=Model,
                      household=house,
@@ -70,5 +71,4 @@ house <- houses[1]
                      memSize=as.numeric(object.size(fitSVM)),
                      stringsAsFactors=FALSE)
   DFsummary <- rbind(DFsummary, sVec)
-  
   
