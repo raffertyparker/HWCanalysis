@@ -41,7 +41,7 @@ knitr::include_graphics(paste0(pFolder, "rf06LinearPlot.pdf"))
 
 Figure \@ref(fig:linearRelations) shows a simple linear regression of current non hot water electricity demand with the following half-hour's hot water electricity demand. This is shown to demonstrate the ability to use current electricity demand to predict hot water electricity demand over the next half hour. Note the low $R^2$ value suggesting that, in it's current form, this model would be rather inadequate at forecasting demand.
 
-```{r simpleLinear, out.width='100%', fig.cap="Actual electricity use and simple linear model approximation using previous half hour's non-hot water electricity over one day for four households"}
+```{r simpleLinear, out.width='100%', fig.cap="Performance of simple linear regression model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "simpleLinear/fourHouses.pdf"))
 ```
 Figure \@ref(fig:simpleLinear) shows the effectiveness of this model for four seperate households. Note that the top two households in the figure, `rf_13` and `rf_30`, show the model fitting reasonable poorly with the data. 
@@ -61,23 +61,19 @@ In addition, this model lends itself to being utilised as an input into more com
 
 ## ARIMA model
 
-Some[@Cui2016] forecasting of electricity hot water use has been done using autoregressive moving average (ARIMA) models.
 As each household has different usage patterns and characteristics, optimal values for these parameters differ for each household.
 The optimal parameters for each household which minimise the AIC (refer to Section \@ref(ARIMAmethodology)) are provided in the appendix.
 
-_include plots and results_
-_rerun results with a max.p = 50 to facilitate seasonal differencing_
+The simple linear regression model has RMSE ranging between between `r round(min(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "ARIMA"], 2)`W.
 
-```{r ARIMA, eval = FALSE}
-AA <- auto.arima(dt$HWelec, max.p = 50)
+The model does not often predict the initial instance of the element turning on, and is somewhat smoother than the actual data. In addition, occasional negative values or values above that capable of the element occur. It scores low to moderate for physical fidelity. 
+Interpretability is moderate, as the output can be understood by the value of the $p$, $d$ and $q$ parameters (provided in the appendix). The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "ARIMA"], 2)`s.
 
-HWarima <- arima(dt$HWelec, seasonal = time3, method = "CSS")
-
-plot(AA)
-
+```{r ARIMAplot, out.width=100% include = FALSE, fig.cap="Performance of ARIMA model for four households over four separate days"}
+knitr::include_graphics(paste0(pFolder, "/ARIMA/fourHouses.pdf"))
 ```
-_Show parameters of autoarima_
 
+<!--
 
 ```{r frequencyPlot, eval = FALSE, include=FALSE, fig.cap="Frequency of power observations"}
 p <- ggplot(dfSimp, aes(x = value, fill = type)) +
@@ -91,19 +87,8 @@ p + labs(y = "Observations",
 Figure \@ref(fig:frequencyPlot) shows the frequency of observations of power (100W bin width) for both the data and the model.
 It can be seen that the model does not fit the data accurately in this regard. In part this may be due to regular occurrences of the element only needing to reheat the water slightly due to thermal losses from the wall of the tank, or very minor hot water usage events.
 
-```{r residualDF, eval = FALSE}
-#residuals(var1)
 
-HWres <- var1$varresult$HWelec$residuals
-HWresAbs <- abs(HWres)
-meanHWres <- mean(HWres)
-meanHWresAbs <- mean(HWresAbs)
-
-sdRes <- sd(HWres) 
-sdResAbs <- sd(HWresAbs)
-```
-
-```{r residualACF, eval = FALSE, fig.cap="Autocovariance of the VAR model residual"}
+```{r residualACF, eval = FALSE, fig.cap="Autocovariance of the ARIMA model residuals"}
 p <- forecast::ggAcf(HWres, lag.max = weekCycle*2, type = "correlation",
     plot = TRUE, na.action = na.pass)
 p + labs(x = "Lag", y = "Autocorrelation", title = "")
@@ -140,4 +125,3 @@ The mean residual when all r length(unique(resDF$house)) houses are considered t
 ```
 The VAR model provides a reasonably accurate means of forecasting. It is be possible to forecast half an hour in advance using minute data but this may not be practically implimentable in reality (smart meters may not store minute data as such).
 
-## Generalised Additive Models with continuous response variable

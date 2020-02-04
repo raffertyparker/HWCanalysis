@@ -74,7 +74,7 @@ In addition, the ability to predict (with reasonable accuracy) the electricity l
 
 In addition to assisting DSM objectives, personalised control of hot water cylinders can improve their efficiency by only heating as much water as is required by the household. 
 As hot water loses heat energy to the environment faster than cooler water, storing hot water in excess of what is required is an inefficiency. 
-Simulations by Denis, Suard, Lomet and Chèze[@Denis2019] demonstrated avergage energy savings of up to 10% in hot water systems that only heated according to what was required.
+Simulations by Denis, Suard, Lomet and Chèze[@Denis2019] demonstrated average energy savings of up to 10% in hot water systems that only heated according to what was required.
 Hot water cylinders under normal usage conditions have a tendency to 'stratify' their contents into distict bodies of water, namely a hot upper layer of water and a cool lower layer of water, separated by a thin thermocline[@JackDew2018].
 The household residents may use hot water with no noticeable changes in temperature until the hotter top layer suddenly runs out, causing the unpleasant 'cold water event', familar to many who have lived in a household with heavy hot water use.
 For those households with moderate to low hot water demand however, their hot water cylinder may be keeping a far greater amount of water hot than they would expect to use.
@@ -185,10 +185,11 @@ These models were found to outperform benchmark models in accuracy.
 _points of difference: different dataset, 1 hour resolution, other appliance use not considered, uses volumetric data, forecasting horizon of 24 hours, no consideration of metrics other than accuracy_
 
 _Need to expand upon how the models are developed, (based on historical data etc)._
+Refs [@Cui2016], [@Denis2019], [@Lomet2015] and [@Popescu2016] also use some variation or ARIMA modelling for electricity demand forecasting.
 
 After confirming the importance of accurate DHW forecasts for effective demand response, the authors in [@Lomet2015] propose the use of an ARMA model fitted to volumetric DHW consumption data for this purpose.  
 
-Aki, Wakui and Yokoyama[@Aki2016] also use volumetric DHW data, however they opt for support vector regression (SVR) forecasting methods using a 'ground-up' approach of separating the data into estimated end-uses, such as bathing, kitchen etc.
+Aki, Wakui and Yokoyama[@Aki2016] also use volumetric DHW data, however they opt for a variation of SVM known as support vector regression as the forecasting method, and use a 'ground-up' approach of separating the data into estimated end-uses, such as bathing, kitchen etc.
 
 [@Denis2019] considers the ability of forecasting to assist in reducing thermal losses from DHW tanks by controlling the operation of the device such that only the necessary amount of hot water is stored in the tank at once. An ARIMA model is utilised along with the TRNSYS energy simulation software. Overall energy reductions of up to 17.4% were demonstrated under this control scenario.
 

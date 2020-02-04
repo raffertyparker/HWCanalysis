@@ -186,7 +186,7 @@ _Test for stationarity here (or mention it in STL section if that section remain
 
 ### Autocovariance of hot water use
 
-We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising cyclical behaviour of data, and is defined as
+We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising and quantifying cyclical behaviour of data, and is defined as
 
 \begin{equation}
 \gamma_k = E[(x_t - \mu)(x_{t+k} - \mu)] ,
@@ -224,7 +224,7 @@ knitr::include_graphics(paste0(pFolder, "ccfAllHouses.pdf"))
 
 We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. 
 
-While Table \@ref(tab:ccvMaxLagTable) and Figure \@ref(fig:ccvMaxLagPlot) show that many houses have their maximum values at the boundary (30 minutes), around half have their maximum cross-correlations occurring at longer timescales.
+Figure \@ref(fig:ccvMaxLagPlot) shows that while many houses have their maximum values at the boundary (30 minutes), around half have their maximum cross-correlations occurring at longer timescales.
 
 ```{r ccvMaxLagPlot, out.width='100%', fig.cap="Lag at maximum correllation for each household (bin width 30 minutes)"}
 knitr::include_graphics(paste0(pFolder, "maxXcorAllHouses.pdf"))
@@ -313,9 +313,9 @@ Due to their simplicity and ease of computation they are sometimes used in forec
 
 ### Seasonal naive model
 
-In a similar manner to the naive model, the seasonal naive model makes a prediction from a single prior obesrvation.
+In a similar manner to the naive model, the seasonal naive model makes a prediction from a single prior observation.
 The seasonal naive model however makes the assumption that for cyclic data, the most likely value of the the next timestep is that of the same time one cycle prior.
-For data that displays weekly seasonality, for eample that of residential electricity demand, a seasonal naive model would predict that hot water demand is the same as it was the same time one week prior.
+For data that displays weekly seasonality, for example that of residential electricity demand, a seasonal naive model would thus predict that hot water demand is the same as it was the same time one week prior.
 
 
 ### Simple linear regression
@@ -393,7 +393,8 @@ AIC = -2\times \text{log-likelihood} + 2\times \text{number of parameters}.
 (\#eq:AIC)
 \end{equation}
 
-The R function `auto.arima`[@RobJ.Hyndman2008] automatically selects the parameters $p,d,q$ that minimise the AIC specific to the particular data being modelled. This is done iteratively according to the algorithm outlined in ref[@RobJ.Hyndman2008]. Inputs for maximum values of $p$ and $q$ are necessary in order to bound processing time.
+The R function `auto.arima`[@R-forecast] was used to automatically select the parameters $p,d,q$ which minimise the AIC specific to the particular data being modelled. This is done iteratively according to the algorithm outlined in ref[@RobJ.Hyndman2008]. Inputs for maximum values of $p$ and $q$ are necessary in order to bound processing time.
+
 
 In a similar manner to how trends can be removed through differencing at lag 1, seasonal effects within data (such as daily use patterns) can be removed by differencing at lag $s$, where $s$ is the length of the season.
 A seasonal ARIMA model may also introduce additional autoregressive and moving average terms at lag $s$, giving a model of the form $ARIMA(p,d,q)(P,D,Q)_s$, expressed using the backward shift operator as
@@ -428,7 +429,6 @@ Given instances $\mathbf{x}_i ,  i= 1, . . . , l$ with labels $y_i \in \{1,-1\}$
   \end{aligned}
 \end{equation*}
 where $\bf{e}$ is the vector of all ones, $C$ is the upper bound of all variables, $Q$ is an $l$ by $l$ symmetric matrix with $Q_{ij} = y_i y_jK(\mathbf{x}_i,\mathbf{x}_j)$, and $K(\bf{x}_i,\bf{x}_j)$ is the kernel function[@Fan2005].
-
 
 Support vector machines were created using the `e1071` package[@e1071] using training algorithms detailed in Fan, Chen and Lin(2005)[@Fan2005].
 
