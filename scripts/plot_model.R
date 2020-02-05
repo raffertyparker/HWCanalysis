@@ -3,7 +3,14 @@ plotModel <- function(ModelData, ModelName){
   require(lubridate)
   theme_set(theme_minimal())
   pMdl <- as.data.table(ModelData$x)
-  names(pMdl) <- c("Time", "Actual")
+  if(exists('hHour', where=ModelData)) # Inserted to deal with non-ts objects or ts objects that don't keep track of the datetime
+  {
+    pMdl$hHour <- ModelData$hHour
+    names(pMdl) <- c("Actual", "Time")
+  }
+  if(!exists('hHour', where=ModelData)){
+    names(pMdl) <- c("Time", "Actual")
+  }
   ifelse("fitted" %in% names(ModelData), pMdl$Fitted <- ModelData$fitted,
          pMdl$Fitted <- ModelData$fitted.values)
   pMdl <- melt(pMdl, id = "Time") 
