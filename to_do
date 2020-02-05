@@ -1,13 +1,13 @@
 ################## TO DO ##################
 
 Complete results chapter
+Fix tables
 Expand upon forecasting lit in lit review
 Include nomenclature at beginning (after list of tables?)
 Draw family tree/landscape of models, indicate if they have been used for elec data and which I have decided to use
 Elaborate on the process of sorting through existing work to choose the models I have chosen
 Interest over time in data science methods is too specific; show broader interest. The specific methods may be able to be used in a different section
-Rerun SARIMA and ARIMAX models with additional xregs
-Include a separate ARIMA with max.p & max.q = 60
+Rerun ARIMAX models with additional xregs
 Look at variance etc of DFsummary
 Make weekly profile plot
 Make plot demonstrating other elec turning on before HW elec
@@ -16,5 +16,4 @@ Redo ccv plot
 Clone github repository and rerun to check reproducibility
 Explain/reference frequency analysis/periodogram/stl
 Tidy ARIMA.R
-rerun bats models - SHOULD BE ABLE TO SPECIFY SEASONAL PERIODS
 Try to plot weighting coefficients and pull out code of how VAR model gets them so we may use this for a GAM model
