@@ -1,5 +1,4 @@
-# This scripts creates the models used for the analysis, saves them,
-# calculates time taken to fit, RMSE and size of file
+# This script creates the STL plots
 
 if (!exists("dFolder")){
   dFolder <- "~/HWCanalysis/data/" 
