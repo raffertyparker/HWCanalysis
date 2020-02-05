@@ -231,59 +231,20 @@ knitr::include_graphics(paste0(pFolder, "maxXcorAllHouses.pdf"))
 ```
 
 
-### STL decomposition
+### STL decomposition {#STL}
 
-_Might be best to delete this whole section. I no longer use this in the rest of the analysis but it is quite interesting. If kept, I need to rerun the STL with new dataset and include plots etc._
-Residential electricity usage would be expected to display high seasonality, corresponding to daily (and weekly) behavioural patterns of the household residents. It may also display average increases or decreases over time (trends).
-There are a number of methods we use to explore any cyclical effects or trends of time series data. One of these is STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using Loess', whereby Loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
+Another method that may be used to explore any cyclical effects or trends of time series data is that of STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using Loess', whereby Loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
+
+```{r STLPlot, out.width='100%', fig.cap="Seasonal decomposition of household rf_35"}
+knitr::include_graphics(paste0(pFolder, "rf_35_STL.pdf"))
+```
+<!--
 Most models are fitted to the data such that the model minimises the sum of the square of each residual (referred to as RSS, residual sum of squares).
 
 _rest of this section may be removed or moved?_
 Models that are advanced enough to effectively take into consideration data attributes such as trend and cyclic effects (known as 'seasonality') have a residual time series that approximates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean.
+-->
 
-```{r stl, include = FALSE, eval=FALSE}
-# Needs editing to work with DT
-
-#df$times <- as.POSIXct(df$times) # may not be necessary if set up correctly
-ts.HW <- ts(dt$HWelec, frequency = 48)
-#ts.HW <- ts(dt$HWelec, frequency = 48*7)
-decomp.HW <- decompose(ts.HW)
-plot(decomp.HW)
-```
-
-```{r stl_gg, include = FALSE, eval=FALSE}
-#This is a great package that separates out the cycle, trend, and noise, and plots them. Needs some work to run nicely
-#df_xts <- as.xts(df) 
-#frequency(dt$HWelec) <- time3[1]
-
-#stat_stl(ts.HW, s.window = "Periodic")
-HWstl <-  stl(ts.HW, s.window = "periodic")
-#plot(HWstl)
-######
-
-s_df <- tsdf(ts.HW)
-ggplot(ap_df, aes(x = x, y = y)) +
-   stat_stl(s.window = 60)
-
-# periodic if fixed seasonality; doesn't work well:
-ggplot(dt, aes(x = datetime, y = HWelec)) +
-   stat_stl(s.window = "Periodic")
-
-################################
-#library(ggseas)
-#load("~/HWCanalysis/Masters/data_new/rf_13_at_1.Rda")
-#s$r_dateTimeNZ <- lubridate::with_tz(s$r_dateTime, tz = "Pacific/Auckland")
-
-
-#ggsdc(s, aes(x = r_dateTimeNZ, y = powerW, colour = circuit),
-#      method = "stl", s.window = 7) +
-#   geom_line() +
-#   labs(x = "   n  ", colour = "") +
-#   scale_y_continuous("Power(W)", label = comma) +
-#   ggtitle("Seasonal decomposition of electricity demand") +
-#   theme(legend.position = c(0.17, 0.92))
-
-```
 
 ## Model selection
 
@@ -395,12 +356,17 @@ AIC = -2\times \text{log-likelihood} + 2\times \text{number of parameters}.
 
 The R function `auto.arima`[@R-forecast] was used to automatically select the parameters $p,d,q$ which minimise the AIC specific to the particular data being modelled. This is done iteratively according to the algorithm outlined in ref[@RobJ.Hyndman2008]. Inputs for maximum values of $p$ and $q$ are necessary in order to bound processing time.
 
-
 In a similar manner to how trends can be removed through differencing at lag 1, seasonal effects within data (such as daily use patterns) can be removed by differencing at lag $s$, where $s$ is the length of the season.
 A seasonal ARIMA model may also introduce additional autoregressive and moving average terms at lag $s$, giving a model of the form $ARIMA(p,d,q)(P,D,Q)_s$, expressed using the backward shift operator as
 \begin{equation}
 \Theta_P(\bf{B}^s)\theta_p(\bf{B})(1-\bf{B}^s)^D(1-\bf{B})^d x_t = \Phi_Q(\bf{B}^s)\phi_q(\bf{B})w_t .
 \end{equation}
+
+Preliminary modelling indicated that the seasonal ARIMA model was extremely computationally expensive, taking up to 8 hours to fit a single household. While this may be due to failings of a package-specific fitting algorithm, this model was not pursued any further.
+
+### ARIMA with STL decomposition
+
+Another mechanism by which to incorporate cyclic effects into ARIMA models is through STL decomposition (see \@ref(STL)). A time series may be split into seasonal and trend components, with the remainder being fed into the auto.arima model.
 
 <!--
 ### Logistic regression
