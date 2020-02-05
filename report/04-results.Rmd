@@ -62,15 +62,33 @@ In addition, this model lends itself to being utilised as an input into more com
 ## ARIMA model
 
 As each household has different usage patterns and characteristics, optimal values for these parameters differ for each household.
-The optimal parameters for each household which minimise the AIC (refer to Section \@ref(ARIMAmethodology)) are provided in the appendix.
+The optimal parameters for each household which minimise the AIC (refer to Section \@ref(ARIMAmethodology)) are provided in the appendix. For this analysis, maximum values for $p$, $d$ and $q$ are fixed at 5, 2 and 5, respectively.
 
-The simple linear regression model has RMSE ranging between between `r round(min(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "ARIMA"], 2)`W.
+The ARIMA model has RMSE ranging between between `r round(min(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "ARIMA"], 2)`W.
 
 The model does not often predict the initial instance of the element turning on, and is somewhat smoother than the actual data. In addition, occasional negative values or values above that capable of the element occur. It scores low to moderate for physical fidelity. 
 Interpretability is moderate, as the output can be understood by the value of the $p$, $d$ and $q$ parameters (provided in the appendix). The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "ARIMA"], 2)`s.
 
-```{r ARIMAplot, out.width=100% include = FALSE, fig.cap="Performance of ARIMA model for four households over four separate days"}
+```{r ARIMAplot, out.width='100%', fig.cap="Performance of ARIMA model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "/ARIMA/fourHouses.pdf"))
+```
+
+
+## ARIMA with STL decomposition
+
+
+
+## SVM model
+
+The SVM model was the most accurate model considered, with RMSEs ranging between between `r round(min(dfSummary$RMSE[dfSummary$model == "SVM"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "SVM"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "SVM"], 2)`W.
+
+The model is slightly smoother than the actual data, and seldom displays negative values or values above what is capable of the element. It scores moderate to high for physical fidelity. 
+This model is essentially "black box", providing very limited insight as to its selected parameters and their significance. As such, it scores low for interpretability. 
+
+As expected, the computational time to fit models to each household was high, varying between `r round(min(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "ARIMA"], 2)`s. 
+
+```{r SVMplot, out.width='100%', fig.cap="Performance of SVM model for four households over four separate days"}
+knitr::include_graphics(paste0(pFolder, "/SVM/fourHouses.pdf"))
 ```
 
 <!--
