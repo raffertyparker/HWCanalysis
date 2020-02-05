@@ -56,6 +56,30 @@
     ts_val <- as.xts(dt_val)
     dt_fit$dow <- weekdays(dt_fit$hHour)
     dt_val$dow <- weekdays(dt_val$hHour)
+    hw_ts_fit <- ts(dt_fit$HWelec, frequency = 48)
+    hw_ts_val <- ts(dt_val$HWelec, frequency = 48)
+    
+    Model <- "STLARIMA"
+    fitTime <- system.time(
+      fitSTLArima <- stlm(hw_ts_fit, s.window = 48, method = "arima"))[3] # Fits model and returns time taken to do so
+    dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
+    saveRDS(fitSTLArima, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
+    valSTLArima <- stlm(hw_ts_val, s.window = 48, method = "arima", model = fitSTLArima)
+    valSTLArima$hHour <- dt_val$hHour
+    saveRDS(valSTLArima, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
+    plotModel(valSTLArima, Model)
+    sVec <- data.frame(model=Model,
+                       household=house,
+                       RMSE=sqrt(mean(valSTLArima$residuals^2)),
+                       fittingTime=as.numeric(fitTime),
+                       memSize=as.numeric(object.size(fitSTLArima)),
+                       stringsAsFactors=FALSE)
+    DFsummary <- rbind(DFsummary, sVec)
+    Par <- as.data.frame(t(arimaorder(fitSTLArima$model)))
+    Par$household <- house
+    ifelse(house == houses[1], 
+           STL_ARIMApars <- Par,
+           STL_ARIMApars <- rbind(ARIMAparameters, Par))
     
     Model <- "SVM"  
     fitTime <- system.time(
