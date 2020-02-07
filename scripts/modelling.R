@@ -79,7 +79,7 @@
     Par$household <- house
     ifelse(house == houses[1], 
            STL_ARIMApars <- Par,
-           STL_ARIMApars <- rbind(ARIMAparameters, Par))
+           STL_ARIMApars <- rbind(STL_ARIMApars, Par))
     
     Model <- "SVM"  
     fitTime <- system.time(
@@ -101,7 +101,7 @@
 
     sVec <- data.frame(model=Model,
                        household=house,
-                       RMSE=sqrt(mean(SVMresidual^2)),
+                       RMSE=sqrt(mean(val_mdl$residual^2)),
                        fittingTime=as.numeric(fitTime),
                        memSize=as.numeric(object.size(fitSVM)),
                        stringsAsFactors=FALSE)
@@ -172,7 +172,7 @@
   Par$household <- house
   ifelse(house == houses[1], 
          ARIMApars <- Par,
-         ARIMApars <- rbind(ARIMAparameters, Par))
+         ARIMApars <- rbind(ARIMApars, Par))
   
   Model <- "ARIMAX"
   fitTime <- system.time(fitArima <- auto.arima(ts_fit$HWelec, 
@@ -190,20 +190,20 @@
                      stringsAsFactors=FALSE)
   DFsummary <- rbind(DFsummary, sVec)
   
-  Model <- "SARIMA"
-  fitTime <- system.time(fitArima <- auto.arima(ts_fit$HWelec, 
-                                                xreg = ts_fit$dHour))[3] # Fits model and returns time taken to do so    dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
-  saveRDS(fitArima, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
-  valArima <- Arima(ts_val$HWelec, xreg = ts_val$dHour, model = fitArima)
-  saveRDS(valArima, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
-  plotModel(valArima, Model)
-  sVec <- data.frame(model=Model,
-                     household=house,
-                     RMSE=sqrt(mean(valArima$residuals^2)),
-                     fittingTime=as.numeric(fitTime),
-                     memSize=as.numeric(object.size(fitArima)),
-                     stringsAsFactors=FALSE)
-  DFsummary <- rbind(DFsummary, sVec)
+#  Model <- "SARIMA" # Not a true SARIMA, uses xreg dummy variables instead
+#  fitTime <- system.time(fitArima <- auto.arima(ts_fit$HWelec, 
+#                                                xreg = ts_fit$dHour))[3] # Fits model and returns time taken to do so    dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
+#  saveRDS(fitArima, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
+#  valArima <- Arima(ts_val$HWelec, xreg = ts_val$dHour, model = fitArima)
+#  saveRDS(valArima, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
+#  plotModel(valArima, Model)
+#  sVec <- data.frame(model=Model,
+#                     household=house,
+#                     RMSE=sqrt(mean(valArima$residuals^2)),
+#                     fittingTime=as.numeric(fitTime),
+#                     memSize=as.numeric(object.size(fitArima)),
+#                     stringsAsFactors=FALSE)
+#  DFsummary <- rbind(DFsummary, sVec)
 }
 
 
