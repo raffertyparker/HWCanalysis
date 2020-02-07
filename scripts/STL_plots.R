@@ -13,9 +13,7 @@ if (!exists("sFolder")){
 library(forecast)
 library(xts)
 library(data.table)
-library(ggplot2)
 library(dplyr)
-library(e1071)
 #library(tseries)
 
 load(paste0(dFolder, "houses.Rda"))
@@ -42,13 +40,13 @@ decomp.HW <- decompose(ts.HW)
 
 t <- decomp.HW
 strt <- 48 # Start 1 day in
-len <- strt + 48*7*2 # take data for an additional 3 weeks
+len <- strt + 48*7*2 # take data for an additional 2 weeks
 
 t$x <- as.ts(t$x[strt:len])
 t$seasonal <- as.ts(t$seasonal[strt:len])
 t$trend <- as.ts(t$trend[strt:len])
 t$random <- as.ts(t$random[strt:len])
-plot(t)
+plot(t, xlab ="Time (half hours)")
 dev.print(pdf, paste0(pFolder, house, "_STL.pdf"))
 }
 
