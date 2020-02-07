@@ -11,9 +11,9 @@ Rerun ARIMAX models with additional xregs
 Look at variance etc of DFsummary
 Make weekly profile plot
 Make plot demonstrating other elec turning on before HW elec
+Plot ACV of model residuals to check that seasonality is being accounted for
 Add other elec (dotted line) to linear model plot
 Redo ccv plot
 Clone github repository and rerun to check reproducibility
-Explain/reference frequency analysis/periodogram/stl
-Tidy ARIMA.R
+Explain/reference frequency analysis/periodogram
 Try to plot weighting coefficients and pull out code of how VAR model gets them so we may use this for a GAM model
