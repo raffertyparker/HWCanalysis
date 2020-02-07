@@ -12,4 +12,7 @@ The report should be fully reproducible by carrying out the following:
 To view the completed thesis, knit from `~/HWCanalysis/report/index.Rmd`.
 
 Scripts `extractCircuitFromCleanGridSpy.R` and `imputeTotalPower.R` are taken from https://github.com/CfSOtago/GREENGridData. 
-Their original authors are Ben Anderson and Jason Mair (respectively).
+Their original authors are Ben Anderson and Jason Mair (respectively), and they are released under GNU General Public License v3.0.
+Very minimal changes have been made to them in order to accommodate the change in directory and automate some steps necessary for this analysis.
+
+Some of the scripts (especially those named after individual models) were used as exploratory tools, and have been superceded by their counterparts within `modelling.R`. The originals remain in case further exploration of individual models is required.
