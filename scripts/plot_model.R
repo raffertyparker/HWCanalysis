@@ -24,7 +24,7 @@ plotModel <- function(ModelData, ModelName){
          aes(x = Time)) +
     geom_line(aes(y = value, colour = variable)) +
     labs(y = "Power (W)", colour = "")
-  dir.create(paste0(pFile, ModelName,"/"), showWarnings = FALSE)
-  ggsave(filename = paste0(pFile, ModelName,"/", house, ".pdf"))
-  ggsave(filename = paste0(pFile, ModelName,"/", house, ".png"))
+  dir.create(paste0(pFolder, ModelName,"/"), showWarnings = FALSE)
+  ggsave(filename = paste0(pFolder, ModelName,"/", house, ".pdf"))
+  ggsave(filename = paste0(pFolder, ModelName,"/", house, ".png"))
 }

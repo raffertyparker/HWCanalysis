@@ -21,7 +21,7 @@ plotModelSVM <- function(dt, fitted){
          aes(x = Time)) +
     geom_line(aes(y = value, colour = variable)) +
     labs(y = "Power (W)", colour = "")
-  dir.create(paste0(pFile, "SVM/"), showWarnings = FALSE)
-  ggsave(filename = paste0(pFile, "SVM/", house, ".pdf"))
-  ggsave(filename = paste0(pFile, "SVM/", house, ".png"))
+  dir.create(paste0(pFolder, "SVM/"), showWarnings = FALSE)
+  ggsave(filename = paste0(pFolder, "SVM/", house, ".pdf"))
+  ggsave(filename = paste0(pFolder, "SVM/", house, ".png"))
 }
