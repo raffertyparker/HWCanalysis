@@ -24,19 +24,12 @@ MathJax.Hub.Config({
 ```{r loadDTandpc_rm, include=FALSE}
 # This loads percentage of data removed
 load(paste0(dFolder, "pc_rm"))
-load(paste0(dFolder, "DT.Rda"))
+DThead <- readRDS(paste0(dFolder, "DThead.rds"))
 ```
 
 ## Data background
 
-The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. This dataset is publically available from the UK Data Service. Publications to date that have utilised the dataset include [@Ocampo2015], [@Suomalainen2017], [@Stephenson2018], [@JackKiti2018], and [@JackDew2018]. More information about this dataset, including detailed reports of data issues and access instructions, is available at https://cfsotago.github.io/GREENGridData/. 
-
-```{r headDT, include=FALSE, fig.cap="Example of the clean and processed data used in the analysis"}
-knitr::kable(head(DT), "latex")
-```
-
-For the purposes of the current project, the data was cleaned and processed until it was in the format shown in Table \@ref(tab:headDT). The columns included are `linkID`, representing the household, `r_dateTime`, which is `R`'s internal datetime format, `dateTime_nz`, the local (New Zealand) datetime, and `HWelec` and `nonHWelec`, the average hot water electricity and non hot water electricity used over the time steps in the data.
-
+The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. The dataset is publically available from the UK Data Service. Publications to date that have utilised the dataset include [@Ocampo2015], [@Suomalainen2017], [@Stephenson2018], [@JackKiti2018], and [@JackDew2018]. More information about this dataset, including detailed reports of data issues and access instructions, is available at https://cfsotago.github.io/GREENGridData/. 
 
 ## Preliminary data analysis
 
@@ -86,18 +79,21 @@ Smaller holes in data were dealt with by inserting zero values of electricity po
 _Seperate this out. Half hour smoothing is important enough to be discussed on its own, not just ran into from another topic_
 As many missing values were only up to a few minutes in sequence, any effects on further analysis should be partially 'smoothed' with the further processing into half hour granularity. 
 This 'smoothing' of data into half hour granularity was obtained by averaging electricity power over each half hour time step, to reflect the data storage and transmission characteristics of current smart meters in New Zealand. 
-The effect of this smoothing may be seen by comparing Figure \@ref(fig:elementPlot) with Figure \@ref(fig:hhElementPlot). _These plots are too large, try to join them together perhaps (subplot (a) and (b))_
+The effect of this smoothing may be seen in Figure \@ref(fig:elementPlot). 
 
-```{r elementPlot, out.width='100%', fig.cap="Hot water electricity use at 1 minute over one day"}
-knitr::include_graphics(paste0(pFolder, "oneDay.pdf"))
-```
-
-```{r hhElementPlot, out.width='100%', fig.cap="Half-hour averaged hot water electricity use over one day"}
-knitr::include_graphics(paste0(pFolder, "oneDay30min.pdf"))
+```{r elementPlot, out.width='100%', fig.cap="Comparison of 1 minute hot water electricity data with its half-hour averaged version"}
+knitr::include_graphics(paste0(pFolder, "elementComparisonPlot.pdf"))
 ```
 
 
-Data processing code can be found in at `~/HWCanalysis/scripts/processing.R`.
+```{r headDT, message=FALSE, fig.cap="Example of the clean and processed data used in the analysis"}
+knitr::kable(DThead, "latex")
+```
+
+While minor additional processing was necessary for particular models, the fundamental form of the data used throughout the analysis is the form shown in Table \@ref(tab:headDT).
+Columns `hHour`, `min` and `day` are various formats for time which were necessary to separate as model inputs. `linkID` represents the household, and `nonHWelec` and `HWelec` are the half-hour averaged electricity demand of other appliances and hot water, respectively.
+
+Data processing code can be viewed at `~/HWCanalysis/scripts/processing.R`.
 _Consider making a flow chart of data processing sequence_
 
 ```{r load_pkg, include = FALSE}
@@ -130,42 +126,19 @@ library(lubridate)
 library(xts)
 ```
 
-```{r load1minHouse, include = FALSE}
-# Choose which househould we want to examine
-# Available houses:
-# "06","08","13","22","24","25","27","29","30","31","32",
-# "33","34","35","36","37","38","40","42","44","45"
 
-#house <- "13" 
-mins <- "1"  
-
-# Daily and weekly cycles created from mins
-
-if (as.numeric(mins) == 1) {
-  dayCycle <- 60*24
-  weekCycle <- 60*24*7
-  linearLag <- -30
-  hourCorrection <- 60
-  dtName <- "DT"
-} else if (as.numeric(mins) == 30) {
-  dayCycle <- 2*24
-  weekCycle <- 2*24*7
-  linearLag <- -1
-  hourCorrection <- 2
-  dtName <- "DTqh"
-} else {
-    print("Check minute sample rate (only 1 and 30 currently available)")
-}
-
-load(paste0(dFolder, dtName, ".Rda"))
-```
 
 ### Data summary
 
-See Table \@ref(tab:summary1) for the mean values of hot water electricity and other electricity for each household.
+Table \@ref(tab:summary1) shows the mean values of hot water electricity and other electricity for each household. Note the large variation in average demand, which can also be seen in the boxplot shown in Figure \@ref(fig:demandBoxplot).
 ```{r means1, echo=FALSE}
 load(paste0(dFolder, "meansDT.Rda"))
 ```
+
+```{r demandBoxplot, out.width='100%', fig.cap='Box plot of average demand for each household'}
+knitr::include_graphics(paste0(pFile, "averages/boxplot.pdf"))
+```
+
 
 ```{r averagePlot, out.width='100%', echo=FALSE, fig.cap="Average daily demand of hot water electricity for each household"}
 knitr::include_graphics(paste0(pFolder, "averages/averageDemand.pdf"))
@@ -173,16 +146,12 @@ knitr::include_graphics(paste0(pFolder, "averages/averageDemand.pdf"))
 
 Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. Also of note is the large variation in average demand, varying from `r round(min(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r round(max(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`).
 
-```{r HWboxplot, out.width='100%', include=FALSE, fig.cap="Box plot of hot water electricity demand for each household"}
-# put this as its own script
-p <- ggplot2::ggplot(DT, aes(x = linkID, y = HWelec, group = linkID)) +
-  geom_boxplot()
-p + coord_flip()
-```
+
+
 
 ### Stationarity
 
-_Test for stationarity here (or mention it in STL section if that section remains)_
+_Test for stationarity here? may not be necessary to include with STL_
 
 ### Autocovariance of hot water use
 
@@ -201,6 +170,8 @@ knitr::include_graphics(paste0(pFolder, "acfAllHouses.pdf"))
 ```
 
 The results are interpreted by plotting $\gamma_k$ against the lag values. Figure \@ref(fig:autocovariance) indicates that our households are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals. In addition, some houses display a third daily cycle, or a weekly cycle (peaks increasing again towards the end of the plot). 
+
+### Frequency analysis
 
 _I need to either eleborate on the frequency analysis process or remove the rest of this section. I don't end up using it in the main analysis so perhaps removal is best. Cycles are pretty well covered by STL and ACV._
 While autocovariance plots are valuable for preliminary data analysis, models that incorporate these cycles need more precise numerical values of these cycles. One method of obtaining usable cycle periods is through frequency analysis.
@@ -233,11 +204,16 @@ knitr::include_graphics(paste0(pFolder, "maxXcorAllHouses.pdf"))
 
 ### STL decomposition {#STL}
 
-Another method that may be used to explore any cyclical effects or trends of time series data is that of STL decomposition. STL is an acronym for 'Seasonal and Trend decomposition using Loess', whereby Loess (short for Local regression) is a method for estimating nonlinear relationships. The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990).
-
-```{r STLPlot, out.width='100%', fig.cap="Seasonal decomposition of household rf_35"}
+Another method that may be used to explore any cyclical effects or trends of time series data is that of STL decomposition. STL is an acronym for 'seasonal and trend decomposition using loess', whereby loess (short for local regression) is a method for estimating nonlinear relationships. 
+An STL decompostition seperates the data into three separate components, referred to as the 'trend', 'seasonality', and 'remainder' (also referred to as 'random'). 
+The trend represents low frequency changes in the data, along with longer term average shifts. 
+Seasonality refers to the cyclic behaviour of the data. The remainder is the deviation of the actual data from the addition of the trend and the seasonality.
+The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990)[@Cleveland1990].
+_Do I need to expand upon this?_
+```{r STLPlot, out.width='100%', fig.cap="Seasonal decomposition of two weeks of data from household 35"}
 knitr::include_graphics(paste0(pFolder, "rf_35_STL.pdf"))
 ```
+Figure \@ref(fig:STLPlot) illustrates an STL decomposition of a household over two weeks. The top panel, labelled 'observed', is the actual data. The 'trend' panel 
 <!--
 Most models are fitted to the data such that the model minimises the sum of the square of each residual (referred to as RSS, residual sum of squares).
 
@@ -257,7 +233,7 @@ For this reason, any forecasting methods that required high capacity computation
 
 ## Introduction to selected models
 
-This section outlines a broad introduction to the various models selected for use either implicitly or explicitly in this analysis. Refer to [@Cowpertwait2009] for further information.
+This section outlines a broad introduction to the various models selected for use either implicitly or explicitly in this analysis. Refer to Cowpertwait and Metcalfe[@Cowpertwait2009] for further information.
 
 ### Naive model
 
@@ -278,7 +254,6 @@ In a similar manner to the naive model, the seasonal naive model makes a predict
 The seasonal naive model however makes the assumption that for cyclic data, the most likely value of the the next timestep is that of the same time one cycle prior.
 For data that displays weekly seasonality, for example that of residential electricity demand, a seasonal naive model would thus predict that hot water demand is the same as it was the same time one week prior.
 
-
 ### Simple linear regression
 
 Linear modelling is a common forecasting method prized for its simplicity in interpretation and computation.
@@ -289,7 +264,7 @@ x_t = \alpha_0 + \alpha_1 t .
 (\#eq:simpleLinearRegression)
 \end{equation}
 
-For time-series forecasting, simple linear regression can fit a line to historical values of the dependent (or 'response') variable in order to predict future values. While this useful for determining general trends over time, they cannot capture any regular shorter term fluctuations of time series data (referred to as 'seasonality'). 
+For time-series forecasting, simple linear regression can fit a line to historical values of the dependent (or 'response') variable in order to estimate future values. While this can be useful for determining general trends over longer periods of time, they cannot capture any regular shorter term fluctuations of time series data about this trend (referred to as 'seasonality'). 
 Another way of utilising simple linear regression for time series forecasting is in the form of a causal model by introducing a seperate predictor variable. For our data, we separate electricity demand into hot water, and other appliances. Simple linear regression is a foundational method of exploring how the demand of other appliances at time $t$ can be used to predict hot water electricity demand at a time $t + k$.
 _include figure showing a good example of other electricity use increasing before hot water?_
 
@@ -366,7 +341,9 @@ Preliminary modelling indicated that the seasonal ARIMA model was extremely comp
 
 ### ARIMA with STL decomposition
 
-Another mechanism by which to incorporate cyclic effects into ARIMA models is through STL decomposition (see \@ref(STL)). A time series may be split into seasonal and trend components, with the remainder being fed into the auto.arima model.
+Another mechanism by which to incorporate cyclic effects into ARIMA models is through applying STL decomposition (see \@ref(STL)) before model fitting. A time series may be split into seasonal, trend, and remainder components, with the remainder component being modelled as an ARIMA process in the same manner as described in Section \@ref(ARIMAmethodology). The seasonal and trend components are then added back to the ARIMA modelled remainder as the complete predictive model.
+This method was highly regarded by Gelažanskas and Gamage[@Gelazanskas2015].
+Our STL + ARIMA models were fitted using the `stlm` function from the `forecast` package[@R-forecast].
 
 <!--
 ### Logistic regression

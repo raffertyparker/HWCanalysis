@@ -7,12 +7,19 @@ This chapter needs to state:
 
 ## Potential for further work 
 
-### 1 minute analysis
+
+
+### Generalised additive models
+Another prediction method that is used for electricity demand forecasting is _generalized additive models_. These...
+
+
+### Exponential smoothing
+Another forecasting model referred to within the literature is exponential smoothing. This method is generally regarded as performing similarly to ARIMA modelling, but can outperform ARIMA for...?
+
+### Logistic regression
 The element within a typical hot water cylinder works is controlled thermostatically by an "on-off" (otherwise known as "bang-bang") controller. This type of controller turns the element fully "on" when the water temperature drops below a certain temperature, and then fully off again once the water reaches another (slightly higher) temperature. _include diagram?_
 On small timescales, the element may then be considered a binary process, impacting our choice of forecasting model. Forecasting a binary output requires more sophisticated models than forecasting a "continous" output. 
 Logistic Autoregression is a predictive model that takes the autoregression model from Chapter \@ref(results) and.....
-
-Another prediction method that is used for electricity demand forecasting is _generalized additive models_. These...
 
 ### Application to other appliances
 
