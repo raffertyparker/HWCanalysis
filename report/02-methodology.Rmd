@@ -136,7 +136,7 @@ load(paste0(dFolder, "meansDT.Rda"))
 ```
 
 ```{r demandBoxplot, out.width='100%', fig.cap='Box plot of average demand for each household'}
-knitr::include_graphics(paste0(pFile, "averages/boxplot.pdf"))
+knitr::include_graphics(paste0(pFolder, "averages/boxplot.pdf"))
 ```
 
 
@@ -180,6 +180,12 @@ While some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many ha
 
 ### Cross covarience of hot water electricity use with non hot water electricity use
 
+```{r bothElecPlot, out.width='100%', fig.cap="Hot water and other appliances' electricity use over one day"}
+knitr::include_graphics(paste0(pFolder, "bothElecPlot.pdf"))
+```
+Many households appeared to show instances whereby the electricity demand of other appliances increased before the hot water element switched on. This may be understood by considering general domestic behavioural patterns. Many people may choose, for example, to turn on the kettle before a shower in the morning, or cook dinner before doing the dishes in the evening. An example demonstrating this behaviour is given in Figure \@ref(fig:bothElecPlot).
+While Figure \@ref(fig:bothElecPlot) may not in itself be very compelling, we can make a more thorough exploration into the temporal relationship between hot water electricity demand and that of other appliances using the cross-covariance function.
+
 In a similar fashion to the autocovariance function, the cross-covariance function of two variables $x, y$ is given by
 
 \begin{equation}
@@ -200,7 +206,6 @@ Figure \@ref(fig:ccvMaxLagPlot) shows that while many houses have their maximum 
 ```{r ccvMaxLagPlot, out.width='100%', fig.cap="Lag at maximum correllation for each household (bin width 30 minutes)"}
 knitr::include_graphics(paste0(pFolder, "maxXcorAllHouses.pdf"))
 ```
-
 
 ### STL decomposition {#STL}
 
