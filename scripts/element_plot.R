@@ -16,8 +16,27 @@ if (!exists("DT_hh")){
 library(dplyr)
 library(data.table)
 library(ggplot2)
+library(gridExtra)
 
 oneDay <- DT[dateTime_nz %between% c("2015-08-01", "2015-08-02") & linkID == "rf_06"]
+
+# HW elec and other appliance elec plot
+w <- DT[dateTime_nz %between% c("2015-08-24", "2015-08-25") & linkID == "rf_06"]
+pData <- melt(w, id.vars = "dateTime_nz", measure.vars = c("HWelec", "nonHWelec"))
+pData[variable == "HWelec", variable := "Hot water"]
+pData[variable == "nonHWelec", variable := "Other appliances"]
+p4 <- ggplot(data = pData, aes(x = dateTime_nz, y = value, colour = variable)) +
+  geom_line()
+p4 + labs(y = "Power (W)", x = "Time", colour = "")
+ggsave(filename = paste0(pFile, "bothElecPlot.pdf"))
+
+# superceded by the above version
+#p3 <- ggplot(data = oneDay, aes(x = dateTime_nz)) +
+#  geom_line(aes(y = nonHWelec)) + 
+#  labs(y = "Power (W)", x = "")
+#bothElecPlot <- grid.arrange(p1,p3,ncol=1)
+
+
 
 p1 <- ggplot(data = oneDay, aes(x = dateTime_nz)) +
   geom_line(aes(y = HWelec)) +
@@ -25,6 +44,9 @@ p1 <- ggplot(data = oneDay, aes(x = dateTime_nz)) +
 p1# + labs(y = "Power (W)", x = "Time")
 ggsave(filename = paste0(pFile, "oneDay.pdf"))
 ggsave(filename = paste0(pFile, "oneDay.png"))
+
+
+
 
 twoDay <- DT[dateTime_nz %between% c("2015-08-01", "2015-08-03") & linkID == "rf_06"]
 p <- ggplot(data = twoDay, aes(x = dateTime_nz)) +
@@ -45,7 +67,7 @@ ggsave(filename = paste0(pFile, "oneDay30min.pdf"))
 ggsave(filename = paste0(pFile, "oneDay30min.png"))
 
 # Create comparison plot
-library(gridExtra)
+
 compPlot <- grid.arrange(p1,p2,ncol=1)
 ggsave(filename = paste0(pFile, "elementComparisonPlot.pdf"))
 
