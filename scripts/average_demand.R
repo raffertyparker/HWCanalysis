@@ -18,7 +18,7 @@ library(data.table)
 DT_hh$dayHour <- hour(DT_hh$hHour)
 
 # NOTE this is inaccurate, it always begins the week hour at the first row per house,
-# not at midnight Sunday. The current weekly average plot is therefore inaccurate.
+# not at midnight Sunday. The current *weekly* average plot is therefore inaccurate.
 DT_hh$weekHour <- (lubridate::day(DT_hh$hHour)-1)*24 + DT_hh$dayHour
 
 # day plot (all households)
@@ -79,3 +79,12 @@ p <- ggplot(data = twoDay, aes(x = Hour)) +
             ggsave(filename = paste0(pFile, "averages/two_day_", house, ".png"))
             ggsave(filename = paste0(pFile, "averages/two_day_", house, ".pdf"))
 }
+
+# This creates the boxplot of average demand
+p <- ggplot(DT_hh, aes(x = linkID, y = HWelec, group = linkID)) +
+  geom_boxplot() +
+  labs(x = "Household", y = "Demand (W)")
+p + coord_flip() 
+ggsave(filename = paste0(pFile, "averages/boxplot.png"))
+ggsave(filename = paste0(pFile, "averages/boxplot.pdf"))
+```
