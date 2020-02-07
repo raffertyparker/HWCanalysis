@@ -69,6 +69,7 @@ setcolorder(DT, neworder =
 
 # Remove HW elec from all elec
 DT$nonHWelec <- DT$nonHWelec - DT$HWelec
+DT[HWelec < 0, HWelec := 0]
 save(DT, file = paste0(dFile, "DT_no_houses_removed.Rda"))
 
 # This gives the datetime as the start of each 30 min average
