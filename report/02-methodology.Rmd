@@ -63,7 +63,7 @@ The remaining households were combined into one data table, and hot water electr
 
 Many of the time series analysis packages used in this work require perfectly sequential data collection, with no missing (or '`NA`') values.
 As such, any 'holes' in our data were dealt with as follows.
-When long periods of missing data occurred, the largest period of uninterrupted data collection was selected for further analysis, with the remainder discarded. 
+When long periods of missing data occurred, the largest period of uninterrupted data collection was selected for further analysis, with the remainder discarded.
 
 The effect of removing these larger holes can be seen by comparing Figures \@ref(fig:prelim_no_holes_removed) and \@ref(fig:prelim_holes_removed).
 ```{r prelim_no_holes_removed, fig.cap="Overview of data before cleaning process"}
@@ -126,8 +126,6 @@ library(lubridate)
 library(xts)
 ```
 
-
-
 ### Data summary
 
 Table \@ref(tab:summary1) shows the mean values of hot water electricity and other electricity for each household. Note the large variation in average demand, which can also be seen in the boxplot shown in Figure \@ref(fig:demandBoxplot).
@@ -145,8 +143,6 @@ knitr::include_graphics(paste0(pFolder, "averages/averageDemand.pdf"))
 ```
 
 Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. Also of note is the large variation in average demand, varying from `r round(min(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r round(max(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`).
-
-
 
 
 ### Stationarity
