@@ -1,6 +1,12 @@
 ################## TO DO ##################
 
 Complete results chapter
+Work on residuals:
+-Average at each hour of day (plot)
+-Average at evening peaks
+-ACF
+Some prelim analysis can be seperated into methodology/results
+Can then have two results chapters: prelim data analysis and modelling
 Fix tables
 Expand upon forecasting lit in lit review
 Include nomenclature at beginning (after list of tables?)
@@ -9,6 +15,7 @@ Elaborate on the process of sorting through existing work to choose the models I
 Interest over time in data science methods is too specific; show broader interest. The specific methods may be able to be used in a different section
 Rerun ARIMAX models with additional xregs
 Look at variance etc of DFsummary
+modelling.R may be better separated into individual functions that are called on as opposed to one huge page worth
 Make weekly profile plot
 Make plot demonstrating other elec turning on before HW elec
 Plot ACV of model residuals to check that seasonality is being accounted for
