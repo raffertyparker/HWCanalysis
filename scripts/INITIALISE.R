@@ -17,3 +17,4 @@ source(paste0(sFile, "modelling.R")) # Creates the models
 source(paste0(sFile, "four_plot.R")) # Creates model comparison plots of 4 households
 source(paste0(sFile, "four_plot_SVM.R")) # Creates SVM plot of 4 households
 source(paste0(sFile, "STL_plots.R")) # Creates STL plots
+source(paste0(sFile, "residual_analysis.R")) 
