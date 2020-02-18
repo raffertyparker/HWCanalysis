@@ -3,14 +3,14 @@
 # ACV PLOTS #
 ###############################################
 
-if (!exists("pFile")){
-  pFile <- "~/HWCanalysis/plots/"
+if (!exists("pFolder")){
+  pFolder <- "~/HWCanalysis/plots/"
 }
-if (!exists("dFile")){
-  dFile <- "~/HWCanalysis/data/" 
+if (!exists("dFolder")){
+  dFolder <- "~/HWCanalysis/data/" 
 }
 if (!exists("DT")){
-  load(paste0(dFile, "DT.Rda"))
+  load(paste0(dFolder, "DT.Rda"))
 }
 
 library(ggplot2)
@@ -33,11 +33,11 @@ for (house in unique(DT$linkID)){
 acvDT <- data.table::data.table(acvDT)
 acvDT$lag <- as.numeric(acvDT$lag)
 
-save(acvDT, file = paste0(dFile, "acvDT.Rda"))
+save(acvDT, file = paste0(dFolder, "acvDT.Rda"))
 
 # lag > 60 selected to remove acv = 1 effect at lag = 0 and corresponding effect on plot
 ggplot(acvDT[lag > 60], aes(lag,value,colour=household)) +
        geom_line() + 
   labs(x = "Lag (minutes)", y = "Autocovariance", 
        colour = "Household")
-ggsave(paste0(pFile, "acfAllHouses.pdf"))
+ggsave(paste0(pFolder, "acfAllHouses.pdf"))
