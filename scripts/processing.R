@@ -28,19 +28,19 @@ library(dplyr)
 library(readr)
 
 # Set path to where we are keeping data
-if (!exists("dFile")){
-  dFile <- "~/HWCanalysis/data/" 
+if (!exists("dFolder")){
+  dFolder <- "~/HWCanalysis/data/" 
 }
-if (!exists("pFile")){
-  pFile <- "~/HWCanalysis/plots/" 
+if (!exists("pFolder")){
+  pFolder <- "~/HWCanalysis/plots/" 
 }
 
 # If different extraction dates are used these need to be changed accordingly
-p <- fread(paste0(dFile, "mputed_2010-01-01_2020-01-01_observations.csv.gz"))
-q <- fread(paste0(dFile, "ater_2010-01-01_2020-01-01_observations.csv.gz"))
+p <- fread(paste0(dFolder, "mputed_2010-01-01_2020-01-01_observations.csv.gz"))
+q <- fread(paste0(dFolder, "ater_2010-01-01_2020-01-01_observations.csv.gz"))
 
 # remove unsuitable houses if they haven't been deleted already
-remove <- c("01", "07", "09", "10", "11", "17a", "17b", "19", "21",
+remove <- c("01", "07", "09", "10", "11", "15b", "17a", "17b", "19", "21",
             "23", "24", "26", "27", "28", "41", "43", "46", "47")
 all_elec <- p[!grepl(paste(remove, collapse="|"), p$linkID),] 
 hw_elec <- q[!grepl(paste(remove, collapse="|"), q$linkID),]
@@ -53,8 +53,8 @@ names(all_elec) <- c("linkID","r_dateTime","nonHWelec")
 hw_elec <- data.table(hw_elec)
 all_elec <- data.table(all_elec)
 
-#save(hw_elec, file = paste0(dFile, "hw_elec"))
-#save(all_elec, file = paste0(dFile, "all_elec"))
+#save(hw_elec, file = paste0(dFolder, "hw_elec"))
+#save(all_elec, file = paste0(dFolder, "all_elec"))
 
 DT <- dplyr::left_join(all_elec,hw_elec)
 DT <- data.table(DT)
@@ -62,7 +62,7 @@ DT <- DT[, dateTime_nz := lubridate::as_datetime(r_dateTime, # stored as UTC
                                                  tz = 'Pacific/Auckland')] # so we can extract within NZ dateTime`
 
 houses <- unique(DT$linkID)
-save(houses, file = paste0(dFile, "houses.Rda"))
+save(houses, file = paste0(dFolder, "houses.Rda"))
 # Reorder columns
 setcolorder(DT, neworder = 
               c("linkID","r_dateTime","dateTime_nz","HWelec","nonHWelec"))
@@ -70,7 +70,7 @@ setcolorder(DT, neworder =
 # Remove HW elec from all elec
 DT$nonHWelec <- DT$nonHWelec - DT$HWelec
 DT[HWelec < 0, HWelec := 0]
-save(DT, file = paste0(dFile, "DT_no_houses_removed.Rda"))
+save(DT, file = paste0(dFolder, "DT_no_houses_removed.Rda"))
 
 # This gives the datetime as the start of each 30 min average
 DT[, hHour := hms::trunc_hms(dateTime_nz, 30*60)]
@@ -83,7 +83,7 @@ DT_hh <- DT %>%
   summarise (nonHWelec = mean(nonHWelec), HWelec = mean(HWelec))
 
 DT_hh <- as.data.table(DT_hh)
-save(DT_hh, file = paste0(dFile, "DT_hh_no_houses_removed.Rda"))
+save(DT_hh, file = paste0(dFolder, "DT_hh_no_houses_removed.Rda"))
 
 #####################################################################
 # This section creates plots of the raw data to demonstrate anomolies
@@ -96,8 +96,8 @@ p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) +
   facet_wrap(~linkID, ncol = 4)
 p + labs(x = "Date", y = "Power (W)", 
          title = "")
-#ggsave(filename = paste0(pFile, "prelim/allHouses.png"))
-ggsave(filename = paste0(pFile, "prelim/allHousesHolesRemoved.pdf"))
+#ggsave(filename = paste0(pFolder, "prelim/allHouses.png"))
+ggsave(filename = paste0(pFolder, "prelim/allHousesHolesRemoved.pdf"))
 
 for (house in houses){
   q <- DT[linkID == house]
@@ -105,7 +105,7 @@ for (house in houses){
     geom_point()
   p + labs(x = "Date", y = "Power (W)", 
            title = paste0("Household ", house))
-  ggsave(filename = paste0(pFile, "prelim/", house, "_test.pdf"))
+  ggsave(filename = paste0(pFolder, "prelim/", house, "_test.pdf"))
 }
 
 #####################################################################
@@ -155,11 +155,11 @@ for (house in houses) {
   newDT[is.na(newDT)] <- 0
   newDT$dateTime_nz <- as_datetime(newDT$dateTime_nz, tz = 'Pacific/Auckland')
   assign(paste0(house, "_at_1_min"), newDT) %>%
-    write_csv(path = paste0(dFile, "households/", house, "_at_1_min.csv"))
+    write_csv(path = paste0(dFolder, "households/", house, "_at_1_min.csv"))
   assign(paste0(house, "_at_1_min_for_fitting"), get(paste0(house, "_at_1_min"))[1:as.integer(0.8*s),]) %>%
-    write_csv(path = paste0(dFile, "households/fitting/", house, "_at_1_min_for_fitting.csv"))
+    write_csv(path = paste0(dFolder, "households/fitting/", house, "_at_1_min_for_fitting.csv"))
   assign(paste0(house, "_at_1_min_for_validating"), get(paste0(house, "_at_1_min"))[as.integer(0.8*s):s,]) %>%
-    write_csv(path = paste0(dFile, "households/validating/", house, "_at_1_min_for_validating.csv"))
+    write_csv(path = paste0(dFolder, "households/validating/", house, "_at_1_min_for_validating.csv"))
   newDT <- data.table(newDT)
   newDT[, hHour := hms::trunc_hms(dateTime_nz, 30*60)]
   newDT_hh <- newDT %>% 
@@ -170,11 +170,11 @@ for (house in houses) {
   t <- nrow(newDT_hh)
   setcolorder(newDT_hh, c("hHour", "nonHWelec" ,"HWelec"))
   assign(paste0(house, "_at_30_min"), newDT_hh) %>%
-    write_csv(path = paste0(dFile, "households/", house, "_at_30_min.csv"))
+    write_csv(path = paste0(dFolder, "households/", house, "_at_30_min.csv"))
   assign(paste0(house, "_at_30_min_for_fitting"), get(paste0(house, "_at_30_min"))[1:as.integer(0.8*t),]) %>%
-    write_csv(path = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
+    write_csv(path = paste0(dFolder, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
   assign(paste0(house, "_at_30_min_for_validating"), get(paste0(house, "_at_30_min"))[as.integer(0.8*t):t,]) %>%
-    write_csv(path = paste0(dFile, "households/validating/", house, "_at_30_min_for_validating.csv"))
+    write_csv(path = paste0(dFolder, "households/validating/", house, "_at_30_min_for_validating.csv"))
 }
 
 #DT_hh <- DT %>% 
@@ -190,13 +190,13 @@ for (house in houses) {
 
 missingValues <- as.data.frame(missingValues)
 names(missingValues) <- c("household", "NAs", "percent")
-write_csv(missingValues, paste0(dFile, "missingValues.csv"))
+write_csv(missingValues, paste0(dFolder, "missingValues.csv"))
 
 # Plenty of missing minutes unfortunately
 # Households rf_14, rf_25 and rf_36 in particular
 # all have more than 5% of values missing
 
-#load(paste0(dFile, "DT_before_holes_removed.Rda"))
+#load(paste0(dFolder, "DT_before_holes_removed.Rda"))
 
 ######################################################
 # This was used to manually locate larger holes in the data
@@ -207,14 +207,14 @@ write_csv(missingValues, paste0(dFile, "missingValues.csv"))
 #p + labs(x = "Date", y = "Power (W)", 
 #         title = paste0("Household ", house))
 #tail(DT[linkID == house])
-#ggsave(filename = paste0(pFile, "prelim/", house, "_test.pdf"))
+#ggsave(filename = paste0(pFolder, "prelim/", house, "_test.pdf"))
 ######################################################
 
 DT$day <- weekdays(DT$dateTime_nz)
 DT$min <- gsub(".* ","", as.character(DT$dateTime_nz))
 DT$min <- gsub('.{3}$', '', DT$min)
 
-save(DT, file = paste0(dFile, "DT.Rda"))
+save(DT, file = paste0(dFolder, "DT.Rda"))
 
 # Now we create the half-hour average data.table
 
@@ -235,10 +235,10 @@ for (house in houses) {
   assign(paste0(house, "_missing_hours"), (nMins - nRows/2))
 }
 
-save(DT_hh, file = paste0(dFile, "DT_hh.Rda"))
+save(DT_hh, file = paste0(dFolder, "DT_hh.Rda"))
 
 houses <- unique(DT_hh$linkID)
-save(houses, file = paste0(dFile, "houses.Rda"))
+save(houses, file = paste0(dFolder, "houses.Rda"))
 
 p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) + 
   geom_point() + 
@@ -246,9 +246,9 @@ p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) +
  # facet_wrap(~linkID, ncol = 4)
 p + labs(x = "Date", y = "Power (W)", 
          title = "")
-ggsave(filename = paste0(pFile, "prelim/allHousesAfterRemoval.png"))
+ggsave(filename = paste0(pFolder, "prelim/allHousesAfterRemoval.png"))
 
-#load(paste0(dFile, "DT_hh.Rda"))
+#load(paste0(dFolder, "DT_hh.Rda"))
 
 # This creates our dummy variables for seasonality
 # Converting
@@ -258,7 +258,7 @@ DT_hh[[index]] <- DT_hh$day == index
 for(index in unique(DT_hh$min)){
   DT_hh[[index]] <- DT_hh$min == index
 }
-save(DT_hh, file = paste0(dFile, "DT_hh_dummy.Rda"))
+save(DT_hh, file = paste0(dFolder, "DT_hh_dummy.Rda"))
 
 to.replace <- names(which(sapply(DT_hh, is.logical)))
 for (var in to.replace) DT_hh[, (var):= as.numeric(get(var))]
@@ -269,9 +269,9 @@ for (house in unique(DT_hh$linkID)){
   assign(paste0(house, "_at_30_min"), DT_hh[linkID == house])
   s <- nrow(get(paste0(house, "_at_30_min")))
   assign(paste0(house, "_at_30_min_for_fitting"), get(paste0(house, "_at_30_min"))[1:as.integer(0.8*s),]) %>%
-    readr::write_csv(path = paste0(dFile, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
+    readr::write_csv(path = paste0(dFolder, "households/fitting/", house, "_at_30_min_for_fitting.csv"))
   assign(paste0(house, "_at_30_min_for_validating"), get(paste0(house, "_at_30_min"))[as.integer(0.8*s):s,]) %>%
-    write_csv(path = paste0(dFile, "households/validating/", house, "_at_30_min_for_validating.csv"))
+    write_csv(path = paste0(dFolder, "households/validating/", house, "_at_30_min_for_validating.csv"))
 }
 
 ########################################################################
@@ -286,7 +286,7 @@ meansDT <- DT_hh %>%
   select(c(HWelec, nonHWelec)) %>%
   summarise_each(funs = mean)
 
-save(meansDT, file = paste0(dFile, "meansDT.Rda"))
+save(meansDT, file = paste0(dFolder, "meansDT.Rda"))
 
 # This gives all houses with PV
 
@@ -294,7 +294,7 @@ PV_houses <- summaryDT %>%
   subset(grepl("PV", circuit)) %>%
   select(linkID)
 PV_houses <- PV_houses$linkID
-save(PV_houses, file = paste0(dFile, "PV_houses.Rda"))
+save(PV_houses, file = paste0(dFolder, "PV_houses.Rda"))
 
 houses <- unique(DT$linkID)
 
@@ -302,7 +302,7 @@ houses <- unique(DT$linkID)
 # despite not having generating capabilities
 # We now look for this property in other houses
 
-load(paste0(dFile,"PV_houses.Rda"))
+load(paste0(dFolder,"PV_houses.Rda"))
 no_pv <- setdiff(houses, PV_houses)
 
 neg_values <- DT %>%
@@ -316,4 +316,4 @@ seperate_HW <- summaryDT %>%
   subset(grepl("ater", circuit))
 
 no_hw_metering <- setdiff(summaryDT$linkID, seperate_HW$linkID)
-save(no_hw_metering, file = paste0(dFile, "no_hw_metering.Rda"))
+save(no_hw_metering, file = paste0(dFolder, "no_hw_metering.Rda"))
