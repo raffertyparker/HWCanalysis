@@ -52,66 +52,23 @@
     dt_fit$nonHWshift2 <- shift(dt_fit$nonHWelec, 2)
     dt_fit$HWshift1 <- shift(dt_fit$HWelec)
     dt_fit$HWshift2 <- shift(dt_fit$HWelec, 2)
+    dt_fit[is.na(dt_fit)] <- 0
+    dt_val[is.na(dt_val)] <- 0
     ts_fit <- as.xts(dt_fit)
     ts_val <- as.xts(dt_val)
+   # ts_fit <- ts_fit[3:nrow(ts_fit), ]
+  #  ts_val <- ts_val[3:nrow(ts_val), ]
     dt_fit$dow <- weekdays(dt_fit$hHour)
     dt_val$dow <- weekdays(dt_val$hHour)
     hw_ts_fit <- ts(dt_fit$HWelec, frequency = 48)
     hw_ts_val <- ts(dt_val$HWelec, frequency = 48)
     
-    Model <- "STLARIMA"
-    fitTime <- system.time(
-      fitSTLArima <- stlm(hw_ts_fit, s.window = 48, method = "arima"))[3] # Fits model and returns time taken to do so
-    dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
-    saveRDS(fitSTLArima, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
-    valSTLArima <- stlm(hw_ts_val, s.window = 48, method = "arima", model = fitSTLArima)
-    valSTLArima$hHour <- dt_val$hHour
-    saveRDS(valSTLArima, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
-    plotModel(valSTLArima, Model)
-    sVec <- data.frame(model=Model,
-                       household=house,
-                       RMSE=sqrt(mean(valSTLArima$residuals^2)),
-                       fittingTime=as.numeric(fitTime),
-                       memSize=as.numeric(object.size(fitSTLArima)),
-                       stringsAsFactors=FALSE)
-    DFsummary <- rbind(DFsummary, sVec)
-    Par <- as.data.frame(t(arimaorder(fitSTLArima$model)))
-    Par$household <- house
-    ifelse(house == houses[1], 
-           STL_ARIMApars <- Par,
-           STL_ARIMApars <- rbind(STL_ARIMApars, Par))
-    
-    Model <- "SVM"  
-    fitTime <- system.time(
-      fitSVM <- svm(HWelec ~ dHour + nonHWshift1 + nonHWshift2
-                    + HWshift1 + HWshift2 + dow, dt_fit))[3]
-    dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
-    saveRDS(fitSVM, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
-    predicted_values <- predict(fitSVM, dt_val) # Make prediction on validating data from model
-    
-    val_mdl <- dt_val[3:nrow(dt_val)] #  Remove first two rows in order to build validated model format necessary to build plots etc
-    val_mdl <- val_mdl %>%
-      select("HWelec", "hHour")
-    val_mdl$fitted <- predicted_values 
-    val_mdl$residual <- val_mdl$HWelec - predicted_values
-    names(val_mdl)[names(val_mdl) == 'HWelec'] <- 'x'
-    saveRDS(val_mdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
-   # plotModel(val_mdl, Model) # Needs to be in xts format, not worth fixing, plotModelSVM.R works fine for now
-    plotModelSVM(dt_val, predicted_values)
-
-    sVec <- data.frame(model=Model,
-                       household=house,
-                       RMSE=sqrt(mean(val_mdl$residual^2)),
-                       fittingTime=as.numeric(fitTime),
-                       memSize=as.numeric(object.size(fitSVM)),
-                       stringsAsFactors=FALSE)
-    DFsummary <- rbind(DFsummary, sVec)
-  
   Model <- "naive"
+  print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   mdl <- naive(ts_val$HWelec, h = 1) # Fits model
   mdl$x <- ts_val$HWelec
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
-  saveRDS(mdl, file = paste0(dFolder, "models/", Model,"/", house, "_model.rds"))
+  saveRDS(mdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(mdl, Model)
   sVec <- data.frame(model=Model,
                      household=house,
@@ -122,11 +79,12 @@
   DFsummary <- rbind(DFsummary, sVec)
   
   Model <- "seasonalNaive"
+  print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   ts_val_HW_seasonal <- ts(dt_val$HWelec, frequency = 48*7)
   mdl <- snaive(ts_val_HW_seasonal, h = 1) # Fits model
   mdl$x <- ts_val$HWelec
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
-  saveRDS(mdl, file = paste0(dFolder, "models/", Model,"/", house, "_model.rds"))
+  saveRDS(mdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(mdl, Model)
   sVec <- data.frame(model=Model,
                      household=house,
@@ -137,12 +95,13 @@
   DFsummary <- rbind(DFsummary, sVec)
   
   Model <- "simpleLinear"
+  print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   fitTime <- system.time(
     fitMdl <- lm(ts_val$HWelec~ts_val$nonHWshift1))[3] # Fits model and returns time taken to do so
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
   saveRDS(fitMdl, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
-  valMdl <- lm(fitMdl, newdata = ts_fit, h = 1)
-  valMdl$x <- ts_val$HWelec[2:nrow(ts_val)]
+  valMdl <- lm(fitMdl, data = ts_fit)
+  valMdl$x <- ts_val$HWelec#[2:nrow(ts_val)]
   saveRDS(valMdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(valMdl, Model)
   sVec <- data.frame(model=Model,
@@ -154,6 +113,7 @@
   DFsummary <- rbind(DFsummary, sVec)
 
   Model <- "ARIMA"
+  print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   fitTime <- system.time(
     fitArima <- auto.arima(ts_fit$HWelec))[3] # Fits model and returns time taken to do so
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
@@ -175,11 +135,16 @@
          ARIMApars <- rbind(ARIMApars, Par))
   
   Model <- "ARIMAX"
+  print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   fitTime <- system.time(fitArima <- auto.arima(ts_fit$HWelec, 
-                                                xreg = ts_fit$nonHWelec))[3] # Fits model and returns time taken to do so
+                                                xreg = as.matrix(cbind(ts_fit$nonHWelec, 
+                                                                       ts_fit$nonHWshift1, 
+                                                                       ts_fit$nonHWshift2))))[3] # Fits model and returns time taken to do so
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
   saveRDS(fitArima, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
-  valArima <- Arima(ts_val$HWelec, xreg = ts_val$nonHWelec, model = fitArima)
+  valArima <- Arima(ts_val$HWelec, xreg = as.matrix(cbind(ts_val$nonHWelec, 
+                                                          ts_val$nonHWshift1, 
+                                                          ts_val$nonHWshift2)), model = fitArima)
   saveRDS(valArima, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(valArima, Model)
   sVec <- data.frame(model=Model,
@@ -187,6 +152,92 @@
                      RMSE=sqrt(mean(valArima$residuals^2)),
                      fittingTime=as.numeric(fitTime),
                      memSize=as.numeric(object.size(fitArima)),
+                     stringsAsFactors=FALSE)
+  DFsummary <- rbind(DFsummary, sVec)
+  
+  Model <- "STLARIMA"
+  print(paste0("Now fitting ", Model, " model for household ", house, "..."))
+  fitTime <- system.time(
+    fitSTLArima <- stlm(hw_ts_fit, s.window = 48, method = "arima"))[3] # Fits model and returns time taken to do so
+  dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
+  saveRDS(fitSTLArima, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
+  valSTLArima <- stlm(hw_ts_val, s.window = 48, method = "arima", model = fitSTLArima)
+  valSTLArima$hHour <- dt_val$hHour
+  saveRDS(valSTLArima, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
+  plotModel(valSTLArima, Model)
+  sVec <- data.frame(model=Model,
+                     household=house,
+                     RMSE=sqrt(mean(valSTLArima$residuals^2)),
+                     fittingTime=as.numeric(fitTime),
+                     memSize=as.numeric(object.size(fitSTLArima)),
+                     stringsAsFactors=FALSE)
+  DFsummary <- rbind(DFsummary, sVec)
+  Par <- as.data.frame(t(arimaorder(fitSTLArima$model)))
+  Par$household <- house
+  ifelse(house == houses[1], 
+         STL_ARIMApars <- Par,
+         STL_ARIMApars <- rbind(STL_ARIMApars, Par))
+  if (house == houses[length(houses)]){
+    write_csv(STL_ARIMApars, path = paste0(dFolder, Model, "/parameters.csv"))
+  }
+  
+  Model <- "STLARIMAX"
+  print(paste0("Now fitting ", Model, " model for household ", house, "..."))
+  fitTime <- system.time(
+    fitSTLArimaX <- stlm(hw_ts_fit, s.window = 48, method = "arima",
+                        xreg = as.matrix(cbind(ts_fit$nonHWelec, 
+                                               ts_fit$nonHWshift1, 
+                                               ts_fit$nonHWshift2))))[3] # Fits model and returns time taken to do so
+  dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
+  saveRDS(fitSTLArimaX, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
+  valSTLArimaX <- stlm(hw_ts_val, s.window = 48, method = "arima",
+                      xreg = as.matrix(cbind(ts_val$nonHWelec, 
+                                             ts_val$nonHWshift1, 
+                                             ts_val$nonHWshift2)),
+                      model = fitSTLArimaX)
+  valSTLArimaX$hHour <- dt_val$hHour
+  saveRDS(valSTLArimaX, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
+  plotModel(valSTLArimaX, Model)
+  sVec <- data.frame(model=Model,
+                     household=house,
+                     RMSE=sqrt(mean(valSTLArima$residuals^2)),
+                     fittingTime=as.numeric(fitTime),
+                     memSize=as.numeric(object.size(fitSTLArima)),
+                     stringsAsFactors=FALSE)
+  DFsummary <- rbind(DFsummary, sVec)
+  Par <- as.data.frame(t(arimaorder(fitSTLArimaX$model)))
+  Par$household <- house
+  ifelse(house == houses[1], 
+         STL_ARIMAXpars <- Par,
+         STL_ARIMAXpars <- rbind(STL_ARIMAXpars, Par))
+  if (house == houses[length(houses)]){
+    write_csv(STL_ARIMAXpars, path = paste0(dFolder, Model, "/parameters.csv"))
+  }
+  
+  Model <- "SVM"
+  print(paste0("Now fitting ", Model, " model for household ", house, "..."))
+  fitTime <- system.time(
+    fitSVM <- svm(HWelec ~ dHour + nonHWshift1 + nonHWshift2
+                  + HWshift1 + HWshift2 + dow, dt_fit))[3]
+  dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
+  saveRDS(fitSVM, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
+  predicted_values <- predict(fitSVM, dt_val) # Make prediction on validating data from model
+  
+  val_mdl <- dt_val#[3:nrow(dt_val)] #  Remove first two rows in order to build validated model format necessary to build plots etc
+  val_mdl <- val_mdl %>%
+    select("HWelec", "hHour")
+  val_mdl$fitted <- predicted_values
+  val_mdl$residual <- val_mdl$HWelec - predicted_values
+  names(val_mdl)[names(val_mdl) == 'HWelec'] <- 'x'
+  saveRDS(val_mdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
+   plotModel(val_mdl, Model) # Needs to be in xts format, not worth fixing, plotModelSVM.R works fine for now
+#  plotModelSVM(dt_val, predicted_values)
+  
+  sVec <- data.frame(model=Model,
+                     household=house,
+                     RMSE=sqrt(mean(val_mdl$residual^2)),
+                     fittingTime=as.numeric(fitTime),
+                     memSize=as.numeric(object.size(fitSVM)),
                      stringsAsFactors=FALSE)
   DFsummary <- rbind(DFsummary, sVec)
   
