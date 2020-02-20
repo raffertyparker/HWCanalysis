@@ -16,7 +16,6 @@ library(dplyr)
 load(paste0(dFolder, "houses.Rda"))
 
 models <- c("STLARIMA", "naive","seasonalNaive","simpleLinear", "ARIMA", "ARIMAX", "SVM")
-
 #house <- "rf_06"
 #model <- "seasonalNaive"
 for (model in models){
@@ -50,14 +49,13 @@ for (model in models){
     geom_line() 
   p + labs(x = "Hour", y = "Residual", 
          colour = "Household")
-  ggsave(paste0(pFolder, model, "/allHousesResidualACF.pdf"))
-  ggsave(paste0(pFolder, model, "/allHousesResidualACF.png"))
+  ggsave(paste0(pFolder, model, "/allHousesResidual.pdf"))
+  ggsave(paste0(pFolder, model, "/allHousesResidual.png"))
   
   
   p <- ggplot(plotResDF, aes(x = dHour, y = value, group = variable)) +
     geom_boxplot() 
   p + labs(x = "Hour", y = "Residual")
-  ggsave(paste0(pFolder, model, "/allHousesResidualACFboxplot.pdf"))
-  ggsave(paste0(pFolder, model, "/allHousesResidualACFboxplot.png"))
-
+  ggsave(paste0(pFolder, model, "/allHousesResidualBoxplot.pdf"))
+  ggsave(paste0(pFolder, model, "/allHousesResidualBoxplot.png"))
 }
