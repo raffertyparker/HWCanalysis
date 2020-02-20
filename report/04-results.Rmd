@@ -20,7 +20,7 @@ In our naive model we assume no drift, and only attempt to predict one (half hou
 \end{equation}
 
 ```{r randomWalk, out.width='100%', fig.cap="Actual electricity use and naive model approximation over one day for four households"}
-knitr::include_graphics(paste0(pFolder, "randomWalk/fourHouses.pdf"))
+knitr::include_graphics(paste0(pFolder, "naive/fourHouses.pdf"))
 ```
 
 As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistantly 'missing' the actual values.
@@ -29,6 +29,12 @@ The random walk model has RMSE ranging between `r min(dfSummary$RMSE[dfSummary$m
 
 The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, although no illumination as to underlying behavioural properties are provided by this model. The computational time to fit models to each household varied between `r min(dfSummary$fittingTime[dfSummary$model == "naive"])`s and `r max(dfSummary$fittingTime[dfSummary$model == "naive"])`s, with the average taking `r DFsummary$fittingTime[DFsummary$model == "naive"]`s.
 
+```{r naiveResiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the naive model"}
+knitr::include_graphics(paste0(pFolder, "naive/allHousesResidual.pdf"))
+```
+
+Examination of the aggregated daily average residuals shows that this model
+
 ## Linear regression of hot water electricity against lagged other electricity
 
 While simple linear regression is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using time series data that displays cyclic behaviour, such as residential electricity demand.
@@ -36,7 +42,7 @@ Where it may be useful, however, is in predicting the relationship between hot w
 The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
 
 ```{r linearRelations, out.width='100%', fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household rf06"}
-knitr::include_graphics(paste0(pFolder, "rf06LinearPlot.pdf"))
+knitr::include_graphics(paste0(pFolder, "rf06LinearPlot.png"))
 ```
 
 Figure \@ref(fig:linearRelations) shows a simple linear regression of current non hot water electricity demand with the following half-hour's hot water electricity demand. This is shown to demonstrate the ability to use current electricity demand to predict hot water electricity demand over the next half hour. Note the low $R^2$ value suggesting that, in it's current form, this model would be rather inadequate at forecasting demand.
@@ -59,6 +65,12 @@ Interpretability is high, as the output can be understood by the simple equation
 Notably, this model has lower RMSE's than the Naive model.
 In addition, this model lends itself to being utilised as an input into more complex models that take other parameters into consideration. 
 
+```{r simpleLinearResiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the simple linear regression model"}
+knitr::include_graphics(paste0(pFolder, "simpleLinear/allHousesResidual.pdf"))
+```
+
+Examination of the aggregated daily average residuals shows that this model
+
 ## ARIMA model
 
 As each household has different usage patterns and characteristics, optimal values for these parameters differ for each household.
@@ -73,6 +85,12 @@ Interpretability is moderate, as the output can be understood by the value of th
 knitr::include_graphics(paste0(pFolder, "/ARIMA/fourHouses.pdf"))
 ```
 
+```{r ARIMAresiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the ARIMA model"}
+knitr::include_graphics(paste0(pFolder, "ARIMA/allHousesResidual.pdf"))
+```
+
+Examination of the aggregated daily average residuals shows that this model
+
 
 ## ARIMA with STL decomposition
 
@@ -81,6 +99,12 @@ Our STL + ARIMA model was the most accurate model that fell into the 'convention
 It performs slightly worse than the standard ARIMA model for physical fidelity. Although more instances where the initial instance of the element turning on is predicted, it is also more likely to return negative values or values above that capable of the element. It therefore scores low for physical fidelity. 
 This model is understandable as the sum of the seasonal and trend components, with an ARIMA modelled remainder. Parameters for all these elements are available, giving a general understanding of underlying patterns in the data, however it is somewhat convoluted. Interpretability therefore scores low to moderate. 
 The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "STLARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "STLARIMA"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "STLARIMA"], 2)`s.
+
+```{r STLARIMAresiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the STLARIMA model"}
+knitr::include_graphics(paste0(pFolder, "STLARIMA/allHousesResidual.pdf"))
+```
+
+Examination of the aggregated daily average residuals shows that this model
 
 ## SVM model
 
@@ -94,3 +118,9 @@ The computational time to fit models to each household was very high, varying be
 ```{r SVMplot, out.width='100%', fig.cap="Performance of SVM model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "/SVM/fourHouses.pdf"))
 ```
+
+```{r SVMresiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the ARIMA model"}
+knitr::include_graphics(paste0(pFolder, "SVM/allHousesResidual.pdf"))
+```
+
+Examination of the aggregated daily average residuals shows that this model
