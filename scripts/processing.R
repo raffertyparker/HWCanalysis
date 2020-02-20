@@ -26,6 +26,7 @@ library(data.table)
 library(lubridate)
 library(dplyr)
 library(readr)
+library(ggplot2)
 
 # Set path to where we are keeping data
 if (!exists("dFolder")){
@@ -89,15 +90,13 @@ save(DT_hh, file = paste0(dFolder, "DT_hh_no_houses_removed.Rda"))
 # This section creates plots of the raw data to demonstrate anomolies
 # and holes. The offending households are cleaned up after this block
 
-library(ggplot2)
-
 p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) + 
   geom_point() + 
   facet_wrap(~linkID, ncol = 4)
 p + labs(x = "Date", y = "Power (W)", 
          title = "")
-#ggsave(filename = paste0(pFolder, "prelim/allHouses.png"))
-ggsave(filename = paste0(pFolder, "prelim/allHousesHolesRemoved.pdf"))
+ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemoved.png"))
+ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemoved.pdf"))
 
 for (house in houses){
   q <- DT[linkID == house]
