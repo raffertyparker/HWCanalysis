@@ -63,18 +63,19 @@ The remaining households were combined into one data table, and hot water electr
 
 Many of the time series analysis packages used in this work require perfectly sequential data collection, with no missing (or '`NA`') values.
 As such, any 'holes' in our data were dealt with as follows.
-When long periods of missing data occurred, the largest period of uninterrupted data collection was selected for further analysis, with the remainder discarded.
+When long periods of missing data occurred (determined by visual inspection of pleliminary plots) the largest period of uninterrupted data collection was selected for further analysis, with the remainder discarded.
+
+```{r prelimNoHolesRemoved, out.width='100%', fig.cap="Overview of data before cleaning process"}
+knitr::include_graphics(paste0(pFolder, "prelim/allHousesNoHolesRemoved.png"))
+```
+
+```{r prelimHolesRemoved, out.width='100%', fig.cap="Overview of data after cleaning process"}
+knitr::include_graphics(paste0(pFolder, "prelim/allHousesHolesRemoved.png"))
+```
 
 The effect of removing these larger holes can be seen by comparing Figures \@ref(fig:prelim_no_holes_removed) and \@ref(fig:prelim_holes_removed).
-```{r prelim_no_holes_removed, fig.cap="Overview of data before cleaning process"}
-knitr::include_graphics(paste0(pFolder, "prelim/allHouses.pdf"))
-```
 
-```{r prelim_holes_removed, fig.cap="Overview of data after cleaning process"}
-knitr::include_graphics(paste0(pFolder, "prelim/allHousesHolesRemoved.pdf"))
-```
-
-Smaller holes in data were dealt with by inserting zero values of electricity power where necessary. Zero values were selected as opposed to using averages or other methods to reflect the 'on/off' nature of the HWC element at 1 minute timescales. This technique facilitates further analysis at this level of granularity.
+Smaller holes in data were dealt with by inserting zero values of electricity power where necessary. Zero values were selected as opposed to using averages or other methods to reflect the 'on/off' nature of the HWC element at 1 minute timescales. This technique facilitates further analysis at this level of granularity
 
 _Seperate this out. Half hour smoothing is important enough to be discussed on its own, not just ran into from another topic_
 As many missing values were only up to a few minutes in sequence, any effects on further analysis should be partially 'smoothed' with the further processing into half hour granularity. 
@@ -134,12 +135,12 @@ load(paste0(dFolder, "meansDT.Rda"))
 ```
 
 ```{r demandBoxplot, out.width='100%', fig.cap='Box plot of average demand for each household'}
-knitr::include_graphics(paste0(pFolder, "averages/boxplot.pdf"))
+knitr::include_graphics(paste0(pFolder, "averages/boxplot.png"))
 ```
 
 
 ```{r averagePlot, out.width='100%', echo=FALSE, fig.cap="Average daily demand of hot water electricity for each household"}
-knitr::include_graphics(paste0(pFolder, "averages/averageDemand.pdf"))
+knitr::include_graphics(paste0(pFolder, "averages/averageDemand.png"))
 ```
 
 Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. Also of note is the large variation in average demand, varying from `r round(min(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r round(max(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`).
