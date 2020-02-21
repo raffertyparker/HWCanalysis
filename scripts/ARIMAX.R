@@ -38,12 +38,16 @@ for (house in houses){
   assign(paste0(house, "_30_min_ARIMAX"), 
          auto.arima(ts_fit$HWelec, 
                     stepwise = FALSE, approximation = FALSE, 
-                    xreg = ts_fit$nonHWelec)) %>% 
+                    xreg = as.matrix(cbind(ts_fit$nonHWelec, 
+                             ts_fit$nonHWshift1, 
+                             ts_fit$nonHWshift2)))) %>% 
     save(file = paste0(dFile, "models/ARIMAX/", house, "_fitted_model.Rda"))
   # Validate model from test data
   assign(paste0(house, "_30_min_ARIMAX_validate"), 
          Arima(ts_val$HWelec, 
-               xreg = ts_val$nonHWelec, 
+               xreg = as.matrix(cbind(ts_fit$nonHWelec, 
+                                      ts_fit$nonHWshift1, 
+                                      ts_fit$nonHWshift2)), 
                model = get(paste0(house, "_30_min_ARIMAX")))) %>%
     saveRDS(file = paste0(dFile, "models/ARIMAX/", house, "_validated_model.rds"))
   # Make plot for demonstration purposes
