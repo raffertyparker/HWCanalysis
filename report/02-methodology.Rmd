@@ -87,8 +87,9 @@ knitr::include_graphics(paste0(pFolder, "elementComparisonPlot.pdf"))
 ```
 
 
-```{r headDT, message=FALSE, fig.cap="Example of the clean and processed data used in the analysis"}
-knitr::kable(DThead, "latex")
+```{r headDT}
+DThead %>%
+  knitr::kable(caption = "Example of the clean and processed data used in the analysis")
 ```
 
 While minor additional processing was necessary for particular models, the fundamental form of the data used throughout the analysis is the form shown in Table \@ref(tab:headDT).
