@@ -92,10 +92,11 @@ save(DT_hh, file = paste0(dFolder, "DT_hh_no_houses_removed.Rda"))
 
 p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) + 
   geom_point() + 
-  facet_wrap(~linkID, ncol = 4)
+  facet_wrap(~linkID, ncol = 3)
 p + labs(x = "Date", y = "Power (W)", 
          title = "")
-ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemoved.png"))
+ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemoved.png"), dpi = 100)
+ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemovedHighRes.png"))
 ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemoved.pdf"))
 
 for (house in houses){
@@ -241,11 +242,12 @@ save(houses, file = paste0(dFolder, "houses.Rda"))
 
 p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) + 
   geom_point() + 
-  facet_wrap(. ~ linkID, scales = "free", ncol = 4)
- # facet_wrap(~linkID, ncol = 4)
+  facet_wrap(~linkID, ncol = 3)
 p + labs(x = "Date", y = "Power (W)", 
          title = "")
-ggsave(filename = paste0(pFolder, "prelim/allHousesAfterRemoval.png"))
+ggsave(filename = paste0(pFolder, "prelim/allHousesAfterRemoval.png"), dpi = 100)
+ggsave(filename = paste0(pFolder, "prelim/allHousesAfterRemovalHighRes.png"))
+ggsave(filename = paste0(pFolder, "prelim/allHousesAfterRemoval.pdf"))
 
 #load(paste0(dFolder, "DT_hh.Rda"))
 

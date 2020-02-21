@@ -27,4 +27,5 @@ plotModel <- function(ModelData, ModelName){
   dir.create(paste0(pFolder, ModelName,"/"), showWarnings = FALSE)
   ggsave(filename = paste0(pFolder, ModelName,"/", house, ".pdf"))
   ggsave(filename = paste0(pFolder, ModelName,"/", house, ".png"))
+  
 }

@@ -27,7 +27,8 @@ p <- ggplot(DT_hh, aes(x=dayHour, y=HWelec))+
   facet_wrap(~linkID, ncol = 4, scales = "free_y")
 p + labs(x = "Hour of day", y = "Average demand (W)")
 ggsave(filename = paste0(pFile, "averages/averageDemand.pdf"))
-ggsave(filename = paste0(pFile, "averages/averageDemand.png"))
+ggsave(filename = paste0(pFile, "averages/averageDemand.png"), dpi = 100)
+ggsave(filename = paste0(pFile, "averages/averageDemandHighRes.png"))
 
 # day plot (all households, other appliances)
 p <- ggplot(DT_hh, aes(x=dayHour, y=nonHWelec))+
@@ -85,6 +86,7 @@ p <- ggplot(DT_hh, aes(x = linkID, y = HWelec, group = linkID)) +
   geom_boxplot() +
   labs(x = "Household", y = "Demand (W)")
 p + coord_flip() 
-ggsave(filename = paste0(pFile, "averages/boxplot.png"))
+ggsave(filename = paste0(pFile, "averages/boxplot.png"), dpi = 100)
+ggsave(filename = paste0(pFile, "averages/boxplotHighRes.png"))
 ggsave(filename = paste0(pFile, "averages/boxplot.pdf"))
-```
+
