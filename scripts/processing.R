@@ -96,6 +96,7 @@ p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) +
 p + labs(x = "Date", y = "Power (W)", 
          title = "")
 ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemoved.png"), dpi = 100)
+ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemoved.jpg"))
 ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemovedHighRes.png"))
 ggsave(filename = paste0(pFolder, "prelim/allHousesNoHolesRemoved.pdf"))
 
@@ -246,6 +247,7 @@ p <- ggplot(DT_hh, aes(x = hHour, y = HWelec)) +
 p + labs(x = "Date", y = "Power (W)", 
          title = "")
 ggsave(filename = paste0(pFolder, "prelim/allHousesAfterRemoval.png"), dpi = 100)
+ggsave(filename = paste0(pFolder, "prelim/allHousesAfterRemoval.jpg"))
 ggsave(filename = paste0(pFolder, "prelim/allHousesAfterRemovalHighRes.png"))
 ggsave(filename = paste0(pFolder, "prelim/allHousesAfterRemoval.pdf"))
 
