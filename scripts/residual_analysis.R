@@ -12,6 +12,7 @@ library(ggplot2)
 library(lubridate)
 library(dplyr)
 
+theme_set(theme_minimal())
 
 load(paste0(dFolder, "houses.Rda"))
 
