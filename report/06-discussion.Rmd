@@ -2,6 +2,3 @@
 
 
 The computational speed of the SVM model is two orders of magnitude higher than that of the conventional models, demonstrating the trade-off between speed and accuracy that we face, particularly when progressing from conventional to AI methods. 
-
-Here is where we compare models to one another and discuss.
-Include a radar chart comparing accuracy, computational efficiency, physical fidelity and interpretability

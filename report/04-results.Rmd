@@ -113,7 +113,7 @@ The SVM model was the most accurate model considered, with RMSEs ranging between
 The model is slightly smoother than the actual data, and seldom displays negative values or values above what is capable of the element. It scores moderate to high for physical fidelity. 
 This model is essentially "black box", providing very limited insight as to its selected parameters and their significance. As such, it scores low for interpretability. 
 
-The computational time to fit models to each household was very high, varying between `r round(min(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "ARIMA"], 2)`s. 
+The computational time to fit models to each household was very high, varying between `r round(min(dfSummary$fittingTime[dfSummary$model == "SVM"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "SVM"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "SVM"], 2)`s. 
 
 ```{r SVMplot, out.width='100%', fig.cap="Performance of SVM model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "/SVM/fourHouses.pdf"))

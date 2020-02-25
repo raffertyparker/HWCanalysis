@@ -36,12 +36,12 @@ The data used for this analysis was collected from monitoring the submetered ele
 In any data analysis, there are initial processes that should be undertaken in order to get a general overview of the data. This allows for an informed opinion to be made as to the best techniques to achieve the desired objectives of the analysis.
 This section explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preparation process, then uses methods to compare and visualise cycles and correllations within relevant variables. The analysis draws upon a broader overview of the data available at https://cfsotago.github.io/GREENGridData/.
 
-### Time series overview and notation
+### Time series overview and notation {#TSoverview}
 
 As this work is concerned with predictability and patterns within our data over time, we extensively utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] provides a good overview to the overall process.
 
 A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009]. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical data values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the _model_ of $\{x_t\}$.  A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.
-The difference between an observed value and the value predicted by the model is formally known as the _residual_, and can be intuitively understood as the error in the value predicted by the model.
+The difference between an observed value and the value predicted by the model is formally known as the _residual_, and can be intuitively understood as the error in the value predicted by the model. Most models considered in this analysis aim to have a residual time series that approximates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean.
 The residual sum of squares (RSS) is the sum of the squares of all the residuals over the times considered.
 Many models are fitted algorithmically in order to minimise the RSS.
 
@@ -70,7 +70,7 @@ knitr::include_graphics(paste0(pFolder, "prelim/allHousesNoHolesRemoved.png"))
 ```
 
 ```{r prelimHolesRemoved, out.width='100%', fig.cap="Overview of data after cleaning process"}
-knitr::include_graphics(paste0(pFolder, "prelim/allHousesHolesRemoved.png"))
+knitr::include_graphics(paste0(pFolder, "prelim/allHousesAfterRemoval.png"))
 ```
 
 The effect of removing these larger holes can be seen by comparing Figures \@ref(fig:prelim_no_holes_removed) and \@ref(fig:prelim_holes_removed).
@@ -153,7 +153,7 @@ _Test for stationarity here? may not be necessary to include with STL_
 
 ### Autocovariance of hot water use
 
-We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising and quantifying cyclical behaviour of data, and is defined as
+We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles (referred to as 'seasonality') are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising and quantifying cyclical behaviour of data, and is defined as
 
 \begin{equation}
 \gamma_k = E[(x_t - \mu)(x_{t+k} - \mu)] ,
@@ -216,14 +216,7 @@ _Do I need to expand upon this?_
 ```{r STLPlot, out.width='100%', fig.cap="Seasonal decomposition of two weeks of data from household 35"}
 knitr::include_graphics(paste0(pFolder, "rf_35_STL.pdf"))
 ```
-Figure \@ref(fig:STLPlot) illustrates an STL decomposition of a household over two weeks. The top panel, labelled 'observed', is the actual data. The 'trend' panel 
-<!--
-Most models are fitted to the data such that the model minimises the sum of the square of each residual (referred to as RSS, residual sum of squares).
-
-_rest of this section may be removed or moved?_
-Models that are advanced enough to effectively take into consideration data attributes such as trend and cyclic effects (known as 'seasonality') have a residual time series that approximates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean.
--->
-
+Figure \@ref(fig:STLPlot) illustrates an STL decomposition of a household over two weeks. The top panel, labelled 'observed', is the actual data, while the lower three panels display the trend, seasonal, and random components of this data.
 
 ## Model selection
 
@@ -267,22 +260,22 @@ x_t = \alpha_0 + \alpha_1 t .
 (\#eq:simpleLinearRegression)
 \end{equation}
 
-For time-series forecasting, simple linear regression can fit a line to historical values of the dependent (or 'response') variable in order to estimate future values. While this can be useful for determining general trends over longer periods of time, they cannot capture any regular shorter term fluctuations of time series data about this trend (referred to as 'seasonality'). 
+For time-series forecasting, simple linear regression can fit a line to historical values of the dependent (or 'response') variable in order to estimate future values. While this can be useful for determining general trends over longer periods of time, they cannot capture any regular shorter term fluctuations of time series data about this trend (seasonality). 
 Another way of utilising simple linear regression for time series forecasting is in the form of a causal model by introducing a seperate predictor variable. For our data, we separate electricity demand into hot water, and other appliances. Simple linear regression is a foundational method of exploring how the demand of other appliances at time $t$ can be used to predict hot water electricity demand at a time $t + k$.
 _include figure showing a good example of other electricity use increasing before hot water?_
 
 ### Moving average
 
-A q-order moving average process, $MA(q)$ is defined as
+A q-order moving average process, $MA(q)$ can be expressed as a linear combination of the current white noise residual ($w_t$, see @TSoverview) and the $q$ most recent previous residuals, defined as
 \begin{equation}
 x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q} ,
 (\#eq:MA1)
 \end{equation}
-where $\{w_t\}$ is white noise with zero mean and variance $\sigma^2_w$. Equation \@ref(eq:MA1) can be expressed as
+Expressing a moving average process in this manner allows \@ref(eq:MA1) to be be expressed as
 \begin{equation}
 x_t = (1 + \beta_1 B + \beta_2 B^2 + ... + \beta_q B^q)w_t = \phi_qBw_t ,
 \end{equation}
-where $B$ is the backshift operator, i.e. $Bx_t = x_{t-1}$, and $\phi_q$ is a polynomial of order 2.
+where $B$ is the backshift operator, i.e. $Bx_t = x_{t-1}$, and $\phi_q$ is a polynomial of order $q$.
 
 ### Autoregression
 
