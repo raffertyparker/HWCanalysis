@@ -1,9 +1,11 @@
-﻿################## TO DO ##################
+################## TO DO ##################
 
 Fix plots so it prints ok
+Change fitting speed to include validating
+-Have fitting and validating separate, then take the total
 Complete results chapter
 Work on residuals:
--Average at evening peaks
+-Quantify value during peaks
 Some prelim analysis can be seperated into methodology/results
 Can then have two results chapters: prelim data analysis and modelling
 Fix tables
