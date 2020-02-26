@@ -265,7 +265,7 @@ save(DT_hh, file = paste0(dFolder, "DT_hh_dummy.Rda"))
 
 to.replace <- names(which(sapply(DT_hh, is.logical)))
 for (var in to.replace) DT_hh[, (var):= as.numeric(get(var))]
-head(DT_hh)
+#head(DT_hh)
 
 # This seperates data into training and test (fitting and validating)
 for (house in unique(DT_hh$linkID)){
@@ -283,7 +283,6 @@ for (house in unique(DT_hh$linkID)){
 # determine how to carry out the initial processing occurring above
 
 # This creates a table of average power values of each house
-
 meansDT <- DT_hh %>%
   group_by(linkID) %>%
   select(c(HWelec, nonHWelec)) %>%
@@ -291,8 +290,11 @@ meansDT <- DT_hh %>%
 
 save(meansDT, file = paste0(dFolder, "meansDT.Rda"))
 
-# This gives all houses with PV
+# This saves the hh data head for quick loading from the report
+DThead <- as.data.table(head(DT_hh))
+saveRDS(DThead, paste0(dFolder, "DThead.rds"))
 
+# This gives all houses with PV
 PV_houses <- summaryDT %>%
   subset(grepl("PV", circuit)) %>%
   select(linkID)
