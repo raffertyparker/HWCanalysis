@@ -49,7 +49,7 @@ If you receive a duplicate label error after knitting, make sure to delete the i
 -->
 ```{r 01setup, include=FALSE}
 # Comment this out if we want inline code chunks
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 ```
 
 <!--

@@ -1,9 +1,9 @@
 # Conclusion {#conclusion}
 
 This chapter needs to state:
-* what we set out to discover
-* what we actually found
-* potential for future work
+*what we set out to discover
+*what we actually found
+*potential for future work
 
 ## Potential for further work 
 
