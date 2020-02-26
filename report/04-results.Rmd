@@ -6,7 +6,7 @@ knitr::opts_chunk$set(echo=TRUE, engine.path = list(python = '/anaconda/bin/pyth
 ```
 -->
 
-```{r loadSummaryStats}
+```{r loadSummaryStats, echo=FALSE}
 DFsummary <- readRDS(paste0(dFolder, "allModelSummaryStats.rds"))
 dfSummary <- readRDS(paste0(dFolder, "allHouseModelStats.rds"))
 ```
@@ -19,23 +19,27 @@ In our naive model we assume no drift, and only attempt to predict one (half hou
 \hat x_{t+1} = x_t .
 \end{equation}
 
-```{r randomWalk, out.width='100%', fig.cap="Actual electricity use and naive model approximation over one day for four households"}
+```{r randomWalk, echo=FALSE, out.width='100%', fig.cap="Actual electricity use and naive model approximation over one day for four households"}
 knitr::include_graphics(paste0(pFolder, "naive/fourHouses.pdf"))
 ```
 
 As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistantly 'missing' the actual values.
 
-The random walk model has RMSE ranging between `r min(dfSummary$RMSE[dfSummary$model == "naive"])`W and `r max(dfSummary$RMSE[dfSummary$model == "naive"])`W, with the average being `r DFsummary$RMSE[DFsummary$model == "naive"]`W.
+The random walk model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "naive"], 2)`W.
 
-The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, although no illumination as to underlying behavioural properties are provided by this model. The computational time to fit models to each household varied between `r min(dfSummary$fittingTime[dfSummary$model == "naive"])`s and `r max(dfSummary$fittingTime[dfSummary$model == "naive"])`s, with the average taking `r DFsummary$fittingTime[DFsummary$model == "naive"]`s.
+The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, although no illumination as to underlying behavioural properties are provided by this model. The computational time to fit models to each household was negligible (< 0.000s).
 
 ```{r naiveResiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the naive model"}
 knitr::include_graphics(paste0(pFolder, "naive/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model
+Examination of the aggregated daily average residuals shows that this model...
 
-## Linear regression of hot water electricity against lagged other electricity
+## Seasonal naive
+
+
+
+## Simple linear regression
 
 While simple linear regression is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using time series data that displays cyclic behaviour, such as residential electricity demand.
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
@@ -91,6 +95,7 @@ knitr::include_graphics(paste0(pFolder, "ARIMA/allHousesResidual.pdf"))
 
 Examination of the aggregated daily average residuals shows that this model
 
+## ARIMAX
 
 ## ARIMA with STL decomposition
 
@@ -105,6 +110,8 @@ knitr::include_graphics(paste0(pFolder, "STLARIMA/allHousesResidual.pdf"))
 ```
 
 Examination of the aggregated daily average residuals shows that this model
+
+## ARIMAX with STL decomposition
 
 ## SVM model
 
