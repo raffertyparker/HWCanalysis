@@ -1,25 +1,25 @@
 ################## TO DO ##################
 
+Include Italian ARIMAX article in lit rev
 Fix plots so it prints ok
 Change fitting speed to include validating
 -Have fitting and validating separate, then take the total
+Elaborate on ARIMAX/STL + ARIMAX in methodology
 Complete results chapter
+-Seasonal naive
+-ARIMAX
+-STL+ARIMAX
 Work on residuals:
 -Quantify value during peaks
 Some prelim analysis can be seperated into methodology/results
 Can then have two results chapters: prelim data analysis and modelling
-Fix tables
-Expand upon forecasting lit in lit review
 Include nomenclature at beginning (after list of tables?)
 Draw family tree/landscape of models, indicate if they have been used for elec data and which I have decided to use
 Elaborate on the process of sorting through existing work to choose the models I have chosen
-Interest over time in data science methods is too specific; show broader interest. The specific methods may be able to be used in a different section
-Rerun ARIMAX models with additional xregs
 Look at variance etc of DFsummary
 modelling.R may be better separated into individual functions that are called on as opposed to one huge page worth
-Make weekly profile plot
-Make plot demonstrating other elec turning on before HW elec
 Plot ACV of model residuals to check that seasonality is being accounted for
+-Join individual plots with grid.arrange
 Add other elec (dotted line) to linear model plot
 Redo ccv plot
 Clone github repository and rerun to check reproducibility
