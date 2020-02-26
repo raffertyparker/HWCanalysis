@@ -14,6 +14,7 @@ library(dplyr)
 library(ggplot2)
 library(lubridate)
 library(data.table)
+theme_set(theme_minimal())
 
 DT_hh$dayHour <- hour(DT_hh$hHour)
 
