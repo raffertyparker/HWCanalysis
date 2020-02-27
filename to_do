@@ -1,5 +1,6 @@
 ################## TO DO ##################
 
+TALK TO BEV ABOUT STIPEND
 Include Italian ARIMAX article in lit rev
 Fix plots so it prints ok
 Change fitting speed to include validating
@@ -9,6 +10,7 @@ Complete results chapter
 -Seasonal naive
 -ARIMAX
 -STL+ARIMAX
+-residual analysis for all households
 Work on residuals:
 -Quantify value during peaks
 Some prelim analysis can be seperated into methodology/results
