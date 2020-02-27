@@ -1,9 +1,9 @@
 # frequency analysis through fourier transform
-if (!exists("dFile")){
-  dFile <- "~/HWCanalysis/data/" 
+if (!exists("dFolder")){
+  dFolder <- "~/HWCanalysis/data/" 
 }
 if (!exists("DT")){
-  load(paste0(dFile, "DT.Rda"))
+  load(paste0(dFolder, "DT.Rda"))
 }
 
 for (house in unique(DT$linkID)){
@@ -22,6 +22,6 @@ freq_DF$Dominance <- as.character(c(1,2,3))
 freq_DF <- reshape2::melt(freq_DF)
 names(freq_DF) <- c("Dominance", "Household", "Frequency")
 freq_DF <- freq_DF[, c(2,1,3)]
-freq_DF$Frequency <- freq_DF$Frequency/60  # Gives values in hours
+freq_DF$Frequency <- round(freq_DF$Frequency/60, 2)  # Gives values in hours
 
-save(freq_DF, file = paste0(dFile, "freq_DF.Rda"))
+save(freq_DF, file = paste0(dFolder, "freq_DF.Rda"))
