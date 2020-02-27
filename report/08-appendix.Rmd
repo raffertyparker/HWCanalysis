@@ -9,8 +9,10 @@ If you feel it necessary to include an appendix, it goes here.
 
 # Appendix {#appendix}
 
+<!--
 ## Relevant code
 
+Probably don't need to include code
 This includes all of the R chunks of code that were hidden throughout the document (using the `include = FALSE` chunk tag) to help with readibility and/or setup.
 
 **In the main Rmd file**
@@ -23,10 +25,12 @@ This includes all of the R chunks of code that were hidden throughout the docume
 ```{r ref.label='include_packages_2', results='hide', echo = TRUE}
 ```
 
+-->
+
 ## Autocovariance lag
 
 
-```{r frequencyAnalysis, out.width='100%'}
+```{r frequencyAnalysis, echo=FALSE, out.width='100%'}
 load(file=paste0(dFolder, "freq_DF.Rda"))
 freq_DF %>%
   knitr::kable(col.names = c("Household", "Dominance", "Frequency (hours)"),
@@ -39,12 +43,12 @@ freq_DF %>%
 
 Table \@ref(tab:ccvMaxLagTable) and the corresponding Figure \@ref(fig:ccvMaxLagPlot) in Chapter \@ref(methodology) have been constructed by taking the maximum cross covarience value for each house, restricted to lag values above 30 minutes, as this is the minimum lag after which these predictions may be useful for participation in demand response markets in New Zealand.
 
-```{r loadCCVdata}
+```{r loadCCVdata, echo=FALSE}
 load(paste0(dFolder, "ccv_max.Rda"))
 maxCor <- maxCor[, c(2,1,3)]
 ```
 
-```{r ccvMaxLagTable}
+```{r ccvMaxLagTable, echo=FALSE}
 maxCor %>%
   knitr::kable(col.names =  c("Household", "Lag", "Cross covariance"),
         caption = "Lag time and correlation value at point of maximum crosscovariance")
@@ -55,6 +59,16 @@ It can be seen that many households have optimal lags greater than one hour. To 
 
 ## Modelling parameters
 
+```{R load_parameter_data}
+#ARIMApar <- read.csv(paste0(dFolder, "ARIMA/parameters.csv"))
+
+```
+
+```{r ARIMA_parameters}
+
+#ARIMApar %>%
+#  knitr::kable(caption = "Automatically determined parameters for the ARIMA models")
+```
 Include a table of ARIMA parameters selected (that minimise AIC).
 
 

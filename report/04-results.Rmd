@@ -27,9 +27,9 @@ As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effect
 
 The random walk model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "naive"], 2)`W.
 
-The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, although no illumination as to underlying behavioural properties are provided by this model. The computational time to fit models to each household was negligible (< 0.000s).
+The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, although no illumination as to underlying behavioural properties are provided by this model. The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "naive"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "naive"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "naive"], 2)`s.
 
-```{r naiveResiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the naive model"}
+```{r naiveResiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the naive model"}
 knitr::include_graphics(paste0(pFolder, "naive/allHousesResidual.pdf"))
 ```
 
@@ -45,22 +45,26 @@ While simple linear regression is a useful method of analysing data that has a r
 Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
 The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
 
-```{r linearRelations, out.width='100%', fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household rf06"}
-knitr::include_graphics(paste0(pFolder, "rf06LinearPlot.png"))
+```{r linearRelations, echo=FALSE, out.width='100%', fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household 13"}
+knitr::include_graphics(paste0(pFolder, "rf_13LinearPlot.png"))
 ```
 
 Figure \@ref(fig:linearRelations) shows a simple linear regression of current non hot water electricity demand with the following half-hour's hot water electricity demand. This is shown to demonstrate the ability to use current electricity demand to predict hot water electricity demand over the next half hour. Note the low $R^2$ value suggesting that, in it's current form, this model would be rather inadequate at forecasting demand.
 
-```{r simpleLinear, out.width='100%', fig.cap="Performance of simple linear regression model for four households over four separate days"}
+```{r simpleLinear, echo=FALSE, out.width='100%', fig.cap="Performance of simple linear regression model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "simpleLinear/fourHouses.pdf"))
 ```
-Figure \@ref(fig:simpleLinear) shows the effectiveness of this model for four seperate households. Note that the top two households in the figure, `rf_13` and `rf_30`, show the model fitting reasonable poorly with the data. 
+Figure \@ref(fig:simpleLinear) shows the effectiveness of this model for four seperate households. 
+<!--
+Different households used!
+
+Note that the top two households in the figure, `rf_13` and `rf_30`, show the model fitting reasonable poorly with the data. 
 Household `rf_13` appears to predict increase in hot water electricity demand before it actually occurs. 
 This should be compared to Figure \@ref(fig:crossCovariance), which shows the correllation between hot water and not hot water electricity peaking at around 200 minutes lag for this household.
 Household `rf_30` shows a model which appears to be very unresponsive to the data. Again, on close examination of Figure \@ref(fig:crossCovariance) we see that this household has a peak in crosscorrelation at around 800 minutes. 
 This indicates that for some households, a correlation lag of greater than 30 mins may increase accuracy. 
 Households `rf_42` and `rf_44` show a more accurate model result, however due to the presence of a non-zero y intercept these models will always consistantly overestimate hot water electricity whenever the true value is zero.
-
+-->
 The simple linear regression model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "simpleLinear"], 2)`W.
 
 The model does not accurately capture zero values, and is significantly smoother than the actual data, however no negative values are present. It therefore scores low to moderate for physical fidelity. 
@@ -69,7 +73,7 @@ Interpretability is high, as the output can be understood by the simple equation
 Notably, this model has lower RMSE's than the Naive model.
 In addition, this model lends itself to being utilised as an input into more complex models that take other parameters into consideration. 
 
-```{r simpleLinearResiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the simple linear regression model"}
+```{r simpleLinearResiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the simple linear regression model"}
 knitr::include_graphics(paste0(pFolder, "simpleLinear/allHousesResidual.pdf"))
 ```
 
@@ -77,19 +81,19 @@ Examination of the aggregated daily average residuals shows that this model
 
 ## ARIMA model
 
-As each household has different usage patterns and characteristics, optimal values for these parameters differ for each household.
-The optimal parameters for each household which minimise the AIC (refer to Section \@ref(ARIMAmethodology)) are provided in the appendix. For to restrict computational expense in model fitting, maximum values for $p$, $d$ and $q$ are fixed at 5, 2 and 5, respectively.
+As each household has different usage patterns and characteristics, optimal values for parameters $p$, $d$, and $q$ (see Section \@ref(ARIMAmethodology)) differ for each household.
+Parameters are selected in order to minimise the AIC (Equation \@ref(eq:AIC)) are provided in the Appendix . For to restrict computational expense in model fitting, maximum values for $p$, $d$ and $q$ are fixed at 5, 2 and 5, respectively.
 
 The ARIMA model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "ARIMA"], 2)`W.
 
 The model does not often predict the initial instance of the element turning on, and is somewhat smoother than the actual data. In addition, occasional negative values or values above that capable of the element occur. It scores low to moderate for physical fidelity. 
 Interpretability is moderate, as the output can be understood by the value of the $p$, $d$ and $q$ parameters (provided in the appendix). The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "ARIMA"], 2)`s.
 
-```{r ARIMAplot, out.width='100%', fig.cap="Performance of ARIMA model for four households over four separate days"}
+```{r ARIMAplot, echo=FALSE, out.width='100%', fig.cap="Performance of ARIMA model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "/ARIMA/fourHouses.pdf"))
 ```
 
-```{r ARIMAresiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the ARIMA model"}
+```{r ARIMAresiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the ARIMA model"}
 knitr::include_graphics(paste0(pFolder, "ARIMA/allHousesResidual.pdf"))
 ```
 
@@ -97,21 +101,23 @@ Examination of the aggregated daily average residuals shows that this model
 
 ## ARIMAX
 
+
 ## ARIMA with STL decomposition
 
-Our STL + ARIMA model was the most accurate model that fell into the 'conventional' forecasting catagory, with RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "STLARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "STLARIMA"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "STLARIMA"], 2)`W.
+Our STL + ARIMA model had RMSEs ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "STLARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "STLARIMA"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "STLARIMA"], 2)`W.
 
 It performs slightly worse than the standard ARIMA model for physical fidelity. Although more instances where the initial instance of the element turning on is predicted, it is also more likely to return negative values or values above that capable of the element. It therefore scores low for physical fidelity. 
 This model is understandable as the sum of the seasonal and trend components, with an ARIMA modelled remainder. Parameters for all these elements are available, giving a general understanding of underlying patterns in the data, however it is somewhat convoluted. Interpretability therefore scores low to moderate. 
 The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "STLARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "STLARIMA"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "STLARIMA"], 2)`s.
 
-```{r STLARIMAresiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the STLARIMA model"}
+```{r STLARIMAresiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the STLARIMA model"}
 knitr::include_graphics(paste0(pFolder, "STLARIMA/allHousesResidual.pdf"))
 ```
 
 Examination of the aggregated daily average residuals shows that this model
 
 ## ARIMAX with STL decomposition
+
 
 ## SVM model
 
@@ -122,11 +128,11 @@ This model is essentially "black box", providing very limited insight as to its 
 
 The computational time to fit models to each household was very high, varying between `r round(min(dfSummary$fittingTime[dfSummary$model == "SVM"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "SVM"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "SVM"], 2)`s. 
 
-```{r SVMplot, out.width='100%', fig.cap="Performance of SVM model for four households over four separate days"}
+```{r SVMplot, echo=FALSE, out.width='100%', fig.cap="Performance of SVM model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "/SVM/fourHouses.pdf"))
 ```
 
-```{r SVMresiduals, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the ARIMA model"}
+```{r SVMresiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the SVM model"}
 knitr::include_graphics(paste0(pFolder, "SVM/allHousesResidual.pdf"))
 ```
 
