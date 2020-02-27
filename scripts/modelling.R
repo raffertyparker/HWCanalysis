@@ -26,6 +26,7 @@
   DFsummary <- data.frame(model=character(),
                           household=character(),
                           RMSE=numeric(),
+                          peakRMSE=numeric(),
                           fittingTime=numeric(),
                           memSize=numeric(),
                           stringsAsFactors=FALSE)
@@ -65,32 +66,43 @@
     
   Model <- "naive"
   print(paste0("Now fitting ", Model, " model for household ", house, "..."))
-  mdl <- naive(ts_val$HWelec, h = 1) # Fits model
+  fitTime <- system.time(
+    mdl <- naive(ts_val$HWelec, h = 1))[3] # Fits model and returns time taken to do so
   mdl$x <- ts_val$HWelec
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
   saveRDS(mdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(mdl, Model)
+  peakMdl <- as.data.table(cbind(ts_val$dHour, mdl$residuals)) # Create dt of hour + residual
+  names(peakMdl) <- c("dHour", "residuals")
+  peakMdl <- peakMdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
   sVec <- data.frame(model=Model,
                      household=house,
                      RMSE=sqrt(mean(mdl$residuals^2, na.rm = TRUE)),
-                     fittingTime=0,
-                     memSize=as.numeric(object.size(ts_val$HWelec[1])),
+                     peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
+                     fittingTime = fitTime,
+                     memSize=as.numeric(object.size(mdl)),
                      stringsAsFactors=FALSE)
   DFsummary <- rbind(DFsummary, sVec)
   
   Model <- "seasonalNaive"
   print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   ts_val_HW_seasonal <- ts(dt_val$HWelec, frequency = 48*7)
-  mdl <- snaive(ts_val_HW_seasonal, h = 1) # Fits model
+  fitTime <- system.time(
+    mdl <- snaive(ts_val_HW_seasonal, h = 1))[3] # Fits model and returns time taken to do so
+  dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
   mdl$x <- ts_val$HWelec
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
   saveRDS(mdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(mdl, Model)
-  sVec <- data.frame(model=Model,
-                     household=house,
-                     RMSE=sqrt(mean(mdl$residuals^2, na.rm = TRUE)),
-                     fittingTime=0,
-                     memSize=as.numeric(object.size(ts_val$HWelec[1:48*7])),
+  peakMdl <- as.data.table(cbind(ts_val$dHour, mdl$residuals)) # Create dt of hour + residual
+  names(peakMdl) <- c("dHour", "residuals")
+  peakMdl <- peakMdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
+  sVec <- data.frame(model = Model,
+                     household = house,
+                     RMSE = sqrt(mean(mdl$residuals^2, na.rm = TRUE)),
+                     peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
+                     fittingTime = fitTime,
+                     memSize = as.numeric(object.size(mdl)),
                      stringsAsFactors=FALSE)
   DFsummary <- rbind(DFsummary, sVec)
   
@@ -104,9 +116,13 @@
   valMdl$x <- ts_val$HWelec#[2:nrow(ts_val)]
   saveRDS(valMdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(valMdl, Model)
+  peakMdl <- as.data.table(cbind(ts_val$dHour, valMdl$residuals)) # Create dt of hour + residual
+  names(peakMdl) <- c("dateTime", "dHour", "residuals")
+  peakMdl <- peakMdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
   sVec <- data.frame(model=Model,
                      household=house,
                      RMSE=sqrt(mean(valMdl$residuals^2)),
+                     peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
                      fittingTime=as.numeric(fitTime),
                      memSize=as.numeric(object.size(fitMdl)),
                      stringsAsFactors=FALSE)
@@ -121,9 +137,13 @@
   valArima <- Arima(ts_val$HWelec, model = fitArima)
   saveRDS(valArima, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(valArima, Model)
+  peakMdl <- as.data.table(cbind(ts_val$dHour, valArima$residuals)) # Create dt of hour + residual
+  names(peakMdl) <- c("dHour", "residuals")
+  peakMdl <- peakMdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
   sVec <- data.frame(model=Model,
                           household=house,
                           RMSE=sqrt(mean(valArima$residuals^2)),
+                          peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
                           fittingTime=as.numeric(fitTime),
                           memSize=as.numeric(object.size(fitArima)),
                           stringsAsFactors=FALSE)
@@ -133,27 +153,44 @@
   ifelse(house == houses[1], 
          ARIMApars <- Par,
          ARIMApars <- rbind(ARIMApars, Par))
+  if (house == houses[length(houses)]){
+    ARIMApars <- ARIMApars[,c(4,1,2,3)]
+    write_csv(ARIMApars, path = paste0(dFolder, Model, "/parameters.csv"))
+  }
   
   Model <- "ARIMAX"
   print(paste0("Now fitting ", Model, " model for household ", house, "..."))
-  fitTime <- system.time(fitArima <- auto.arima(ts_fit$HWelec, 
+  fitTime <- system.time(fitArimaX <- auto.arima(ts_fit$HWelec, 
                                                 xreg = as.matrix(cbind(ts_fit$nonHWelec, 
                                                                        ts_fit$nonHWshift1, 
                                                                        ts_fit$nonHWshift2))))[3] # Fits model and returns time taken to do so
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
-  saveRDS(fitArima, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
-  valArima <- Arima(ts_val$HWelec, xreg = as.matrix(cbind(ts_val$nonHWelec, 
+  saveRDS(fitArimaX, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
+  valArimaX <- Arima(ts_val$HWelec, xreg = as.matrix(cbind(ts_val$nonHWelec, 
                                                           ts_val$nonHWshift1, 
-                                                          ts_val$nonHWshift2)), model = fitArima)
-  saveRDS(valArima, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
-  plotModel(valArima, Model)
+                                                          ts_val$nonHWshift2)), model = fitArimaX)
+  saveRDS(valArimaX, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
+  plotModel(valArimaX, Model)
+  peakMdl <- as.data.table(cbind(ts_val$dHour, valArimaX$residuals)) # Create dt of hour + residual
+  names(peakMdl) <- c("dHour", "residuals")
+  peakMdl <- peakMdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
   sVec <- data.frame(model=Model,
                      household=house,
-                     RMSE=sqrt(mean(valArima$residuals^2)),
+                     RMSE=sqrt(mean(valArimaX$residuals^2)),
+                     peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
                      fittingTime=as.numeric(fitTime),
                      memSize=as.numeric(object.size(fitArima)),
                      stringsAsFactors=FALSE)
   DFsummary <- rbind(DFsummary, sVec)
+  Par <- as.data.frame(t(arimaorder(fitArimaX)))
+  Par$household <- house
+  ifelse(house == houses[1], 
+         ARIMAXpars <- Par,
+         ARIMAXpars <- rbind(ARIMAXpars, Par))
+  if (house == houses[length(houses)]){
+    ARIMAXpars <- ARIMApars[,c(4,1,2,3)]
+    write_csv(ARIMAXpars, path = paste0(dFolder, Model, "/parameters.csv"))
+  }
   
   Model <- "STLARIMA"
   print(paste0("Now fitting ", Model, " model for household ", house, "..."))
@@ -165,9 +202,13 @@
   valSTLArima$hHour <- dt_val$hHour
   saveRDS(valSTLArima, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(valSTLArima, Model)
+  peakMdl <- as.data.table(cbind(ts_val$dHour, valSTLArima$residuals)) # Create dt of hour + residual
+  names(peakMdl) <- c("dHour", "residuals")
+  peakMdl <- peakMdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
   sVec <- data.frame(model=Model,
                      household=house,
                      RMSE=sqrt(mean(valSTLArima$residuals^2)),
+                     peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
                      fittingTime=as.numeric(fitTime),
                      memSize=as.numeric(object.size(fitSTLArima)),
                      stringsAsFactors=FALSE)
@@ -178,6 +219,7 @@
          STL_ARIMApars <- Par,
          STL_ARIMApars <- rbind(STL_ARIMApars, Par))
   if (house == houses[length(houses)]){
+    ARIMApars <- STL_ARIMApars[,c(4,1,2,3)]
     write_csv(STL_ARIMApars, path = paste0(dFolder, Model, "/parameters.csv"))
   }
   
@@ -198,9 +240,13 @@
   valSTLArimaX$hHour <- dt_val$hHour
   saveRDS(valSTLArimaX, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(valSTLArimaX, Model)
+  peakMdl <- as.data.table(cbind(ts_val$dHour, valSTLArimaX$residuals)) # Create dt of hour + residual
+  names(peakMdl) <- c("dHour", "residuals")
+  peakMdl <- peakMdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
   sVec <- data.frame(model=Model,
                      household=house,
                      RMSE=sqrt(mean(valSTLArima$residuals^2)),
+                     peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
                      fittingTime=as.numeric(fitTime),
                      memSize=as.numeric(object.size(fitSTLArima)),
                      stringsAsFactors=FALSE)
@@ -211,6 +257,7 @@
          STL_ARIMAXpars <- Par,
          STL_ARIMAXpars <- rbind(STL_ARIMAXpars, Par))
   if (house == houses[length(houses)]){
+    STL_ARIMAXpars <- ARIMApars[,c(4,1,2,3)]
     write_csv(STL_ARIMAXpars, path = paste0(dFolder, Model, "/parameters.csv"))
   }
   
@@ -232,10 +279,14 @@
   saveRDS(val_mdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
    plotModel(val_mdl, Model) # Needs to be in xts format, not worth fixing, plotModelSVM.R works fine for now
 #  plotModelSVM(dt_val, predicted_values)
-  
+ #  peakMdl <- as.data.table(cbind(ts_val$dHour, valSTLArima$residuals)) # Create dt of hour + residual
+#   names(peakMdl) <- c("dHour", "residuals")
+   val_mdl$dHour <- hour(val_mdl$hHour) + minute(val_mdl$hHour)/60
+   peakMdl <- val_mdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
   sVec <- data.frame(model=Model,
                      household=house,
                      RMSE=sqrt(mean(val_mdl$residual^2)),
+                     peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
                      fittingTime=as.numeric(fitTime),
                      memSize=as.numeric(object.size(fitSVM)),
                      stringsAsFactors=FALSE)
@@ -257,10 +308,8 @@
 #  DFsummary <- rbind(DFsummary, sVec)
 }
 
-
 saveRDS(DFsummary, file = paste0(dFolder, "allHouseModelStats.rds"))
-ARIMApars <- ARIMApars[,c(4,1,2,3)]
-saveRDS(ARIMApars, file = paste0(dFolder, "ArimaParsStandardMaxValues"))
+#saveRDS(ARIMApars, file = paste0(dFolder, "ARIMA/parameters.rds"))
 allHouseSummary <- DFsummary %>%
   group_by(model) %>%
   summarise(RMSE = mean(RMSE), fittingTime = mean(fittingTime),
