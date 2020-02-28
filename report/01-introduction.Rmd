@@ -207,6 +207,8 @@ Gajowniczeka and Ząbkowski (2014)[@Gajowniczek2014] compare ANN and SVM forecas
 
 Ahmad, Hassan, Abdullah, Rahman and Hussin (2014)[@Ahmad2014] also compared ANNs and SVMs, as well as some conventional forecasting techniques, for building-level short term electricity demand forecasting. They concluded that the AI methods outperformed conventional methods in accuracy, with SVM models generally outperforming ANNs. No comparison on computational expense was provided.
 
+De Felice, Alessandri, Ruti (2013)[@DeFelice2013] used weather forecasts as an external regressor in an ARIMAX model to predict Italian grid-level electricity demand up to 5 days in advance. This was compared against a naive model and an ARIMA model, with the inclusion of weather data into the models being found to significantly increasing the accuracy of prediction.
+
 Jain and Satish (2009)[@Jain2009] used SVMs to forecast day-ahead grid-level electricity demand. While ANNs were mentioned for their prevalence in electricity demand forecasting, SVMs were ultimately chosen as the forecast method for their generalisation, performance, and automatic model parameter selection capabilities.
 
 _Make sure introduction has provided sufficient information that the reader will understand the research aims in next subsection. By the time I get here it should be clear exactly what the problem is about and that I am trying a new approach to solve the problem_

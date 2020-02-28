@@ -68,11 +68,11 @@ As such, any 'holes' in our data were dealt with as follows.
 When long periods of missing data occurred (determined by visual inspection of pleliminary plots) the largest period of uninterrupted data collection was selected for further analysis, with the remainder discarded.
 
 ```{r prelimNoHolesRemoved, out.width='100%', fig.cap="Overview of data before cleaning process"}
-knitr::include_graphics(paste0(pFolder, "prelim/allHousesNoHolesRemoved.png"))
+knitr::include_graphics(paste0(pFolder, "prelim/allHousesNoHolesRemoved.jpg"))
 ```
 
 ```{r prelimHolesRemoved, out.width='100%', fig.cap="Overview of data after cleaning process"}
-knitr::include_graphics(paste0(pFolder, "prelim/allHousesAfterRemoval.png"))
+knitr::include_graphics(paste0(pFolder, "prelim/allHousesAfterRemoval.jpg"))
 ```
 
 The effect of removing these larger holes can be seen by comparing Figures \@ref(fig:prelim_no_holes_removed) and \@ref(fig:prelim_holes_removed).
@@ -151,7 +151,7 @@ knitr::include_graphics(paste0(pFolder, "averages/boxplot.png"))
 knitr::include_graphics(paste0(pFolder, "averages/averageDemand.png"))
 ```
 
-Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. Also of note is the large variation in average demand, varying from `r round(min(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r round(max(meansDT$HWelec), 2)` (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`).
+Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. Average demand varies significantly for each household, ranging from `r round(min(meansDT$HWelec), 2)`W (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r round(max(meansDT$HWelec), 2)`W (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`).
 
 ### Autocovariance of hot water use
 
@@ -214,8 +214,8 @@ Another method that may be used to explore any cyclical effects or trends of tim
 An STL decompostition seperates the data into three separate components, referred to as the 'trend', 'seasonality', and 'remainder' (also referred to as 'random'). 
 The trend represents low frequency changes in the data, along with longer term average shifts. 
 Seasonality refers to the cyclic behaviour of the data. The remainder is the deviation of the actual data from the addition of the trend and the seasonality.
-The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990)[@Cleveland1990], with the decomposition algorithm provided in the reference.
-_Do I need to expand upon this?_
+The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990)[@Cleveland1990]. As the decomposition algorithm is quite involved it is not included here, but can be examined in the previous reference.
+
 ```{r STLPlot, out.width='100%', fig.cap="Seasonal decomposition of two weeks of data from household 35"}
 knitr::include_graphics(paste0(pFolder, "rf_35_STL.pdf"))
 ```
@@ -234,7 +234,7 @@ For this reason, any forecasting methods that required high capacity computation
 
 This section outlines a broad introduction to the various models selected for use either implicitly or explicitly in this analysis. Refer to Cowpertwait and Metcalfe[@Cowpertwait2009] for further details regarding these models. _No ARIMAX or SVM in this book_
 
-### Naive model
+### Naive model {#naive}
 
 A time series $\{x_t\}$ is known as a 'random walk' if 
 
@@ -259,7 +259,7 @@ Linear modelling is a common forecasting method prized for its simplicity in int
 A special case of a linear model is the simple linear regression, which fits a straight line through data in order to minimise the RSS. 
 This line can be represented by the equation
 \begin{equation}
-x_t = \alpha_0 + \alpha_1 t .
+x_t = \gamma_0 + \gamma_1 t .
 (\#eq:simpleLinearRegression)
 \end{equation}
 
@@ -302,7 +302,7 @@ A prediction is then given by
 
 Differencing a time series $\{x_t\}$ is a method of removing trends, where, for example with a random walk process, the difference is white noise $x_t - x_{t-1} = w_t$.
 More generally, a time series $\{x_t\}$ is referred to as _integrated_ of order $d$ (denoted $I(d)$, where $d \in \mathbb{Z}$) if the $d$th difference of $\{x_t\}$ is white noise.
-The random walk model is the special case $I(1)$.
+The naive model in Section \@ref(naive) is the special case $I(1)$.
 
 ### ARIMA {#ARIMAmethodology}
 
@@ -353,9 +353,21 @@ This is particularly pronounced when considering data at 1 minute resolution. At
 
 ### ARIMAX
 
-ARIMAX (ARIMA with eXternal regressor) models utilise both time series and causal methods by including an explanatory variable (in our case, other appliance electricity demand) as a regressor within an ARIMA model.
+ARIMAX (ARIMA with external regressor or exogenous variable) models utilise both time series and causal methods by including an explanatory variable (in our case, other appliance electricity demand) as a linear regressor within an ARIMA model.
+One way in which this model may be interperated is as a simple linear regression model with ARIMA errors.
+This combines Equations \@ref(eq:simpleLinearRegression) and \@ref(eq:ARMA) in the form
 
-_Cite, include equation_
+\begin{equation}
+x_t = \gamma_0 + \gamma_1y_{t-1} + \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q}.
+(\#eq:ARMA)
+\end{equation}
+Where $y$ is the exogenous variable (in our case, other appliance electricity demand).
+This may be expressed in terms of the backward shift operator in polynomial form as
+\begin{equation}
+x_t = \gamma_0 + \gamma_1y_{t-1} + \frac{\theta (\bf{B})}{\phi (\bf{B})} w_t .
+(\#eq:ARMAXpolyform)
+\end{equation}
+
 
 ### STL decomposition with ARIMAX
 
