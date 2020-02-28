@@ -19,6 +19,7 @@
   library(ggplot2)
   library(dplyr)
   library(e1071)
+  library(readr)
   
   load(paste0(dFolder, "houses.Rda"))
   
@@ -155,7 +156,7 @@
          ARIMApars <- rbind(ARIMApars, Par))
   if (house == houses[length(houses)]){
     ARIMApars <- ARIMApars[,c(4,1,2,3)]
-    write_csv(ARIMApars, path = paste0(dFolder, Model, "/parameters.csv"))
+    write_csv(ARIMApars, path = paste0(dFolder, "models/", Model, "/parameters.csv"))
   }
   
   Model <- "ARIMAX"
@@ -189,7 +190,7 @@
          ARIMAXpars <- rbind(ARIMAXpars, Par))
   if (house == houses[length(houses)]){
     ARIMAXpars <- ARIMApars[,c(4,1,2,3)]
-    write_csv(ARIMAXpars, path = paste0(dFolder, Model, "/parameters.csv"))
+    write_csv(ARIMAXpars, path = paste0(dFolder, "models/", Model, "/parameters.csv"))
   }
   
   Model <- "STLARIMA"
@@ -220,7 +221,7 @@
          STL_ARIMApars <- rbind(STL_ARIMApars, Par))
   if (house == houses[length(houses)]){
     ARIMApars <- STL_ARIMApars[,c(4,1,2,3)]
-    write_csv(STL_ARIMApars, path = paste0(dFolder, Model, "/parameters.csv"))
+    write_csv(STL_ARIMApars, path = paste0(dFolder, "models/",  Model, "/parameters.csv"))
   }
   
   Model <- "STLARIMAX"
@@ -258,7 +259,7 @@
          STL_ARIMAXpars <- rbind(STL_ARIMAXpars, Par))
   if (house == houses[length(houses)]){
     STL_ARIMAXpars <- ARIMApars[,c(4,1,2,3)]
-    write_csv(STL_ARIMAXpars, path = paste0(dFolder, Model, "/parameters.csv"))
+    write_csv(STL_ARIMAXpars, path = paste0(dFolder, "models/",  Model, "/parameters.csv"))
   }
   
   Model <- "SVM"
