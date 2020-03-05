@@ -1,18 +1,6 @@
 ################## TO DO ##################
 
-TALK TO BEV ABOUT STIPEND
-Include Italian ARIMAX article in lit rev
 Fix plots so it prints ok
-Change fitting speed to include validating
--Have fitting and validating separate, then take the total
-Elaborate on ARIMAX/STL + ARIMAX in methodology
-Complete results chapter
--Seasonal naive
--ARIMAX
--STL+ARIMAX
--residual analysis for all households
-Work on residuals:
--Quantify value during peaks
 Some prelim analysis can be seperated into methodology/results
 Can then have two results chapters: prelim data analysis and modelling
 Include nomenclature at beginning (after list of tables?)
@@ -23,7 +11,5 @@ modelling.R may be better separated into individual functions that are called on
 Plot ACV of model residuals to check that seasonality is being accounted for
 -Join individual plots with grid.arrange
 Add other elec (dotted line) to linear model plot
-Redo ccv plot
 Clone github repository and rerun to check reproducibility
 Explain/reference frequency analysis/periodogram
-Try to plot weighting coefficients and pull out code of how VAR model gets them so we may use this for a GAM model
