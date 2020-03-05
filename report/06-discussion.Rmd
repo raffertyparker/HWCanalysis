@@ -1,4 +1,6 @@
 # Discussion
 
-
-The computational speed of the SVM model is two orders of magnitude higher than that of the conventional models, demonstrating the trade-off between speed and accuracy that we face, particularly when progressing from conventional to AI methods. 
+Unsurprisingly, increasing the complexity of the models tends to increase both the accuracy of the model, and the time taken to fit.
+Increasing computational time doesn't necessarily ensure increased accuracy however, as the SVM model has a fitting time that is two orders of magnitude higher than that of the conventional models, while being slightly outperformed by the STL + ARIMAX model in accuracy. 
+All models are less accurate during peak periods, however those that incorporate the STL decomposition have a smaller percentage increase in errors than others, due to the inclusion of seasonal effects.
+The SVM model displayed the largest percentage increase in error during peak periods.

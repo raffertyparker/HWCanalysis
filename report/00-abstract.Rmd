@@ -10,5 +10,4 @@ Every stage of the process was formulated to facilitate reuse of selected models
 Consideration was given to performance metrics other than forecast accuracy, such as the computational speed of model fitting and the suitablity of the model for providing deeper understanding of behavioural patterns of hot water use.
 It was found that in general, increasing the forecast accuracy of models reduced their performance in other metrics.
 A relationship was discovered between the electricity demand of other appliances and that of future hot water demand, which was incorporated into some models.
-Of the models selected for development and comparison, support vector machines provided the most accurate forecasts.
-A model incorporating seasonal decomposition with local polynomial regression and autoregressive integrated moving averages also provided reasonable accuracy, while outperforming support vector machines in other metrics.
+A model incorporating seasonal decomposition with local polynomial regression, autoregressive integrated moving averages, and other electricity demand as an external regressor was the most accurate, while also performing highly in other metrics.

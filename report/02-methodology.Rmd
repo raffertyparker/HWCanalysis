@@ -1,4 +1,4 @@
-# Methodology {#methodology}
+# Data analysis {#da}
 
 This chapter begins by giving an introduction to the origin of our dataset, as well as noting some necessary preliminary cleaning. It goes on to provide a more theoretical background as to the nature of our data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
 
@@ -137,7 +137,7 @@ load(paste0(dFolder, "meansDT.Rda"))
 
 ```{r summary1, echo=FALSE}
 meansDT %>%
-  knitr::kable(caption = "Mean values electricity demand for hot water and other appliances")
+  knitr::kable(caption = "Mean values of electricity demand for hot water and other appliances")
 ```
 
 Table \@ref(tab:summary1) shows the mean values of hot water electricitydemand  and other appliance electricity demand for each household. Note the large variation in average demand, which can also be seen in the boxplot shown in Figure \@ref(fig:demandBoxplot).
@@ -151,7 +151,7 @@ knitr::include_graphics(paste0(pFolder, "averages/boxplot.png"))
 knitr::include_graphics(paste0(pFolder, "averages/averageDemand.png"))
 ```
 
-Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. Average demand varies significantly for each household, ranging from `r round(min(meansDT$HWelec), 2)`W (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r round(max(meansDT$HWelec), 2)`W (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`).
+Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. Average demand varies significantly for each household, ranging from `r signif(min(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r signif(max(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`).
 
 ### Autocovariance of hot water use
 
@@ -184,7 +184,7 @@ While some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many ha
 ```{r bothElecPlot, echo=FALSE, out.width='100%', fig.cap="Hot water and other appliances' electricity use over one day"}
 knitr::include_graphics(paste0(pFolder, "bothElecPlot.pdf"))
 ```
-Many households appeared to show instances whereby the electricity demand of other appliances increased before the hot water element switched on. This may be understood by considering general domestic behavioural patterns. Many people may choose, for example, to turn on the kettle before a shower in the morning, or cook dinner before doing the dishes in the evening. An example demonstrating this behaviour is given in Figure \@ref(fig:bothElecPlot).
+Many households appeared to show instances whereby the electricity demand of other appliances increases before the hot water element switched on. This may be understood by considering general domestic behavioural patterns. Many people may choose, for example, to turn on the kettle before a shower in the morning, or cook dinner before doing the dishes in the evening. An example demonstrating this behaviour is given in Figure \@ref(fig:bothElecPlot).
 While this figure may not in itself be very compelling, we can make a more thorough exploration into the temporal relationship between hot water electricity demand and that of other appliances using the cross-covariance function.
 
 In a similar fashion to the autocovariance function (Equation \@ref(eq:ACV)), the cross-covariance function of two variables $x, y$ is given by
@@ -239,8 +239,8 @@ This section outlines a broad introduction to the various models selected for us
 A time series $\{x_t\}$ is known as a 'random walk' if 
 
 \begin{equation}
-x_t = x_{t+1} + w_t ,
-(\#eq:randomWalk)
+  x_t = x_{t-1} + w_t ,
+  (\#eq:randomWalk)
 \end{equation}
 where $\{w_t\}$ is a white noise series. 
 Random walk models are more commonly used in simulations than forecasts. When used in simulations, a random walk model will artificially generate white noise to simulate a potential evolution of the variable in time.
@@ -268,7 +268,7 @@ Another way of utilising simple linear regression for time series forecasting is
 
 ### Moving average
 
-A q-order moving average process, $MA(q)$ can be expressed as a linear combination of the current white noise residual ($w_t$, see @TSoverview) and the $q$ most recent previous residuals, defined as
+A q-order moving average process, $MA(q)$ can be expressed as a linear combination of the current white noise residual ($w_t$, see \@ref(TSoverview)) and the $q$ most recent previous residuals, defined as
 \begin{equation}
 x_t = w_t + \beta_1 w_{t-1} + ... + \beta_q w_{t-q} ,
 (\#eq:MA1)
@@ -308,13 +308,13 @@ The naive model in Section \@ref(naive) is the special case $I(1)$.
 
 An Autoregressive Moving Average (ARMA) process of order $(p,q)$ combines autoregression with the moving average process, adding the two together. This results in 
 \begin{equation}
-x_t = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q} .
-(\#eq:ARMA)
+  x_t = \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q} .
+  (\#eq:ARMA)
 \end{equation}
 This may be expressed in terms of the backward shift operator in polynomial form as
 \begin{equation}
-\theta (\bf{B}) x_t = \phi (\bf{B}) w_t .
-(\#eq:ARMApolyform)
+  \theta (\bf{B}) x_t = \phi (\bf{B}) w_t .
+  (\#eq:ARMApolyform)
 \end{equation}
 The previously described processes are frequently combined into what as known as an Autoregressive Integrated Moving Average (ARIMA).
 A time series $\{x_t\}$ is referred to as an $ARIMA(p,d,q)$ process if, when differenced $d$ times, it becomes an $ARMA(p,q)$ process.
@@ -323,8 +323,8 @@ Values for $p,d,q$ are selected in order to best fit the data while minimising c
 The process of selecting optimal values for $p,d,q$ can be automated through minimising the Akaike Information Criterion (AIC)[@Akaike1974], where
 
 \begin{equation}
-AIC = -2\times \text{log-likelihood} + 2\times \text{number of parameters}.
-(\#eq:AIC)
+  AIC = -2\times \text{log-likelihood} + 2\times \text{number of parameters}.
+  (\#eq:AIC)
 \end{equation}
 
 The R function `auto.arima`[@R-forecast] was used to automatically select the parameters $p,d,q$ which minimise the AIC specific to the particular data being modelled. This is done iteratively according to the algorithm outlined in ref[@RobJ.Hyndman2008]. Inputs for maximum values of $p$ and $q$ are necessary in order to bound processing time.
@@ -351,20 +351,20 @@ The models previously mentioned assume the dependent variables are continuous an
 This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot) for an example of this behaviour.
 -->
 
-### ARIMAX
+### ARIMAX {#ARIMAX}
 
 ARIMAX (ARIMA with external regressor or exogenous variable) models utilise both time series and causal methods by including an explanatory variable (in our case, other appliance electricity demand) as a linear regressor within an ARIMA model.
 One way in which this model may be interperated is as a simple linear regression model with ARIMA errors.
 This combines Equations \@ref(eq:simpleLinearRegression) and \@ref(eq:ARMA) in the form
 
 \begin{equation}
-x_t = \gamma_0 + \gamma_1y_{t-1} + \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + w_t + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q}.
+x_t = \gamma_1y_{t-1} + \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q} + w_t .
 (\#eq:ARMA)
 \end{equation}
 Where $y$ is the exogenous variable (in our case, other appliance electricity demand).
 This may be expressed in terms of the backward shift operator in polynomial form as
 \begin{equation}
-x_t = \gamma_0 + \gamma_1y_{t-1} + \frac{\theta (\bf{B})}{\phi (\bf{B})} w_t .
+x_t = \frac{\gamma_1}{\phi (\bf{B})}y_{t-1} + \frac{\theta (\bf{B})}{\phi (\bf{B})} w_t .
 (\#eq:ARMAXpolyform)
 \end{equation}
 
@@ -372,6 +372,7 @@ x_t = \gamma_0 + \gamma_1y_{t-1} + \frac{\theta (\bf{B})}{\phi (\bf{B})} w_t .
 ### STL decomposition with ARIMAX
 
 Combining the predictive power of seasonal decomposition, external regressors, and time series analysis, we have an STL decomposition with ARIMAX model.
+This method decomposes the data into seasonal, trend and remainder components, (refer to Section \@ref(STL)), and then fits an ARIMAX model to the remainder using lagged values of other appliance electricity demand as the external regressors (refer to Section \@ref(ARIMAX)). This is then recombined with the seasonal and trend components to complete the model.
 
 ### Support vector machines
 
@@ -402,12 +403,12 @@ There are a number of different considerations that must be made when comparing 
 ### Accuracy
 
 Perhaps the most important consideration in forecasting is the accuracy of the model. For this work, model accuracy is determined by the root mean square (RMS) of the residuals, averaged over each house, with lower values indicating higher accuracy.
-As demand respose is most crucial during daily peak periods, additional analysis is carried out to acertain the accuracy during grid peaks (defined as 7am to 9am, and 5pm to 8pm, as per reference [@TranspowerNZ2015].
+As demand respose is most crucial during daily peak periods, additional analysis is carried out to acertain the accuracy during grid peaks (defined as 7am to 9am, and 5pm to 8pm[@TranspowerNZ2015]).
 
 ### Physical fidelity
 
 In addition to accuracy of prediction values, there are benefits to models that closely resemble the physical process they are predicting.  While a model that provides occasional values that are negative or greater than the element can output may provide a minimal RSS, they would not be optimal to use when modelling for research purposes. 
-Physical fidelity is a measure of how closely the model approximates the physical process of the element of the hot water cylinder turning on and off in response to the draw down of hot water. Properties of decent physical fidelity include the non-existance of negative values or values above the maximum power of the element being modelled, and replication of the on/off nature of the element at one minute timescales.
+Physical fidelity is a measure of how closely the model approximates the physical process of the element of the hot water cylinder turning on and off in response to the draw down of hot water. Properties of decent physical fidelity include the non-existance of negative values or values above the maximum power of the element being modelled, as well as replication of the general shape of data determined by the on/off nature of the element.
 
 ### Interpretability
 

@@ -5,9 +5,16 @@ This chapter needs to state:
 *what we actually found
 *potential for future work
 
+
+
+This thesis set out to build and compare a selection of models to forecast residential hot water electricity demand using only data in the format currently available from smart meters in New Zealand. The ultimate goal was to discover an 'optimal' forecasting method for predicting hot water electricity demand for incorporation into a smart-control system.
+
+The method this research suggests as being most promising was STL decomposition of the hot water demand data into seasonal, trend and remainder components, modelling the remainder as an ARIMAX process with other electricity demand as the exogenous variable, and subsequent recomposition of the ARIMAX modelled remainder with the seasonal and trend components. This method (referred to as STL + ARIMAX) provided a combination of accuracy, computational speed and interpretability that was unmatched in other methods considered. It was, however, outperformed by a number of other methods in physical fidelity, with the output containing values unobtainable by the cylinder element, as well as having higher stochasticity than the data due to the presence of the exogenous variable.
+
 ## Potential for further work 
 
-
+The obvious next step for this work is to incorporate the recommended forecasting model into hot water cylinder smart control scenarios (either simulated or real-world) and determine the additional benefits it can provide over smart control without demand forecasting.
+In addition, there is potential for further exploration of these models for forecasting the demand of other flexible appliances, such as electric vehicles.
 
 ### Generalised additive models
 Another prediction method that is used for electricity demand forecasting is _generalized additive models_. These...
@@ -20,10 +27,6 @@ Another forecasting model referred to within the literature is exponential smoot
 The element within a typical hot water cylinder works is controlled thermostatically by an "on-off" (otherwise known as "bang-bang") controller. This type of controller turns the element fully "on" when the water temperature drops below a certain temperature, and then fully off again once the water reaches another (slightly higher) temperature. _include diagram?_
 On small timescales, the element may then be considered a binary process, impacting our choice of forecasting model. Forecasting a binary output requires more sophisticated models than forecasting a "continous" output. 
 Logistic Autoregression is a predictive model that takes the autoregression model from Chapter \@ref(results) and.....
-
-### Application to other appliances
-
-_Discuss the applicability to EV charging_
 
 <!--
 Despite the reasonable forecasting accuracy of the vector autoregression method above, the model diverges from physical reality in two crucial ways. First, the model is fitted using ordinary least squares, with no regard for maintaining the forcasted demand to be greater than zero.
