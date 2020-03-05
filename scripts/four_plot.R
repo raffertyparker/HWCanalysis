@@ -15,7 +15,7 @@ library(reshape2)
 library(dplyr)
 library(lubridate)
 
-My_Theme = theme(
+Big_Theme = theme(
   axis.title.x = element_text(size = 20),
   axis.text.x = element_text(size = 12),
   axis.title.y = element_text(size = 20),
@@ -23,8 +23,8 @@ My_Theme = theme(
 
 theme_set(theme_minimal())
 
-modelName <- "SVM" # For manual creation 
-#models <- c("naive", "seasonalNaive", "ARIMA", "ARIMAX", "SARIMA", "simpleLinear")
+#modelName <- "STLARIMA" # For manual creation 
+models <- c("naive", "seasonalNaive", "ARIMA", "ARIMAX", "SARIMA", "simpleLinear", "STLARIMA", "STLARIMAX")
 fourHouses <- c("rf_06", "rf_13", "rf_22", "rf_40") 
 
 for (modelName in models){
@@ -39,7 +39,11 @@ for (modelName in models){
   
   for (house in fourHouses){
     assign("pMdl", as.data.table(get(paste0(house, "_model"))$x))
-    names(pMdl) <- c("dateTime_nz", "Actual")
+    if(ncol(pMdl) == 1){ # Accomodates different model formats
+           pMdl$dateTime_nz <- get(paste0(house, "_model"))$hHour
+           setcolorder(pMdl, c("dateTime_nz", "x"))
+    }
+           names(pMdl) <- c("dateTime_nz", "Actual")
     ifelse("fitted.values" %in% names(get(paste0(house, "_model"))), 
            pMdl$Predicted <- as.numeric(get(paste0(house, "_model"))$fitted.values),
            pMdl$Predicted <- as.numeric(get(paste0(house, "_model"))$fitted))
@@ -66,6 +70,7 @@ for (modelName in models){
   # facet_wrap(. ~ linkID, scales = "free")
   p
   ggsave(filename = paste0(pFolder, modelName, "/fourHouses.pdf"))
-  p + My_Theme
   ggsave(filename = paste0(pFolder, modelName, "/fourHouses.png"))
+  p + Big_Theme
+  ggsave(filename = paste0(pFolder, modelName, "/fourHousesLarge.png"))
 }

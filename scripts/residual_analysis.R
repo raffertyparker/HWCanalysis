@@ -48,9 +48,9 @@ addPeaks <- function(p){
 
 
 
-models <- c("STLARIMA", "naive","seasonalNaive","simpleLinear", "ARIMA", "ARIMAX", "SVM")
+models <- c("naive","seasonalNaive","simpleLinear", "ARIMA", "ARIMAX","STLARIMA", "STLARIMAX", "SVM")
 #house <- "rf_06"
-#model <- "seasonalNaive"
+#model <- "STLARIMAX"
 for (model in models){
   for (house in houses){
     mdl <- readRDS(paste0(dFolder, "models/", model, "/", house, "_validated_model.rds"))

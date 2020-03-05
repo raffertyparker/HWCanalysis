@@ -246,7 +246,7 @@
   peakMdl <- peakMdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
   sVec <- data.frame(model=Model,
                      household=house,
-                     RMSE=sqrt(mean(valSTLArima$residuals^2)),
+                     RMSE=sqrt(mean(valSTLArimaX$residuals^2)),
                      peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
                      fittingTime=as.numeric(fitTime),
                      memSize=as.numeric(object.size(fitSTLArima)),
@@ -280,14 +280,14 @@
   saveRDS(val_mdl, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
    plotModel(val_mdl, Model) # Needs to be in xts format, not worth fixing, plotModelSVM.R works fine for now
 #  plotModelSVM(dt_val, predicted_values)
- #  peakMdl <- as.data.table(cbind(ts_val$dHour, valSTLArima$residuals)) # Create dt of hour + residual
+#  peakMdl <- as.data.table(cbind(ts_val$dHour, valSTLArima$residuals)) # Create dt of hour + residual
 #   names(peakMdl) <- c("dHour", "residuals")
    val_mdl$dHour <- hour(val_mdl$hHour) + minute(val_mdl$hHour)/60
    peakMdl <- val_mdl[(dHour >= 7 & dHour < 9) | (dHour >= 17 & dHour < 20)] # Crop to only include peak hour residuals
   sVec <- data.frame(model=Model,
                      household=house,
                      RMSE=sqrt(mean(val_mdl$residual^2)),
-                     peakRMSE = sqrt(mean(peakMdl$residuals^2, na.rm = TRUE)),
+                     peakRMSE = sqrt(mean(peakMdl$residual^2, na.rm = TRUE)),
                      fittingTime=as.numeric(fitTime),
                      memSize=as.numeric(object.size(fitSVM)),
                      stringsAsFactors=FALSE)
@@ -313,6 +313,9 @@ saveRDS(DFsummary, file = paste0(dFolder, "allHouseModelStats.rds"))
 #saveRDS(ARIMApars, file = paste0(dFolder, "ARIMA/parameters.rds"))
 allHouseSummary <- DFsummary %>%
   group_by(model) %>%
-  summarise(RMSE = mean(RMSE), fittingTime = mean(fittingTime),
+  summarise(RMSE = mean(RMSE), 
+            peakRMSE = mean(peakRMSE), 
+            fittingTime = mean(fittingTime),
             memSize = mean(memSize))
+allHouseSummary$pcErrorIncrease <- 100*(allHouseSummary$peakRMSE - allHouseSummary$RMSE)/allHouseSummary$RMSE
 saveRDS(allHouseSummary, file = paste0(dFolder, "allModelSummaryStats.rds"))

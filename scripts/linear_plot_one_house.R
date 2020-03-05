@@ -1,17 +1,18 @@
 # This creates a linear regression plot for a selected house
-if (!exists("dFile")){
-  dFile <- "~/HWCanalysis/data/" 
+if (!exists("dFolder")){
+  dFolder <- "~/HWCanalysis/data/" 
 }
-if (!exists("pFile")){
-  pFile <- "~/HWCanalysis/plots/" 
+if (!exists("pFolder")){
+  pFolder <- "~/HWCanalysis/plots/" 
 }
 # Load the processed dataframe
 if (!exists("DT_hh")){
-  load(paste0(dFile, "DT_hh.Rda"))
+  load(paste0(dFolder, "DT_hh.Rda"))
 }
 
 library(data.table)
 library(ggpmisc)
+theme_set(theme_minimal())
 
 DF_hh <- as.data.frame(DT_hh)
 house <- "rf_13"  # Input appropriate house
@@ -34,5 +35,5 @@ p <- ggplot(data = linearRelData, aes(x = nonHW, y = HWminusOne)) +
                rr.digits = 2, parse = TRUE)         
 p + labs(x = "Other appliance demand (time = t)", 
          y = "Hot water demand (time = t+30 mins)", title = "")
-ggsave(filename = paste0(pFile, house, "LinearPlot.pdf"))
-ggsave(filename = paste0(pFile, house, "LinearPlot.png"))
+ggsave(filename = paste0(pFolder, house, "LinearPlot.pdf"))
+ggsave(filename = paste0(pFolder, house, "LinearPlot.png"))
