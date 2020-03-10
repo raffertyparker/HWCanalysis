@@ -23,7 +23,7 @@ In our naive model we assume no drift, and only attempt to predict one (half hou
 knitr::include_graphics(paste0(pFolder, "naive/fourHouses.pdf"))
 ```
 
-As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistantly 'missing' the actual values.
+As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistently 'missing' the actual values.
 
 The naive model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "naive"], 2)`W.
 
@@ -57,7 +57,7 @@ The model precisely mimics the actual data with a week long lag, and therefore s
 knitr::include_graphics(paste0(pFolder, "seasonalNaive/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model...
+Examination of the aggregated daily average residuals shows that despite attempting to consider cyclic effects, this model performs very poorly during peak periods, with a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "seasonalNaive"], 2)`%, slightly higher than that of the naive model.
 
 ## Simple linear regression
 
@@ -74,7 +74,7 @@ Figure \@ref(fig:linearRelations) shows a simple linear regression of current no
 ```{r simpleLinear, echo=FALSE, out.width='100%', fig.cap="Performance of simple linear regression model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "simpleLinear/fourHouses.pdf"))
 ```
-Figure \@ref(fig:simpleLinear) shows the effectiveness of this model for four seperate households. 
+Figure \@ref(fig:simpleLinear) shows the effectiveness of this model for four separate households. 
 <!--
 Different households used!
 
@@ -83,7 +83,7 @@ Household `rf_13` appears to predict increase in hot water electricity demand be
 This should be compared to Figure \@ref(fig:crossCovariance), which shows the correllation between hot water and not hot water electricity peaking at around 200 minutes lag for this household.
 Household `rf_30` shows a model which appears to be very unresponsive to the data. Again, on close examination of Figure \@ref(fig:crossCovariance) we see that this household has a peak in crosscorrelation at around 800 minutes. 
 This indicates that for some households, a correlation lag of greater than 30 mins may increase accuracy. 
-Households `rf_42` and `rf_44` show a more accurate model result, however due to the presence of a non-zero y intercept these models will always consistantly overestimate hot water electricity whenever the true value is zero.
+Households `rf_42` and `rf_44` show a more accurate model result, however due to the presence of a non-zero y intercept these models will always consistently overestimate hot water electricity whenever the true value is zero.
 -->
 The simple linear regression model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "simpleLinear"], 2)`W.
 
@@ -99,7 +99,7 @@ In addition, this model lends itself to being utilised as an input into more com
 knitr::include_graphics(paste0(pFolder, "simpleLinear/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model
+This model performed particularly poorly during peak periods, with a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "simpleLinear"], 2)`%.
 
 ## ARIMA model
 
@@ -121,7 +121,7 @@ knitr::include_graphics(paste0(pFolder, "/ARIMA/fourHouses.pdf"))
 knitr::include_graphics(paste0(pFolder, "ARIMA/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model underperforms during peak periods, hampering its ability to assist in demand response scenarios.
+Examination of the aggregated daily average residuals shows that this model also underperforms during peak periods, with a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "ARIMA"], 2)`%.
 
 ## ARIMAX model
 
@@ -142,7 +142,7 @@ knitr::include_graphics(paste0(pFolder, "/ARIMAX/fourHouses.pdf"))
 knitr::include_graphics(paste0(pFolder, "ARIMAX/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model
+The addition of the external regressor provides a very slight increase of accuracy during peak periods compared to the ARIMA model, with an increase in RMSE of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "ARIMAX"], 2)`%.
 
 ## ARIMA with STL decomposition
 
@@ -162,7 +162,7 @@ knitr::include_graphics(paste0(pFolder, "STLARIMA/fourHouses.pdf"))
 knitr::include_graphics(paste0(pFolder, "STLARIMA/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model
+While still losing accuracy during peak periods, with a RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "STLARIMA"], 2)`%, this model had the lowest percentage increase in peak period RMSEs of all those considered in this analysis.
 
 ## ARIMAX with STL decomposition
 
@@ -181,7 +181,7 @@ knitr::include_graphics(paste0(pFolder, "/STLARIMAX/fourHouses.pdf"))
 knitr::include_graphics(paste0(pFolder, "STLARIMAX/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model
+This method had a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "STLARIMAX"], 2)`%, which, interestingly, is slightly more than the same model without the external regressor.
 
 ## SVM model
 
@@ -202,4 +202,4 @@ knitr::include_graphics(paste0(pFolder, "/SVM/fourHouses.pdf"))
 knitr::include_graphics(paste0(pFolder, "SVM/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model
+Examination of the aggregated daily average residuals shows that this model had the highest increase in peak period RMSEs of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "SVM"], 2)`%.

@@ -20,7 +20,7 @@
 # Combines hot water elec and total in new data table
 # Subtracts hot water from total
 # Cleans 'holes' from some further households 
-# Creates summary data tables
+# Creates summary data tables and plots
 
 library(data.table)
 library(lubridate)
@@ -35,6 +35,8 @@ if (!exists("dFolder")){
 if (!exists("pFolder")){
   pFolder <- "~/HWCanalysis/plots/" 
 }
+
+theme_set(theme_minimal())
 
 # If different extraction dates are used these need to be changed accordingly
 p <- fread(paste0(dFolder, "mputed_2010-01-01_2020-01-01_observations.csv.gz"))

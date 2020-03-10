@@ -16,33 +16,34 @@ source(paste0(filepathsPath, "/filepaths.R"))
 
 ## Demand side management
 
-Temporal variation in electricity demand occurs at a variety of timescales in an electricity grid. As electrical energy cannot be stored, electricity supply must match this fluctuating demand. Providing electricity at times of very high demand requires the building and maintanence of underutilised generation and transmission infrastructure, a costly and inefficient situation[@Strbac2008]. 
+Temporal variation in electricity demand occurs at a variety of timescales in an electricity grid. As electrical energy cannot be stored, electricity supply must match this fluctuating demand. Providing electricity at times of very high demand requires the building and maintenance of underutilised generation and transmission infrastructure, a costly and inefficient situation[@Strbac2008]. 
 There are currently a range of mechanisms in place to ensure that the supply of electricity balances with the varying demand[@Strbac2008], and that currents do not exceed transmission and distribution infrastructure constraints[@TranspowerNZ2015].
 
 The process of adjusting demand to meet supply is referred to as demand side management (DSM). The challenges associated with supplying electricity in order to effectively meet demand are likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015]. Demand side management is thus likely to have an increasing role in the transition to a low-carbon electricity grid. 
 
-The grid benefits in being able to rapidy increase generation or decrease load is reflected by the ability to monetize this capacity through various electricity markets.
+The grid benefits in being able to rapidly increase generation or decrease load is reflected by the ability to monetize this capacity through various electricity markets.
 The 'instantaneous reserves' (IR) markets are national markets concerned with stabilising the grid alternating current (AC) frequency during times of severe demand peaks or grid emergencies.
 
-New Zealand's electricity system frequency must be maintained at or near 50 Hz. Roughly speaking, when more electricity is generated than is being consumed the AC frequency increases, and when more electricity is being consumed than is generated the AC frequency drops.
+New Zealand's electricity system frequency must be maintained at or near 50 Hz. In general, when more electricity is generated than is being consumed the AC frequency increases, and when more electricity is being consumed than is generated the AC frequency drops.
 In the event of a large generator unexpectedly going offline, a high voltage direct current (HVDC) pole tripping, or other large disruptions to supply there must be reserve electricity available so that the frequency is maintained within an acceptable range (between 48 and 52 Hz). This is provided by the instantaneous reserves market[@EANZ2014]. The systems operator will pay a premium for any electricity available to be generated during these periods (know as generating capacity), or load able to be shed during these periods (known as interruptible load).
 There are two distinct markets covering these periods. Fast instantaneous reserve (FIR) is for electricity that can be produced (or load that can be shed) within 1 second and continue being produced (or remain reduced) for 60 seconds. Sustained instantaneous reserve (SIR) is for electricity that can be produced (or load that can be shed) within 60 seconds and continue being produced (or remain reduced) until instructed otherwise by the systems operator. 
-Electricity generators that are running under capacity, and electricity consumers with a large enough load, may sell their ability to increase supply or decrease demand in half-hour ahead markets.
+Electricity generators that are running under capacity, and electricity consumers with a large enough reducible load, may sell their ability to increase supply or decrease demand in half-hour ahead markets.
 These actors are then paid for providing this service, regardless of whether or not they were required to perform it.
 
 Congestion period demand charges are another market-based mechanism for smoothing electricity loads. 
-Large electricity users are often provided a discounted kWh price of electricity, while being charged high penalties for any electricity consumed during times where there is extreme local network demand (known as 'congestion periods')[@Orion2017].
+Large electricity users are often provided a discounted kWh price of electricity, while being charged high penalties for any electricity consumed during times where there is extreme local network demand (known as 'congestion periods')[@Orion2017]. Once again, this provides market value to the ability to shift electricity demand in time.
 
 Another DSM mechanism is that of ripple control. 
-Ripple control is a system whereby electricity distribution networks provide a discounted electricity rate in order to be able to remotely cease the supply of electricity during peak periods or grid emergencies[@Orion2017]. 
+Ripple control is a DSM mechanism that has been utilised in New Zealand since the 1950's.
+Under a ripple controlled system, electricity distribution networks provide a discounted electricity rate in order to be able to remotely cease the supply of electricity during peak periods or grid emergencies[@Orion2017]. 
 This is achieved through sending high frequency signals though the electricity lines to be interpreted by specialised receivers that then suppress the operation of the appliance they are connected to (usually hot water cylinders or irrigation systems).
-While this system as it currently operates is highly beneficial to the grid, it has been operating essentially unchanged since its introduction in the 1950s, and there is significant room for improvement utilising more recent technology[@Jack].
+While this system as it currently operates is highly beneficial to the grid, it has been operating essentially unchanged since its introduction, and there is significant room for improvement utilising more recent technology[@Jack].
 
 An additional mechanism for matching supply and demand is that of spot market electricity pricing.
 The New Zealand electricity grid is composed of over 200 points at which electricity may enter or exit. These are referred to as the grid 'nodes'. 
 Electricity generators bid for the right to provide electricity to cover the predicted demand of each grid node over the next half-hour[@ElectricityAuthority2011]. 
 Price variation occurs according to supply and demand. Prices rise when there is high electricity demand on the grid or there is limited availability of electricity resources with low marginal cost of production, such as those from renewable sources. Conversely, prices fall when electricity is cheap to produce, or total electricity demand is low. 
-Spot market electricity prices fluctuate wildly, with the Benmore node BEN2201 having prices ranging from \$0.02/MWh to \$894.38/MWh during 2017.
+Spot market electricity prices fluctuate wildly, with the Benmore node BEN2201 having prices ranging from \$0.02/MWh to \$894.38/MWh during 2017 for example.
 Electricity retailers purchase electricity from the generators on this spot market, and sell it to consumers. 
 While some larger commercial and industrial electricity consumers are exposed to spot market pricing and may adjust their consumption accordingly, residential electricity consumers are usually charged a fixed price per kWh, with the price variability being 'bundled in' by the retailer.
 There have been proposals[@NewZealandElectricityCommission2009] that a market-based tactic to reduce grid peaks would be to encourage residential consumers to move to a real-time pricing plan that uses smart meters to send price signals in order to disincentivise peak-time electricity usage. 
@@ -52,15 +53,16 @@ One solution to this is to automate the scheduling of appliances in order to tak
 
 
 With the rapid rise of 'internet of things' technology, whereby devices are interconnected and offer the ability to be controlled remotely, there is the ability to automatically schedule flexible devices in order to minimise operations costs or more effectively utilise renewable electricity sources.
-Many electricity using devices can have their use times shifted on a daily scale with limited impact to the end user (a property referred to as 'flexibility'). Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders (HWCs). Flexibile devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand (for example into times where electricity is cheaper) with minimal impact to the end user.
+Many electricity using devices can have their use times shifted on a daily scale with limited impact to the end user (a property referred to as 'flexibility'). Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders (HWCs). Flexible devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand (for example into times where electricity is cheaper) with minimal impact to the end user.
 
 
 ## Predicting electricity demand
 
-The ability to predict usage patterns allows devices to be controlled according to the usage patterns of individual houses. This is beneficial for demand side management objectives as it would provide additional capacity for control while reducing negative effects on service[@Gelazanskas2015]. It may also provide the means to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted shedable demand. 
+The ability to predict usage patterns allows devices to be controlled according to the usage patterns of individual houses. This is beneficial for demand side management objectives as it would provide additional capacity for control while reducing negative effects on service[@Gelazanskas2015]. It may also provide the means to participate in half-hour ahead demand response markets by providing the ability to bid an estimated capacity for load-shedding according to forecasted reducible demand. 
 In addition, scheduling thermal appliances such as hot water cylinders to fit forecasted demand patterns can facilitate improvements in energy efficiency[@Denis2019].
+
 With the roll-out of smart meters in New Zealand, there is now the ability to collect and process essentially 'real-time' data on hot water electricity consumption for individual consumers. 
-This would allow ripple control (or a similar system) to be personalised to individual household useage patterns, providing the ability to suppress the element operation more or less frequently according to whether the household had low or high hot water consumption, respectively.
+This would allow ripple control (or a similar system) to be personalised to individual household usage patterns, providing the ability to suppress the element operation more or less frequently according to whether the household had low or high hot water consumption, respectively.
 
 ### Enhancing control for DSM objectives
 
@@ -70,13 +72,13 @@ A study by the Household Energy End Use Project (HEEP) showed that hot water usa
 In New Zealand, electric hot water cylinders (HWCs) are very common, with 91% of households having electricity as an energy source for water heating[@Pollard2002]. 
 Due to their ability to store large amounts of energy in the form of heat, hot water cylinders are generally the most “flexible” appliances in New Zealand households[@Stephenson2017], rendering them perfect candidates for demand shifting.
 While control of hot water cylinders for DSM objectives is possible without demand forecasting, the ability to accurately predict future demand allows more finely-tuned control that may be catered to the use patterns of individual households, allowing a far greater range of control without negative effects to the end-user[@Lomet2015].
-In addition, the ability to predict (with reasonable accuracy) the electricity load for the next half hour of a significant number of hot water cylinders would allow an aggregator service with remote control abilities to submit bids into the instantaneous reserves markets.
+In addition, the ability to predict (with reasonable accuracy) the electricity load for the next half hour of a significant number of hot water cylinders would provide the ability for companies which have the ability to remote control these HWCs (known as an "aggregator service") to submit bids into the instantaneous reserves markets.
 
 ### Reducing standing losses
 
 In addition to assisting DSM objectives, personalised control of hot water cylinders can improve their efficiency by only heating as much water as is required by the household. 
-Hot water cylinders under normal usage conditions have a tendency to 'stratify' their contents into distict bodies of water, namely a hot upper layer of water and a cool lower layer of water, separated by a thin thermocline[@JackDew2018].
-The household residents may use hot water with no noticeable changes in temperature until the hotter top layer suddenly runs out, causing the unpleasant 'cold water event', familar to many who have lived in a household with heavy hot water use.
+Hot water cylinders under normal usage conditions have a tendency to 'stratify' their contents into distinct bodies of water, namely a hot upper layer of water and a cool lower layer of water, separated by a thin thermocline[@JackDew2018].
+The household residents may use hot water with no noticeable changes in temperature until the hotter top layer suddenly runs out, causing the unpleasant 'cold water event', familiar to many who have lived in a household with heavy hot water use.
 For those households with moderate to low hot water demand however, their hot water cylinder may be keeping a far greater amount of water hot than they would expect to use.
 As no insulation is perfect, any object that is hotter than its surroundings will suffer from heat loss, with the amount of heat lost being proportional to the difference in temperature between the body and the surroundings. 
 Thus, as hot water loses heat energy to the environment faster than cooler water, storing hot water in excess of what is required is inefficient. 
@@ -88,16 +90,14 @@ The ability to store only as much hot water as will be required by the household
 Time series data is that which involves measurements of variables sequentially or at fixed intervals of time[@Cowpertwait2009].
 This data may then be processed, analysed and extrapolated in a manner that produces predictions of future events or occurrences, a process known as 'forecasting'. 
 There are number of different methods of forecasting time series data.
-Although the distinction is subtle, these methods may be broadly separated into two catagories; (i) conventional, and (ii) artificial intelligence (AI)[@MatDaut2017].
-In the context of electricity demand, forecasting may also be boradly classified by the length of time into the future the demand (or 'load') forecast is predicting[@Ahmad2014]. Short term load forecasting (STLF) is usually used to refer to predictions of less than 24 hours, although it can refer to forecast periods of up to one week. Medium term load forecasting (MTLF) refers to predictions between one week and one year. Long term load forecasting (LTLF) is for predictions spanning longer than one year.
+Although the distinction is subtle, these methods may be broadly separated into two categories; (i) conventional, and (ii) artificial intelligence (AI)[@MatDaut2017].
+In the context of electricity demand, forecasting may also be broadly classified by the length of time into the future the demand (or 'load') forecast is predicting[@Ahmad2014]. Short term load forecasting (STLF) is usually used to refer to predictions of less than 24 hours, although it can refer to forecast periods of up to one week. Medium term load forecasting (MTLF) refers to predictions between one week and one year. Long term load forecasting (LTLF) is for predictions spanning longer than one year.
 
 ### Conventional forecasting methods
 
-_Need to provide a clearer picture of the strengths and weaknesses of these forecasting methods_
-
 Conventional methods may be separated into two distinct techniques.
 The first, referred to as _causal_ modelling[@Hong2016], utilises data of separate but related (explanatory[^1]) variables and makes predictions based on basic statistical relationships between them. Regression analysis is a causal model commonly used in electricity forecasting, and may be understood as follows:
-If there is the ability to know (or sufficiently accurately predict) the value(s) of the independant variable(s) at a particular future time, then a forecast for the dependent variable may be calculated at that same time based on the causal relationship between them.
+If there is the ability to know (or sufficiently accurately predict) the value(s) of the independent variable(s) at a particular future time, then a forecast for the dependent variable may be calculated at that same time based on the causal relationship between them.
 In the context of electricity demand forecasting, relevant predictable independent variables may be social factors such as public holidays, or (accurately forecasted) weather conditions[@Wei2018].
 However if there is no obtainable value(s) for the independent variable(s) at the future time for which a prediction is required, more subtle techniques must be employed. 
 One option is to establish a relationship between the value(s) of the independent variables and the following values of the dependent variable. In the context of DHW electricity demand forecasting, this may be the relationship between the electricity demand of other appliances, and subsequent values of DHW electricity demand.
@@ -107,7 +107,7 @@ On important technique used in time series analysis is the separation of the dat
 In the context of DHW electricity time series data, the trend would be a gradual increase (or decrease) in average hot water use over long periods of time, the cycles would be average daily use patterns such as morning and evening peaks previously mentioned, and the noise is any deviation of the data from the trend and cycle components (people not actually using hot water according to strict mathematical relationships).
 Additionally, forecasts may be made by understanding the relationships between a variable and its previous values. Autoregression (AR) and moving average (MA) are two commonly utilised techniques to obtain these relationships. In the context of DHW forecasting this method may be best interpreted as an understanding of the lengths of time a water heater element will typically remain on (or off) for. 
 
-Conventional forecasting techniques are generally prized for being simple and interpretable, while taking minimal computing resources, but often require significant human input and tend to be outperformed in regards to accuracy by more advanced methods, such as artificial intelligence.
+Conventional forecasting techniques are generally prized for being simple and interpretable, while taking minimal computing resources, but often require significant human input and are often outperformed in regards to accuracy by more advanced methods, such as artificial intelligence.
 
 [^1]: Multivariate data can be thought to be made up of both dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research we use time and the electricity demand of other appliances).
 
@@ -126,7 +126,7 @@ In addition, AI modelling can be hindered by the large amounts of computing reso
 
 
 Two commonly used AI techniques in the field of electricity demand forecasting are those of artificial neural networks (ANN) and support vector machines (SVM).
-ANNs attempt to mimic biological learning mechanisms by processing a set of training data through clusters of artificial neurons, each of which individually recieve (numerical) inputs, assign them certain weights, and then output the weighted value into other artificial neurons, which perform the same task, until eventually producing a final output.
+ANNs attempt to mimic biological learning mechanisms by processing a set of training data through clusters of artificial neurons, each of which individually receive (numerical) inputs, assign them certain weights, and then output the weighted value into other artificial neurons, which perform the same task, until eventually producing a final output.
 The weights assigned by each neuron are then iteratively adjusted in order to minimise the error of the final output.
 
 While Hippert, Pedreira, and Souza[@Hippert2014] state in 2001 that ANNs do not outperform conventional forecasting methods in accuracy, a more recent analysis from Raza and Khosravi[@Raza2015] in 2015 claims the contrary.
@@ -134,7 +134,7 @@ Despite this recent claim to superiority in forecast accuracy, the computational
 To facilitate reproducibility of results, ANN methods were therefore not included within this research.
 
 An alternative AI method that is gaining in popularity for use in electricity demand forecasting is that of support vector machines (SVMs).
-Support vector machines may be used in electricity forecasting by automating the process of discovering, catagorising and quantifying various relationships within the data, such as those previously described as part of time series analysis and causal modelling[@Wei2018].
+Support vector machines may be used in electricity forecasting by automating the process of discovering, categorising and quantifying various relationships within the data, such as those previously described as part of time series analysis and causal modelling[@Wei2018].
 This method is less computationally expensive to train than ANNs, and better suited to solving non-linear problems such as those encountered in cyclic time series data[@Ahmad2014]. 
 <!--
 _Perhaps for these reasons, research interest of SVMs in the context of electricity demand forecasting is still growing, as can be seen in Figure \@ref(fig:SVMinDF). remove?_
@@ -148,15 +148,14 @@ knitr::include_graphics(paste0(pFolder, "SVelecDemandForecasting.png"))
 
 ## Relevant literature
 
-_Key things to aim for in the lit review: (i) Demonstrating that I know the literature, and (ii) Identifying the gap I intend to fill with this research._
-
 There is a large and active body of research that explores different methods of controlling demand-flexible appliances under various demand side management objectives. While some involve short-term forecasting of electricity prices, short-term demand forecasting of individual appliances is still relatively sparse in the academic literature. 
 
 This section is broadly separated into two parts. The first describes literature around control of appliances for efficiency gains or demand side management, the second describes literature around electricity demand forecasting.
 
 ### Smart control literature
 
-_Too many unfamiliar/unintroduced terms in here._
+_Too many unfamiliar/unintroduced terms in here. Need to either (i) put methodology before this section, or (ii) edit to make more general. Michael?_
+_Do I need to state the date after the authors?_
 
 Ramchurn, Vytelingum, Rogers and Jennings, (2011)[@Ramchurn2012] model households with generic storage capacity under a homeostatic control mechanism which uses linear optimisation to minimise consumption of high-carbon electricity by shifting electricity use over daily timescales in order to match predicted renewable energy availability. Reduction in residential carbon emissions of up to 25% were demonstrated, as were consumer savings of up to 14.5% under a carbon-based pricing mechanism. 
 
@@ -166,13 +165,13 @@ Cui, Wang, Wang and Zhang (2016)[@Cui2016] also used real-time pricing signals t
 
 Yu, Jia, Murphy-Hoye, Pratt and Tong (2013)[@Yu2013] modelled demand-side management of various residential appliances, with emphasis on a thermal model of the household HVAC system. Instead of optimising a cost function under end-use satisfaction related constraints, their research focuses on maximising consumer satisfaction under a budget constraint. The controllers utilised model-predictive control with indoor and outdoor temperatures, insolation, weather reports, and prior electricity consumption as inputs for a mixed-integer stochastic optimisation problem, which schedules household appliances in an on/off manner.
 
-O'Shaghnessy, Cutler, Ardani and Margolis (2018)[@OShaughnessy2018] used the U.S. National Renewable Energy Laboratory's Renewable Energy Optimisation (REOpt) and Building Energy Optimisation (BEOpt) models to mimimise the lifecycle cost of energy for a household through optimal configuration of PV, battery storage, smart domestic water heater, and smart AC unit. The household thermal storage devices (electric water heater, AC unit) were controlled through adjustment of the thermostat set-points through the day to take advantage of the daytime PV output. It was found that under current pricing, load-shifting through the use of smart AC units and smart domestic water heaters is a more cost effective method of increasing self-consumption of solar PV than the installation of batteries.
+O'Shaghnessy, Cutler, Ardani and Margolis (2018)[@OShaughnessy2018] used the U.S. National Renewable Energy Laboratory's Renewable Energy Optimisation (REOpt) and Building Energy Optimisation (BEOpt) models to minimise the lifecycle cost of energy for a household through optimal configuration of PV, battery storage, smart domestic water heater, and smart AC unit. The household thermal storage devices (electric water heater, AC unit) were controlled through adjustment of the thermostat set-points through the day to take advantage of the daytime PV output. It was found that under current pricing, load-shifting through the use of smart AC units and smart domestic water heaters is a more cost effective method of increasing self-consumption of solar PV than the installation of batteries.
 
 Other research focused solely on demand response of electric water heaters, usually employing more sophisticated thermal models which allow for greater understanding of potential impacts on service. 
 
 Sepulveda, Paull, Morsi, Li, Diduch and Chang (2010)[@Sepulveda2010] utilised a fully-mixed thermal model to investigate the potential of heterogeneous control of hot water cylinders using a binary particle swarm optimisation algorithm for the purpose of reducing grid peaks. Their direct load control modelling suggested an average reduction in peak-time electricity use of between 500W-750W per household.
 
-Kapsalis, Safouri and Hadellis (2018)[@Kapsalis2018] also used a fully-mixed model in a multiobjective optimisation problem that considers individual user preferences as well as a hot water consumption pattern and day-ahead electricity prices to both reduce costs under a real-time pricing plan while maintaining service, with the emphasis on cost or comfort set by individual households. An heuristic optimisation algorithm with low computational complexity was utilised to operate the controller, enabling implementation by a low-cost embedded controller and relay fitted to the heating elements of conventional water heaters. 
+Kapsalis, Safouri and Hadellis (2018)[@Kapsalis2018] also used a fully-mixed model in a multi-objective optimisation problem that considers individual user preferences as well as a hot water consumption pattern and day-ahead electricity prices to both reduce costs under a real-time pricing plan while maintaining service, with the emphasis on cost or comfort set by individual households. An heuristic optimisation algorithm with low computational complexity was utilised to operate the controller, enabling implementation by a low-cost embedded controller and relay fitted to the heating elements of conventional water heaters. 
 
 Kondoh, Lu, and Hammerstrom (2011)[@Kondoh2011] used a two-volume, vertically stratified model of a hot water cylinder with both top and bottom elements and thermostats. Usage patterns were based on hot water demand data and was simulated as discrete 2.0kWh events. The lower thermostat was controlled for varying numbers of water heaters simultaneously for the purpose of providing grid-beneficial services. It was estimated that to provide a 2-MW load-shedding service for 24 hours a day, it was necessary to be able to control around 33,000 water heaters.
 
@@ -182,7 +181,7 @@ Some research combines the computational efficiency of the single-volume well-mi
 
 ### Demand forecasting literature
 
-A common theme within the literature regarding smarter control of appliances is the necessity of accurately forecasting demand. An accurate demand forecast allows for more efficient energy storage and demand response capabilites, and may lessen any negative effects to the end user.
+A common theme within the literature regarding smarter control of appliances is the necessity of accurately forecasting demand. An accurate demand forecast allows for more efficient energy storage and demand response capabilities, and may lessen any negative effects to the end user.
 While much work has been done on medium to long term electricity demand forecasting, this thesis is concerned only with short term forecasts, and as such there is a strong emphasis on literature relating to short term forecasting.
 
 _To each paper below, add forecast length and whether or not household data are aggregated_
@@ -192,16 +191,15 @@ These models were found to outperform benchmark models in accuracy.
 
 _points of difference: different dataset, 1 hour resolution, other appliance use not considered, uses volumetric data, forecasting horizon of 24 hours, no consideration of metrics other than accuracy_
 
-_Need to expand upon how the models are developed, (based on historical data etc)._
-Refs [@Cui2016] and [@Denis2019] also use some variation or ARIMA modelling for short term electricity demand forecasting at individual household level.
+Cui, Wang, Wang, and Zhang[@Cui2016] (mentioned in previous section) use some variation or ARIMA modelling for their short term electricity demand forecasting at individual household level.
 
-After confirming the importance of accurate DHW forecasts for effective demand response, the authors in [@Lomet2015] propose the use of an ARMA model fitted to household level volumetric DHW consumption data for this purpose.  
+After confirming the importance of accurate DHW forecasts for effective demand response, Lomet, Suard, and Chèze [@Lomet2015] propose the use of an ARMA model fitted to household level volumetric DHW consumption data for this purpose.  
 
 Aki, Wakui and Yokoyama[@Aki2016] also use volumetric DHW data, however they opt for a variation of SVM known as support vector regression as the forecasting method, and use a 'ground-up' approach of separating the data into estimated end-uses, such as bathing, kitchen etc.
 
-[@Popescu2016] uses an ARMA model for forecasting day-ahead hot water consumption of a block of 60 apartments under a district heating system.
+Popescu and Serban[@Popescu2016] use an ARMA model for forecasting day-ahead hot water consumption of a block of 60 apartments under a district heating system.
 
-[@Denis2019] considers the ability of forecasting to assist in reducing thermal losses from DHW tanks by controlling the operation of the device such that only the necessary amount of hot water is stored in the tank at once. An ARIMA model is utilised along with the TRNSYS energy simulation software. Overall energy reductions of up to 17.4% were demonstrated under this control scenario.
+Denis, Suard, Lomet, and Chèze[@Denis2019] considers the ability of forecasting to assist in reducing thermal losses from DHW tanks by controlling the operation of the device such that only the necessary amount of hot water is stored in the tank at once. An ARIMA model is utilised along with the TRNSYS energy simulation software. Overall energy reductions of up to 17.4% were demonstrated under this control scenario.
 
 Gajowniczeka and Ząbkowski (2014)[@Gajowniczek2014] compare ANN and SVM forecasting methods to forecast aggregate household demand over 24 hour periods. Both models displayed similar performance in accuracy, however no consideration was given for other comparative metrics.
 
@@ -210,8 +208,6 @@ Ahmad, Hassan, Abdullah, Rahman and Hussin (2014)[@Ahmad2014] also compared ANNs
 De Felice, Alessandri, Ruti (2013)[@DeFelice2013] used weather forecasts as an external regressor in an ARIMAX model to predict Italian grid-level electricity demand up to 5 days in advance. This was compared against a naive model and an ARIMA model, with the inclusion of weather data into the models being found to significantly increasing the accuracy of prediction.
 
 Jain and Satish (2009)[@Jain2009] used SVMs to forecast day-ahead grid-level electricity demand. While ANNs were mentioned for their prevalence in electricity demand forecasting, SVMs were ultimately chosen as the forecast method for their generalisation, performance, and automatic model parameter selection capabilities.
-
-_Make sure introduction has provided sufficient information that the reader will understand the research aims in next subsection. By the time I get here it should be clear exactly what the problem is about and that I am trying a new approach to solve the problem_
 
 ## Aims
 

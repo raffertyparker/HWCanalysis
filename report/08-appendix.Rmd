@@ -34,6 +34,7 @@ This includes all of the R chunks of code that were hidden throughout the docume
 load(file=paste0(dFolder, "freq_DF.Rda"))
 freq_DF %>%
   knitr::kable(col.names = c("Household", "Dominance", "Frequency (hours)"),
+               digits = 2,
                caption = "Three dominant cycle periods for each household, as determined using frequency analysis",
                longtable = TRUE)
 ```
