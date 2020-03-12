@@ -11,11 +11,17 @@ library(data.table)
 library(ggplot2)
 library(lubridate)
 library(dplyr)
+library(gridExtra)
+#library(forecast)
 
 theme_set(theme_minimal())
 
 load(paste0(dFolder, "houses.Rda"))
-
+for (house in houses){
+  ifelse(house == houses[1],
+         allHouseStr <- house, 
+         allHouseStr <- paste(allHouseStr, house, sep = ","))
+}
 
 # ---- define peak periods ----
 # Add peaks function adapted from original written by Ben Anderson
@@ -51,6 +57,53 @@ addPeaks <- function(p){
 models <- c("naive","seasonalNaive","simpleLinear", "ARIMA", "ARIMAX","STLARIMA", "STLARIMAX", "SVM")
 #house <- "rf_06"
 #model <- "STLARIMAX"
+###################################################################
+# Combined ACV plots
+
+for (model in models){
+  for (house in houses){
+    mdl <- readRDS(paste0(dFolder, "models/", model, "/", house, "_validated_model.rds"))
+   # pdf(file=paste0(pFolder, model, "/", house, "_residual_acv.pdf"))
+   # tst <- ggtsdisplay(mdl$residuals, lag.max = 48*7*2)
+    p <- forecast::ggAcf(mdl$residuals, lag.max = 48*7*2, main = house)
+    theme(plot.title = element_text(size = 40, face = "bold"))
+    p$labels$y <- NULL
+    p$labels$x <- NULL
+    p$labels$xend <- NULL
+    assign(house, p)
+    #  save.image(file = paste0(pFolder, model, "/", house, "_residual_acv.png"))
+   # dev.off()
+    w <- as.data.table(mdl$x)
+    if(ncol(w) == 1){
+      w$index <- mdl$hHour
+    }
+    w$dHour <- hour(w$index) + minute(w$index)/60
+    w$residual <- mdl$residuals
+    e <- w %>%
+      group_by(dHour) %>%
+      summarise(error = mean(residual, na.rm = TRUE))
+    names(e) <- c("dHour", house)
+    ifelse(house == houses[1], 
+           avResDF <- e, 
+           avResDF <- left_join(avResDF, e))
+    saveRDS(avResDF, file = paste0(dFolder,"models/", model, "/dailyResiduals.rds"))
+    ifelse(house == houses[1], 
+           plotString <- "plot1",
+           plotString <- append(plotString, paste0("plot", as.character(which(house == houses)))))
+  }
+
+  allHouses <- grid.arrange(rf_06,rf_08,rf_13,rf_14,rf_22,rf_25,
+                            rf_29,rf_30,rf_31,rf_32,rf_33,rf_34,
+                            rf_35,rf_36,rf_37,rf_38,rf_39,rf_40,
+                            rf_42,rf_44,rf_45, ncol = 3)
+  ggsave(allHouses, width = 8.3, height = 11.7, filename = paste0(pFolder, model, "/allResiduals.pdf"))
+  
+  }
+ 
+
+#############################################################
+# Individual acv plots
+
 for (model in models){
   for (house in houses){
     mdl <- readRDS(paste0(dFolder, "models/", model, "/", house, "_validated_model.rds"))
