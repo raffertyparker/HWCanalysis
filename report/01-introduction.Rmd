@@ -13,31 +13,45 @@ source(paste0(filepathsPath, "/filepaths.R"))
 #pFolder <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did not like '~' notation)
 ```
 
+_Problem with mismatched temporal electricity needs to be eleborated on_
+_Why would we want to predict hot water demand? DSM and efficiency. Both need to be introduced_
+
+Temporal variation in electricity demand occurs at a variety of timescales in an electricity grid. As electrical energy cannot be stored, electricity supply must match this fluctuating demand in order to avoid large-scale damage to electricity-using appliances that operate under specific alternating current (AC) frequencies.
+New Zealand's electricity system frequency must be maintained at or near 50 Hz. In general, when more electricity is generated than is being consumed the AC frequency increases, and when more electricity is being consumed than is generated the AC frequency drops.
+In the event of a large generator unexpectedly going offline, a high voltage direct current (HVDC) pole tripping, or other large disruptions to supply there must be reserve electricity available so that the frequency is maintained within an acceptable range (between 48 and 52 Hz).
+Ensuring that there is enough capacity to provide electricity at times of very high demand or during unexpected grid emergencies requires the building and maintenance of underutilised generation and transmission infrastructure, a costly and inefficient situation[@Strbac2008]. 
+The challenges associated with supplying electricity in order to effectively meet demand are likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015]. 
 
 ## Demand side management
 
-Temporal variation in electricity demand occurs at a variety of timescales in an electricity grid. As electrical energy cannot be stored, electricity supply must match this fluctuating demand. Providing electricity at times of very high demand requires the building and maintenance of underutilised generation and transmission infrastructure, a costly and inefficient situation[@Strbac2008]. 
 There are currently a range of mechanisms in place to ensure that the supply of electricity balances with the varying demand[@Strbac2008], and that currents do not exceed transmission and distribution infrastructure constraints[@TranspowerNZ2015].
 
-The process of adjusting demand to meet supply is referred to as demand side management (DSM). The challenges associated with supplying electricity in order to effectively meet demand are likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015]. Demand side management is thus likely to have an increasing role in the transition to a low-carbon electricity grid. 
+One method to deal with the imbalance between the supply and demand of electricity is to adjust demand to meet supply. This is referred to as demand side management (DSM). 
 
 The grid benefits in being able to rapidly increase generation or decrease load is reflected by the ability to monetize this capacity through various electricity markets.
-The 'instantaneous reserves' (IR) markets are national markets concerned with stabilising the grid alternating current (AC) frequency during times of severe demand peaks or grid emergencies.
 
-New Zealand's electricity system frequency must be maintained at or near 50 Hz. In general, when more electricity is generated than is being consumed the AC frequency increases, and when more electricity is being consumed than is generated the AC frequency drops.
-In the event of a large generator unexpectedly going offline, a high voltage direct current (HVDC) pole tripping, or other large disruptions to supply there must be reserve electricity available so that the frequency is maintained within an acceptable range (between 48 and 52 Hz). This is provided by the instantaneous reserves market[@EANZ2014]. The systems operator will pay a premium for any electricity available to be generated during these periods (know as generating capacity), or load able to be shed during these periods (known as interruptible load).
+### Instantaneous reserves
+
+The 'instantaneous reserves' (IR) markets are national markets concerned with stabilising the grid alternating current (AC) frequency during times of severe demand peaks or grid emergencies [@EANZ2014].
+The systems operator will pay a premium for any electricity available to be generated during these periods (know as generating capacity), or load able to be shed during these periods (known as interruptible load).
 There are two distinct markets covering these periods. Fast instantaneous reserve (FIR) is for electricity that can be produced (or load that can be shed) within 1 second and continue being produced (or remain reduced) for 60 seconds. Sustained instantaneous reserve (SIR) is for electricity that can be produced (or load that can be shed) within 60 seconds and continue being produced (or remain reduced) until instructed otherwise by the systems operator. 
 Electricity generators that are running under capacity, and electricity consumers with a large enough reducible load, may sell their ability to increase supply or decrease demand in half-hour ahead markets.
 These actors are then paid for providing this service, regardless of whether or not they were required to perform it.
 
+### Congestion periods
+
 Congestion period demand charges are another market-based mechanism for smoothing electricity loads. 
 Large electricity users are often provided a discounted kWh price of electricity, while being charged high penalties for any electricity consumed during times where there is extreme local network demand (known as 'congestion periods')[@Orion2017]. Once again, this provides market value to the ability to shift electricity demand in time.
+
+### Ripple control
 
 Another DSM mechanism is that of ripple control. 
 Ripple control is a DSM mechanism that has been utilised in New Zealand since the 1950's.
 Under a ripple controlled system, electricity distribution networks provide a discounted electricity rate in order to be able to remotely cease the supply of electricity during peak periods or grid emergencies[@Orion2017]. 
 This is achieved through sending high frequency signals though the electricity lines to be interpreted by specialised receivers that then suppress the operation of the appliance they are connected to (usually hot water cylinders or irrigation systems).
 While this system as it currently operates is highly beneficial to the grid, it has been operating essentially unchanged since its introduction, and there is significant room for improvement utilising more recent technology[@Jack].
+
+### Spot markets
 
 An additional mechanism for matching supply and demand is that of spot market electricity pricing.
 The New Zealand electricity grid is composed of over 200 points at which electricity may enter or exit. These are referred to as the grid 'nodes'. 
@@ -50,7 +64,7 @@ There have been proposals[@NewZealandElectricityCommission2009] that a market-ba
 Electricity company Flick in New Zealand is already providing this, offering customers with compatible smart-meters the spot-market electricity price (with additional base costs). An app that displays the current spot price is provided to customers, with the intention being that consumers attempt to reduce demand during times of comparatively high prices.
 While this method of 'deliberate' demand response is well intentioned, studies of consumer response to changes in electricity price indicate that prices generally have little effect on consumption patterns when relying on consumers to deliberately alter their electricity consumption[@Lawson2011a; @Okajima2013; @Filippini2011].
 One solution to this is to automate the scheduling of appliances in order to take advantage of price differentials. 
-
+### Smart control
 
 With the rapid rise of 'internet of things' technology, whereby devices are interconnected and offer the ability to be controlled remotely, there is the ability to automatically schedule flexible devices in order to minimise operations costs or more effectively utilise renewable electricity sources.
 Many electricity using devices can have their use times shifted on a daily scale with limited impact to the end user (a property referred to as 'flexibility'). Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders (HWCs). Flexible devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand (for example into times where electricity is cheaper) with minimal impact to the end user.
@@ -124,18 +138,18 @@ In general, AI methods are constructed more autonomously than than conventional 
 This comes with a trade-off however, as their outputs tend to be 'black box', generally providing less in the way of understanding underlying processes than many conventional methods obtained through utilising human intuition and statistics.
 In addition, AI modelling can be hindered by the large amounts of computing resources necessary.
 
-
 Two commonly used AI techniques in the field of electricity demand forecasting are those of artificial neural networks (ANN) and support vector machines (SVM).
 ANNs attempt to mimic biological learning mechanisms by processing a set of training data through clusters of artificial neurons, each of which individually receive (numerical) inputs, assign them certain weights, and then output the weighted value into other artificial neurons, which perform the same task, until eventually producing a final output.
 The weights assigned by each neuron are then iteratively adjusted in order to minimise the error of the final output.
+Support vector machines classify data points by mapping them in hyperspace and distinguishing between them according to which side of a hyperplane they fall on, with the position of the classifying hyperplanes being constructed iteratively in order to maximise the perpendicular distance between each hyperplane and the closest samples on either side of it (refer to Figure \@ref(fig:SVMexample) for a linear example). 
 
-While Hippert, Pedreira, and Souza[@Hippert2014] state in 2001 that ANNs do not outperform conventional forecasting methods in accuracy, a more recent analysis from Raza and Khosravi[@Raza2015] in 2015 claims the contrary.
-Despite this recent claim to superiority in forecast accuracy, the computational expense of training ANNs can be a hindrance to large-scale adoption, as it generally involves a time-consuming process using expensive and energy-intensive computers.
-To facilitate reproducibility of results, ANN methods were therefore not included within this research.
 
-An alternative AI method that is gaining in popularity for use in electricity demand forecasting is that of support vector machines (SVMs).
-Support vector machines may be used in electricity forecasting by automating the process of discovering, categorising and quantifying various relationships within the data, such as those previously described as part of time series analysis and causal modelling[@Wei2018].
-This method is less computationally expensive to train than ANNs, and better suited to solving non-linear problems such as those encountered in cyclic time series data[@Ahmad2014]. 
+```{r SVMexample, out.width='100%', fig.cap="Example demonstrating the classifying mechanism of a SVM. Image by Larhmam - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=73710028"}
+knitr::include_graphics(paste0(pFolder, "SVMmargin.png"))
+```
+
+Non-linear partitions can also be constructed using a kernel function. 
+
 <!--
 _Perhaps for these reasons, research interest of SVMs in the context of electricity demand forecasting is still growing, as can be seen in Figure \@ref(fig:SVMinDF). remove?_
 -->
@@ -207,7 +221,14 @@ Ahmad, Hassan, Abdullah, Rahman and Hussin (2014)[@Ahmad2014] also compared ANNs
 
 De Felice, Alessandri, Ruti (2013)[@DeFelice2013] used weather forecasts as an external regressor in an ARIMAX model to predict Italian grid-level electricity demand up to 5 days in advance. This was compared against a naive model and an ARIMA model, with the inclusion of weather data into the models being found to significantly increasing the accuracy of prediction.
 
+While Hippert, Pedreira, and Souza[@Hippert2014] state in 2001 that ANNs do not outperform conventional forecasting methods in accuracy, a more recent analysis from Raza and Khosravi[@Raza2015] in 2015 claims the contrary.
+Despite this recent claim to superiority in forecast accuracy, the computational expense of training ANNs can be a hindrance to large-scale adoption, as it generally involves a time-consuming process using expensive and energy-intensive computers.
+
+An alternative AI method that is gaining in popularity for use in electricity demand forecasting is that of support vector machines (SVMs).
+Support vector machines may be used in electricity forecasting by automating the process of discovering, categorising and quantifying various relationships within the data, such as those previously described as part of time series analysis and causal modelling[@Wei2018].
+This method is less computationally expensive to train than ANNs, and better suited to solving non-linear problems such as those encountered in cyclic time series data[@Ahmad2014]. 
 Jain and Satish (2009)[@Jain2009] used SVMs to forecast day-ahead grid-level electricity demand. While ANNs were mentioned for their prevalence in electricity demand forecasting, SVMs were ultimately chosen as the forecast method for their generalisation, performance, and automatic model parameter selection capabilities.
+
 
 ## Aims
 

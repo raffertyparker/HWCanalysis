@@ -220,7 +220,7 @@ The histogram of maximum cross-covarience for each household (Figure \@ref(fig:c
 ### STL decomposition {#STL}
 
 Another method that may be used to explore any cyclical effects or trends of time series data is that of STL decomposition. STL is an acronym for 'seasonal and trend decomposition using loess', whereby loess (short for 'local polynomial regression') is a method for estimating nonlinear relationships. 
-An STL decomposition separates the data into three components, referred to as the 'trend', 'seasonality', and 'remainder' (also referred to as 'random'), which added (or multiplied) to one another make up the original data. 
+An STL decomposition separates the data into three components, referred to as the 'trend', 'seasonality', and 'remainder' (also referred to as 'random'), which added to one another make up the original data. 
 The trend represents low frequency changes in the data, along with longer term average shifts. 
 Seasonality refers to the cyclic behaviour of the data. The remainder is the deviation of the actual data from the addition of the trend and the seasonality.
 The STL method was developed by Cleveland, Cleveland, McRae, & Terpenning (1990)[@Cleveland1990]. As the decomposition algorithm is quite involved it is not included here, but can be examined in the previous reference. For our analysis, STL decomposition was conducted using the R packages `stats`[@R-base] and `forecast`[@R-forecast].
@@ -390,18 +390,11 @@ This may be expressed in terms of the backward shift operator in polynomial form
 ### STL decomposition with ARIMAX
 
 Combining the predictive power of seasonal decomposition, external regressors, and time series analysis, we have an STL decomposition with ARIMAX model.
-This method decomposes the data into seasonal, trend and remainder components, (refer to Section \@ref(STL)), and then fits an ARIMAX model to the remainder using lagged values of other appliance electricity demand as the external regressors (refer to Section \@ref(ARIMAX)). This is then recombined with the seasonal and trend components to complete the model.
+This method decomposes the data into seasonal, trend and remainder components, (refer to Section \@ref(STL)), and then fits an ARIMAX model to the remainder using lagged values of other appliance electricity demand as the external regressors (refer to Section \@ref(ARIMAX)). This is then added to the seasonal and trend components to complete the model.
 
 ### Support vector machines
 
-Support vector machines classify data points by mapping them in hyperspace and distinguishing between them according to which side of a hyperplane they fall on, with the position of the classifying hyperplanes being constructed iteratively in order to maximise the perpendicular distance between each hyperplane and the closest samples on either side of it (refer to Figure \@ref(fig:SVMexample) for a linear example). 
-
-
-```{r SVMexample, out.width='100%', fig.cap="Example demonstrating the classifying mechanism of a SVM. Image by Larhmam - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=73710028"}
-knitr::include_graphics(paste0(pFolder, "SVMmargin.png"))
-```
-
-Non-linear partitions can also be constructed using a kernel function. The process of training a non-linear SVM can be stated mathematically as follows:
+The process of training a non-linear SVM can be stated mathematically as follows:
 Given instances $\mathbf{x}_i ,  i= 1, . . . , l$ with labels $y_i \in \{1,-1\}$, solve the following quadratic optimization problem:
 \begin{equation*}
   \begin{aligned}
