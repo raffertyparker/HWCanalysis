@@ -9,6 +9,7 @@
 startTime <- proc.time()
 
 #> Load GREENGrid package ----
+
 library(GREENGridData)
 
 #> Packages needed in this .Rmd file ----
@@ -43,7 +44,7 @@ for (circuitPattern in twoPatterns){
     # amend these paths to suit your location
     # if the script fails it is most probably because the paths are incorrect
     iPath <- "~/HWCanalysis/powerData/imputed/" # downloaded from https://dx.doi.org/10.5255/UKDA-SN-853334
-    oPath <- dFile # where the extract is saved. Create this before you run the script or it will fail
+    oPath <- dFolder # where the extract is saved. Create this before you run the script or it will fail
   } else {
     # HCS
     dPath <- "/Volumes/hum-csafe/Research Projects/GREEN Grid/cleanData/safe/gridSpy/1min/" # Otago HCS
