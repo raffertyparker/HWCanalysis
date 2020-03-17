@@ -1,12 +1,11 @@
 # Methodology {#methodology}
 _Michael you mentioned this chapter could be broken into two, with the data analysis sections in their own chapter. If you still think this should happen, please give a rough indication about what should go where_ 
 
-This chapter begins by giving an introduction to the origin of our dataset, as well as noting some necessary preliminary cleaning. It goes on to provide a more theoretical background as to the nature of our data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
+This chapter begins by giving an introduction to the dataset that was used to fit and test the models, as well as describing some necessary preliminary cleaning of the data. It goes on to provide a more theoretical background as to the nature of our data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
 
-All data processing and modelling was conducted using the `R` programming language.
-In particular, data extraction and processing used the packages `GREENGridData`[@R-GREENGridData], `dplyr`[@R-dplyr] and `data.table`[@R-data.table]. Time series manipulation and analysis used packages `lubridate`[@R-lubridate], `TSA`[@R-TSA], and `xts`[@R-xts]. Plots were created using the packages `ggplot2`[@R-ggplot2] and `ggplotmisc`[@R-ggpmisc]. 
-Significant consideration has been given to facilitating reproducibility of results. 
-<!--, and all code is publicly available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. -->
+All data processing and modelling was conducted using the `R` programming language[@R-base].
+In particular, data extraction and processing used the packages `GREENGridData`[@R-GREENGridData], `dplyr`[@R-dplyr] and `data.table`[@R-data.table]. Time series manipulation and analysis used packages `lubridate`[@R-lubridate], `forecast`[@R-forecast], and `xts`[@R-xts]. Plots were created using the packages `ggplot2`[@R-ggplot2], `ggplotmisc`[@R-ggpmisc], and `ggExtra`[@R-gridExtra]. 
+<!--Significant consideration has been given to facilitating reproducibility of results, and all code is publicly available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. -->
 ```{r loadFiles2, include=FALSE}
 filepathsPath <- dirname(getwd())
 #filepathsPath <- getwd()
@@ -414,7 +413,7 @@ There are a number of different considerations that must be made when comparing 
 ### Accuracy
 
 Perhaps the most important consideration in forecasting is the accuracy of the model. For this work, model accuracy is determined by the root mean square (RMS) of the residuals, averaged over each house, with lower values indicating higher accuracy.
-As demand response is most crucial during daily peak periods, additional analysis is carried out to ascertain the accuracy during grid peaks (defined as 7am to 9am, and 5pm to 8pm[@TranspowerNZ2015]).
+As demand response is most crucial during daily peak periods, additional analysis is carried out to ascertain the accuracy during grid peaks (defined as 7am to 9am, and 5pm to 8pm[@TranspowerNZ2015]). This is analysed as a percentage error increase between average RMSE and RMSE increase during peak times
 
 ### Physical fidelity
 
