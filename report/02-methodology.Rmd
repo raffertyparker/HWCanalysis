@@ -30,7 +30,7 @@ DThead <- readRDS(paste0(dFolder, "DThead.rds"))
 
 ## Data background
 
-The data used for this analysis was collected from monitoring the submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. The dataset is publicly available from the UK Data Service. Publications to date that have utilised the dataset include [@Ocampo2015], [@Suomalainen2017], [@Stephenson2018], [@JackKiti2018], and [@JackDew2018]. More information about this dataset, including detailed reports of data issues and access instructions, is available at https://cfsotago.github.io/GREENGridData/. 
+The data used for this thesis was collected from monitored electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. The dataset is publicly available from the UK Data Service. Publications to date that have utilised the dataset include [@Ocampo2015], [@Suomalainen2017], [@Stephenson2018], [@JackKiti2018], and [@JackDew2018]. More information about this dataset, including detailed reports of data issues and access instructions, is available at https://cfsotago.github.io/GREENGridData/. 
 
 ## Preliminary data analysis
 
