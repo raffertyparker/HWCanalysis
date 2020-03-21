@@ -1,6 +1,7 @@
 ################## TO DO ##################
 
 Fix plots so it prints ok
+Improve smart control section (actually define smart control in it for starters)
 Some prelim analysis can be seperated into methodology/results
 put combined acv plots in appendix
 Include international context esp for demand response/elec grid
