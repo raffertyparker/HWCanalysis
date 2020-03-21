@@ -73,3 +73,4 @@ It can be seen that many households have optimal lags greater than one hour. To 
 Include a table of ARIMA parameters selected (that minimise AIC).
 
 
+

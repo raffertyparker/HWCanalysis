@@ -1,0 +1,3 @@
+# Glossary {#glossary}
+
+Flexibility - the ability for an appliance to shift its electricity demand in time with little impact to the end user
