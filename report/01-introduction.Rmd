@@ -81,8 +81,11 @@ One solution to this is to automate the scheduling of appliances in order to tak
 ### Smart control
 
 With the rapid rise of 'internet of things' technology, whereby devices are interconnected and offer the ability to be controlled remotely, there is the ability to automatically schedule flexible devices in order to minimise operations costs or more effectively utilise renewable electricity sources.
+
 Many electricity using devices can have their use times shifted on a daily scale with limited impact to the end user (a property referred to as 'flexibility'). Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders (HWCs). Flexible devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand (for example into times where electricity is cheaper) with minimal impact to the end user.
 
+<!--Smart control of demand-flexible appliances is part of a new paradigm in electricity distribution known as the Smart Grid. The Smart Grid is a power grid where energy producers, network companies and consumers are intelligently connected to each other. On the consumer side this largely enabled by advanced electricity meters, known as “smart meters”, which have the ability to store, display and transmit data associated with the electricity being consumed. This two-way information communication is proposed to encourage the integration of distributed (generally renewable) power generation, and allow sophisticated metering and automation to proliferate\cite{Lund2015}. Due to the high flexibility of various residential appliances, this technology could thus enable significant load-levelling\cite{Dhulst2015}.
+-->
 
 ## Predicting electricity demand
 
@@ -176,72 +179,41 @@ knitr::include_graphics(paste0(pFolder, "SVelecDemandForecasting.png"))
 
 ## Literature review
 
-There is a large and active body of research that explores different methods of controlling demand-flexible appliances under various demand side management objectives. While some involve short-term forecasting of electricity prices, short-term demand forecasting of individual appliances is still relatively sparse in the academic literature. 
+The literature relevant to this thesis may best be considered as falling somewhere within three separate but overlapping categories: hot water cylinder modelling, demand forecasting, and smart control of appliances.
+Hot water cylinder modelling refers to the process of building computer models that represent a hot water cylinder and its operation.
+While all models are less accurate than the systems they replicate, analyses that utilise computer models have a number of crucial benefits over real-world alternatives. 
+Firstly, a well-constructed computer model provides the ability to make an analysis regarding alterations to the physical system that may be difficult or expensive to carry out in reality. 
+Secondly, computer models provide the ability to ‘speed up’ the passing of time, and to be run ‘into the future’, two features currently unavailable when conducting real-world analysis. 
 
-This section is broadly separated into two parts. The first describes literature around control of appliances for efficiency gains or demand side management, the second describes literature around electricity demand forecasting.
+Generally speaking, a hot water cylinder model will consist of two components.
+First, a mathematical representation of the physical cylinder itself. At a minimum, this must take into consideration the inflows of cold and outflows of hot water, heat input into the cylinder from the element, and heat loss from the walls of the cylinder.
+Water temperature(s) within the cylinder are important, both for heat flow calculations, and for determining if and when the cylinder has run out of hot water.
+In a cylinder of warm water at equilibrium a temperature difference between the top and bottom of the cylinder naturally arises. This can be described in terms of three distinct volumes of water. At the bottom of the cylinder, there is a volume of cooler water, with only a slight change in temperature from the bottom to the top of it. At the top, a volume of warmer water, again with only a slight vertical temperature gradient.
+These are separated by a volume of water known as the thermocline, whereby a rapid change in temperature occurs between its top and bottom[@JackDew2018].
+Some models choose to simplify this heat distribution within the tank, considering it instead to be one well-mixed, single temperature volume of water[@Heleno2015; @Parra2016; @Roux2017]. This method has the benefit of being computationally inexpensive, allowing for temporally extensive analyses to be carried out, to the detriment of some physical accuracy.
+Other models simplify the heat distribution as two well-mixed bodies of water at the top and bottom, separated by a thermocline of negligible width[@JackDew2018; @Booysen2017; @Nel2018].
+While requiring more computer resources than the single-volume models, the two-volume models also provide relatively computationally inexpensive means of analysing hot water usage, while capturing some additional physical characteristics such as the rapid ‘running out’ of hot water.
+Finally, some hot water cylinder models use computational fluid dynamics (CFD) software to maintain very high amounts of physical accuracy, essentially allowing the determination of water temperature at any point within the cylinder[@Kong2016; @Yaici2013]. 
 
 ### Smart control literature
 
-_Too many unfamiliar/unintroduced terms in here. Need to either briefly introduce tnew terms in terms of old ones i.e "ARIMA, a time series method..."
+Hot water cylinder models may then be utilised for a number of applications.
+The high accuracy CFD models are great for providing accurate estimates as to the effects of making physical changes to the system, such as adjusting the position of the outlet[@Kong2016; @Yaici2013] or cylinder dimensions [@Yaici2013].
+The more physically simplistic models are more suitable for analyses that span over long periods of time.
+One such analysis a hot water cylinder model may be used for is as a simulation to analyse the impacts of smart control scenarios.
+These scenarios generally involve simulating the suppression of the element or adjustment of thermostat at key times to reduce grid peaks[@Roux2018; @Sepulveda2010, @Kepplinger2015], provide grid-beneficial (instantaneous response) services[@Kondoh2011], minimise costs under time-varying electricity prices[@Kepplinger2015; @Mohsenian-Rad2010; @OShaughnessy2018; @Sepulveda2010; @Cui2016; @Kapsalis2018], utilise low-carbon electricity[@Ramchurn2012], and minimise ‘cold water events’ under a budget constraint[@Yu2013].
+Insulated hot water cylinders show high flexibility, and as such are good candidates for smart control, but similar objectives can be obtained with other thermal devices such as heating and air conditioning systems[@OShaughnessy2018; @Yu2013], as well as other devices such as electric vehicles and washing machines[@Cui2016; @Mohsenian-Rad2010].
+In order to effectively schedule appliances under smart control, reasonable estimates must be made as to when they are required to be utilised. An electric vehicle, for example, must be sufficiently charged before the next drive, and a hot water cylinder must be sufficiently hot before the next shower. Accurate predictions of these 'next' usage events provide a smart control system the ability to fine tune their optimisation algorithms to take full advantage of the demand flexibility without negatively impacting the end user.
+As such, demand forecasting in some form is common in smart control literature[@Cui2016; @Roux2018; @Kepplinger2015; @Ramchurn2012; @Sepulveda2010; @Yu2013; @Kapsalis2018].
 
 Ramchurn, Vytelingum, Rogers and Jennings[@Ramchurn2012] model households with generic storage capacity under a homeostatic control mechanism which uses linear optimisation to minimise consumption of high-carbon electricity by shifting electricity use over daily timescales in order to match predicted renewable energy availability. Reduction in residential carbon emissions of up to 25% were demonstrated, as were consumer savings of up to 14.5% under a carbon-based pricing mechanism. 
 
-Mohsinian-Rad, Wong, Jatskevitch, Schober and Leon-Garcia[@Mohsenian-Rad2010] modelled demand-side management of various residential appliances to minimise both cost of electricity to the consumer, and peak-to-average ratio of total load in the electricity grid. Real-time pricing signals were used as inputs in a game theoretical algorithm that optimised energy scheduling of flexible appliances for individual household cost minimisation. It was demonstrated that the Nash equilibrium obtained by these automatic energy schedulers was also the optimal solution for the electricity grid as a whole.
+Electricity demand forecasting itself is a large and active research area. 
+While much research is conducted relating to predicting grid-level[@DeFelice2013; @Jain2009], substation level[@Goude2014], or building level[@Popescu2016; @Gajowniczek2014; @Ahmad2014, @McLoughlin2013] demand, some has been done on predicting the demand of individual household appliances [@Arghira2012], including that of hot water cylinders[@Gelazanskas2015; @Lomet2015; @Aki2016; @Denis2019].
 
-Cui, Wang, Wang and Zhang[@Cui2016] also used real-time pricing signals to schedule flexible appliances in a cooperative game that attempts to minimise consumer costs. Their control method used time series analysis methods to forecast electricity prices. These were then used as an input, along with simulated appliance demands, to an optimisation program which scheduled appliances such that their forecasted demand was fully satisfied at minimal cost. Under the profit-sharing assumptions used, residential electricity bills were shown to be reduced by about 4% while retailer's relative costs were reduced by 7.56%.
+Hot water electricity demand forecasts are examples of a different type of model the the physical hot water models mentioned at the beginning of this section. Rather than being concerned with replicating physical characteristics of hot water demand, these models focus only on understanding mathematical relationships within existing data. This is acheived by algorithmically 'fitting' themselves to existing data, in order to best replicate under certain constraints. Once this is acheived, these models may then be projected forward in time to where no data exists in order to provide forecasts.
 
-Yu, Jia, Murphy-Hoye, Pratt and Tong[@Yu2013] modelled demand-side management of various residential appliances, with emphasis on a thermal model of the household HVAC system. Instead of optimising a cost function under end-use satisfaction related constraints, their research focuses on maximising consumer satisfaction under a budget constraint. The controllers utilised model-predictive control with indoor and outdoor temperatures, insolation, weather reports, and prior electricity consumption as inputs for a mixed-integer stochastic optimisation problem, which schedules household appliances in an on/off manner.
-
-O'Shaghnessy, Cutler, Ardani and Margolis[@OShaughnessy2018] used the U.S. National Renewable Energy Laboratory's Renewable Energy Optimisation (REOpt) and Building Energy Optimisation (BEOpt) models to minimise the lifecycle cost of energy for a household through optimal configuration of PV, battery storage, smart domestic water heater, and smart AC unit. The household thermal storage devices (electric water heater, AC unit) were controlled through adjustment of the thermostat set-points through the day to take advantage of the daytime PV output. It was found that under current pricing, load-shifting through the use of smart AC units and smart domestic water heaters is a more cost effective method of increasing self-consumption of solar PV than the installation of batteries.
-
-Other research focused solely on demand response of electric water heaters, usually employing more sophisticated thermal models which allow for greater understanding of potential impacts on service. 
-
-Sepulveda, Paull, Morsi, Li, Diduch and Chang[@Sepulveda2010] utilised a fully-mixed thermal model to investigate the potential of heterogeneous control of hot water cylinders using a binary particle swarm optimisation algorithm for the purpose of reducing grid peaks. Their direct load control modelling suggested an average reduction in peak-time electricity use of between 500W-750W per household.
-
-Kapsalis, Safouri and Hadellis[@Kapsalis2018] also used a fully-mixed model in a multi-objective optimisation problem that considers individual user preferences as well as a hot water consumption pattern and day-ahead electricity prices to both reduce costs under a real-time pricing plan while maintaining service, with the emphasis on cost or comfort set by individual households. An heuristic optimisation algorithm with low computational complexity was utilised to operate the controller, enabling implementation by a low-cost embedded controller and relay fitted to the heating elements of conventional water heaters. 
-
-Kondoh, Lu, and Hammerstrom[@Kondoh2011] used a two-volume, vertically stratified model of a hot water cylinder with both top and bottom elements and thermostats. Usage patterns were based on hot water demand data and was simulated as discrete 2.0kWh events. The lower thermostat was controlled for varying numbers of water heaters simultaneously for the purpose of providing grid-beneficial services. It was estimated that to provide a 2-MW load-shedding service for 24 hours a day, it was necessary to be able to control around 33,000 water heaters.
-
-Roux, Apperly and Booysen[@Roux2018] also use a two-volume model for their heuristic demand response solution that considers individual consumption patterns as well as hot water temperatures and physical cylinder metadata in order to reduce grid peaks as well as reduce overall energy consumption through heating water 'as needed'. The results showed that their proposed mechanism outperformed measured results from field units, as well as conventional 'ripple controlled' units, without sacrificing user comfort.
-
-Some research combines the computational efficiency of the single-volume well-mixed model with the physical fidelity of a multi-volume model by utilising both models for different aspects of the simulation/optimisation/control process. The control algorithm utilised by Kepplinger, Huber and Petrasch[@Kepplinger2015] uses a single-volume well-mixed model in order to construct a cost-optimised binary switch function under real-time electricity prices using the hot water demand predicted using a kth nearest neighbour data mining algorithm. This optimised binary switch function is input along with the electrical power used by the physical hot water cylinder into a multi-volume thermal model that is used to estimate future temperatures inside the physical cylinder. These predictive temperatures are returned to the original optimisation algorithm to check that they are between the minimum and maximum temperature constraints. 
-
-### Demand forecasting literature
-
-A common theme within the literature regarding smarter control of appliances is the necessity of accurately forecasting demand. An accurate demand forecast allows for more efficient energy storage and demand response capabilities, and may lessen any negative effects to the end user.
-While much work has been done on medium to long term electricity demand forecasting, this thesis is concerned only with short term forecasts, and as such there is a strong emphasis on literature relating to short term forecasting.
-
-_To each paper below, add forecast length and whether or not household data are aggregated_
-
-Perhaps the work most similar to this thesis in the existing literature is that of Gelažanskas and Gamage[@Gelazanskas2015]. In this work, a number of time series analysis based forecasting models are fitted to volumetric hot water data at one hour resolution to predict domestic hot water electricity demand for the following 24 hours.
-These models were found to outperform benchmark models in accuracy.
-
-Cui, Wang, Wang, and Zhang[@Cui2016] (mentioned in previous section) use some variation or ARIMA modelling for their short term electricity demand forecasting at individual household level.
-
-After confirming the importance of accurate DHW forecasts for effective demand response, Lomet, Suard, and Chèze [@Lomet2015] propose the use of an ARMA model fitted to household level volumetric DHW consumption data for this purpose.  
-
-Aki, Wakui and Yokoyama[@Aki2016] also use volumetric DHW data, however they opt for a variation of SVM known as support vector regression as the forecasting method, and use a 'ground-up' approach of separating the data into estimated end-uses, such as bathing, kitchen etc.
-
-Popescu and Serban[@Popescu2016] use an ARMA model for forecasting day-ahead hot water consumption of a block of 60 apartments under a district heating system.
-
-Denis, Suard, Lomet, and Chèze[@Denis2019] considers the ability of forecasting to assist in reducing thermal losses from DHW tanks by controlling the operation of the device such that only the necessary amount of hot water is stored in the tank at once. An ARIMA model is utilised along with the TRNSYS energy simulation software. Overall energy reductions of up to 17.4% were demonstrated under this control scenario.
-
-Gajowniczeka and Ząbkowski (2014)[@Gajowniczek2014] compare ANN and SVM forecasting methods to forecast aggregate household demand over 24 hour periods. Both models displayed similar performance in accuracy, however no consideration was given for other comparative metrics.
-
-Ahmad, Hassan, Abdullah, Rahman and Hussin (2014)[@Ahmad2014] also compared ANNs and SVMs, as well as some conventional forecasting techniques, for building-level short term electricity demand forecasting. They concluded that the AI methods outperformed conventional methods in accuracy, with SVM models generally outperforming ANNs. No comparison on computational expense was provided.
-
-De Felice, Alessandri, Ruti (2013)[@DeFelice2013] used weather forecasts as an external regressor in an ARIMAX model to predict Italian grid-level electricity demand up to 5 days in advance. This was compared against a naive model and an ARIMA model, with the inclusion of weather data into the models being found to significantly increasing the accuracy of prediction.
-
-While Hippert, Pedreira, and Souza[@Hippert2014] state in 2001 that ANNs do not outperform conventional forecasting methods in accuracy, a more recent analysis from Raza and Khosravi[@Raza2015] in 2015 claims the contrary.
-Despite this recent claim to superiority in forecast accuracy, the computational expense of training ANNs can be a hindrance to large-scale adoption, as it generally involves a time-consuming process using expensive and energy-intensive computers.
-
-An alternative AI method that is gaining in popularity for use in electricity demand forecasting is that of support vector machines (SVMs).
-Support vector machines may be used in electricity forecasting by automating the process of discovering, categorising and quantifying various relationships within the data, such as those previously described as part of time series analysis and causal modelling[@Wei2018].
-This method is less computationally expensive to train than ANNs, and better suited to solving non-linear problems such as those encountered in cyclic time series data[@Ahmad2014]. 
-Jain and Satish (2009)[@Jain2009] used SVMs to forecast day-ahead grid-level electricity demand. While ANNs were mentioned for their prevalence in electricity demand forecasting, SVMs were ultimately chosen as the forecast method for their generalisation, performance, and automatic model parameter selection capabilities.
-
-There are a number of key gaps in the literature around demand forecasting for smart control purposes that I hope to fill with this thesis.
-While much work exists on forecasting demand down to household level, academic literature concerned with demand forecasting at the level of individual hot water cylinders is sparse. For that which does exist, much of it uses volumetric data, as opposed to electricity demand data. I encountered none that focussed on predicting demand for only the next half hour, with most forecasting 24 hours ahead. Few used data at half hour resolution, the current resolution of New Zealand smart meter data. I encountered none that utilised the electricity demand of other appliances as an external regressor. Finally, very few were concerned with any metrics except for accuracy.
+Improve thermal efficiency with forecasting([@Denis2019]) without forecasting as such, only 'patterns?(@Roux2018)
 
 
 ## Aims
