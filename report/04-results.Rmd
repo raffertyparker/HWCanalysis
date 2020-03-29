@@ -23,7 +23,7 @@ In our naive model we assume no drift, and only attempt to predict one (half hou
 knitr::include_graphics(paste0(pFolder, "naive/fourHouses.pdf"))
 ```
 
-As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistently 'missing' the actual values.
+As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same avaraged output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistently 'missing' the actual values.
 
 The naive model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "naive"], 2)`W.
 
