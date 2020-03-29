@@ -1,0 +1,55 @@
+# Literature review
+
+The literature relevant to this thesis may best be considered as falling somewhere within three separate but overlapping categories: hot water cylinder modelling, smart control of appliances, and demand forecasting.
+
+Hot water cylinder modelling refers to the process of building computer models that represent a hot water cylinder and its operation.
+In the wider context of computer modelling, these are referred to as 'physical' models.
+While all models are less accurate than the systems they replicate, analyses that utilise computer models have a number of crucial benefits over real-world alternatives.
+Firstly, a well-constructed computer model provides the ability to make an analysis regarding alterations to the physical system that may be difficult or expensive to carry out in reality. 
+Secondly, computer models provide the ability to ‘speed up’ the passing of time, and to be run ‘into the future’, two features currently unavailable when conducting real-world analyses. 
+
+Generally speaking, a hot water cylinder model will consist of two components.
+First, a mathematical representation of the physical cylinder itself. At a minimum, this must take into consideration the inflows of cold and outflows of hot water, heat input into the cylinder from the element, and heat loss from the walls of the cylinder.
+Water temperature(s) within the cylinder are important, both for heat flow calculations, and for determining if and when the cylinder has run out of hot water.
+In a cylinder of warm water at equilibrium a temperature difference between the top and bottom of the cylinder naturally arises. This can be described in terms of three distinct volumes of water. At the bottom of the cylinder, there is a volume of cooler water, with only a slight change in temperature from the bottom to the top of it. At the top, a volume of warmer water, again with only a slight vertical temperature gradient.
+These are separated by a volume of water known as the thermocline, whereby a rapid change in temperature occurs between its top and bottom[@JackDew2018].
+Some models choose to simplify this heat distribution within the tank, considering it instead to be one well-mixed, single temperature volume of water[@Heleno2015; @Parra2016; @Roux2017]. This method has the benefit of being computationally inexpensive, allowing for temporally extensive analyses to be carried out, to the detriment of some physical accuracy.
+Other models simplify the heat distribution as two well-mixed bodies of water at the top and bottom, separated by a thermocline of negligible width[@JackDew2018; @Booysen2017; @Nel2018].
+While requiring more computer resources than the single-volume models, the two-volume models also provide relatively computationally inexpensive means of analysing hot water usage, while capturing some additional physical characteristics such as the rapid ‘running out’ of hot water.
+Finally, some hot water cylinder models use computational fluid dynamics (CFD) software to maintain very high amounts of physical accuracy, essentially allowing the determination of water temperature at any point within the cylinder[@Kong2016; @Yaici2013]. 
+The second component of these models is the simulation of hot water demand.
+The model in [@Heleno2015] simply schedules three 35L, 38° hot water events at three separate times through the day.
+The model in [@JackDew2018] simulates domestic hot water usage by assuming up to three major use events (representing showers, bathing etc) that are random and normally distributed about fixed times of day, with additional minor usage events (representing hand washing etc) having equal probability of occurring between specified intervals at other times.
+For much of the hot water cylinder research previously mentioned however, the methodology around demand simulation is not elucidated. 
+
+Hot water cylinder models may be utilised for a number of applications.
+The high accuracy CFD models are great for providing accurate estimates as to the effects of making physical changes to the system, such as adjusting the position of the outlet[@Kong2016; @Yaici2013] or cylinder dimensions [@Yaici2013].
+The more physically simplistic models are more suitable for analyses that span over long periods of time.
+One such analysis a hot water cylinder model may be used for is as a simulation to analyse the impacts of smart control scenarios.
+These scenarios generally involve simulating the suppression of the element or adjustment of thermostat at key times in order to reduce grid peaks[@Roux2018; @Sepulveda2010, @Kepplinger2015], provide grid-beneficial (instantaneous response) services[@Kondoh2011], minimise costs under time-varying electricity prices[@Kepplinger2015; @Mohsenian-Rad2010; @OShaughnessy2018; @Sepulveda2010; @Cui2016; @Kapsalis2018], utilise low-carbon electricity[@Ramchurn2012; @Passenberg2016], and minimise ‘cold water events’ under a budget constraint[@Yu2013].
+Insulated hot water cylinders show high flexibility, and as such are good candidates for smart control, but similar objectives can be obtained with other thermal devices such as heating and air conditioning systems[@OShaughnessy2018; @Yu2013], as well as other devices such as electric vehicles and washing machines[@Cui2016; @Mohsenian-Rad2010].
+In order to effectively schedule appliances under smart control, reasonable estimates must be made as to when they are required to be utilised. An electric vehicle, for example, must be sufficiently charged before the next drive, and a hot water cylinder must be sufficiently hot before the next shower. Accurate predictions of these 'next' usage events provide a smart control system the ability to fine tune their optimisation algorithms to take full advantage of the demand flexibility without negatively impacting the end user.
+As such, demand forecasting in some form is common in smart control literature[@Cui2016; @Roux2018; @Arghira2012; @Kepplinger2015; @Ramchurn2012; @Sepulveda2010; @Yu2013; @Kapsalis2018; Passenberg2016].
+
+Electricity demand forecasting itself is a large and active research area. 
+While much research is conducted relating to predicting grid-level[@DeFelice2013; @Jain2009], substation level[@Goude2014], or building level[@Popescu2016; @Gajowniczek2014; @Ahmad2014; @McLoughlin2013] demand, some has been done on predicting the demand of individual household appliances [@Arghira2012], including that of hot water cylinders[@Gelazanskas2015; @Lomet2015; @Aki2016; @Denis2019].
+
+Hot water electricity demand forecasting uses similar methods to the simulated hot water demand component of the physical models mentioned at the beginning of this section.
+The key difference is that rather than being run in order to simulate flow events for a physical model, they are projected into the future to obtain forecasts of demand.
+When used in this manner, there is no need to be replicating physical characteristics of the hot water cylinder, thus these models focus only on understanding mathematical relationships within existing demand data. 
+This is achieved by algorithmically 'fitting' themselves to existing data, in order to best replicate the data under certain constraints. Once this is completed, these models may then be projected forward in time to where no data exists in order to provide forecasts.
+
+There is currently no consensus on the 'optimal' method for forecasting electricity demand.
+Conventional techniques are commonly used, either some form of time series analysis such as ARIMA[@Lomet2015; @Arghira2012; @Popescu2016, @Denis2019], regression[@Wei2015; @McLoughlin2015; @Kaytez2015; @Dervilis2018; @Massana2015], or combination of the two[@DeFelice2013].
+
+AI techniques are also common in electricity demand forecasting. Two very common AI methods used for this purpose[@Ahmad2014; @MatDaut2017; @Tardioli2015; @Amasyali2018] are ANNs[@Dervilis2018; @Chitsaz2015] and SVMs[@Aki2016; @Jain2009; @Zhang2016], however others use more novel AI methods such as ensemble bagging trees[@Wang2018], particle swarm optimisation[@Sepulveda2010], reinforcement learning[@Ruelens2018], cluster analysis[@McLoughlin2015], or dynamic Gaussian processes[@Dervilis2018].
+
+Some research has been done that compares a selection of models with one another.
+While a comparison between AI methods in [@Gajowniczek2014] showed a that an ANN provides slightly more accurate forecasts when predicting a full day ahead, the SVM was most accurate when predicting the next hour. 
+Some comparative research considers both AI and conventional methods[@Dervilis2018; @Kaytez2015; @Massana2015]. 
+SVMs were compared against ANNs and linear regression in [@Kaytez2015; @Massana2015], and found to be the most accurate model.
+SVMs were not considered in [@Dervilis2018], which instead found an AI forecasting method called dynamic Gaussian processes to be by far the most accurate when predicting grid-level electricity load.
+Dynamic Gaussian processes were noted again in [@McLoughlin2013] as being unsuitable for building level demand forecasting.
+Research comparing AI methods showed SVMs tend to outperform ANNs in accuracy[@Ahmad2014] while having reasonable computational efficiency[@Ahmad2014], whereas ANNs in particular were noted as being computationally expensive[@Dervilis2018].
+Other comparative research considers only considers conventional forecasting methods, with ARIMA models consistantly featuring as highly regarded for this purpose[@Gelazanskas2015].
+A comprehensive review of data-driven building energy consumption prediction studies[@Amasyali2018] shows SVMs consistantly outperforming ANNs in accuracy for demand forecasting, which is confirmed by another review in [@MatDaut2017]. 
