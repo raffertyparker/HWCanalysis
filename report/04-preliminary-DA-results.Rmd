@@ -1,0 +1,54 @@
+# Preliminary data analysis {#prelimDA}
+
+This chapter explores the results from some of the preliminary data analysis that was carried out before starting to build models.
+
+## Data summary
+
+```{r means1, echo=FALSE}
+load(paste0(dFolder, "meansDT.Rda"))
+```
+
+```{r summary1, echo=FALSE}
+meansDT %>%
+  knitr::kable(caption = "Mean values of electricity demand for hot water and other appliances, rounded to nearest Watt", 
+               col.names = c("Household", "Hot water (W)", "Other appliances (W)"), 
+               digits = 0)
+```
+
+Table \@ref(tab:summary1) shows the mean values of hot water electricity demand and other appliance electricity demand for each household. Average demand varies significantly for each household, ranging from `r signif(min(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r signif(max(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`). The variation in hot water electricity demand can also be seen in the box plot shown in Figure \@ref(fig:demandBoxplot).
+
+```{r demandBoxplot, echo=FALSE, out.width='100%', fig.cap='Box plot of demand for each household'}
+knitr::include_graphics(paste0(pFolder, "averages/boxplot.png"))
+```
+
+
+```{r averagePlot, echo=FALSE, out.width='100%', fig.cap="Average half-hourly demand of hot water electricity for each household"}
+knitr::include_graphics(paste0(pFolder, "averages/averageDemand.png"))
+```
+
+Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. 
+
+## Autocovariance
+
+```{r autocovariance, echo=FALSE, out.width='100%', fig.cap="Autocovariance of all households"}
+knitr::include_graphics(paste0(pFolder, "acfAllHouses.pdf"))
+```
+
+Figure \@ref(fig:autocovariance) indicates that our households are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals, as well as a weekly cycle (peaks increasing again towards the end of the plot). 
+
+## Cross-covariance
+
+Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use, often at lags of around half an hour.
+
+```{r crossCovariance, echo=FALSE, out.width='100%', fig.cap="Cross correlogram of all households"}
+knitr::include_graphics(paste0(pFolder, "ccfAllHouses.pdf"))
+```
+
+We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. 
+
+```{r ccvMaxLagPlot, echo=FALSE, out.width='100%', fig.cap="Lag at maximum correlation for each household (bin width 30 minutes)"}
+knitr::include_graphics(paste0(pFolder, "maxXcorAllHouses.pdf"))
+```
+
+The histogram of maximum cross-covarience for each household (Figure \@ref(fig:ccvMaxLagPlot)) shows that while many houses have the maximum value of their cross-covariances at the boundary (30 minutes), around half have maximums at longer timescales.
+
