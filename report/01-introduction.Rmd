@@ -21,10 +21,7 @@ source(paste0(filepathsPath, "/filepaths.R"))
 #dFolder <- "~/HWCanalysis/Masters/data/"   # Data folder
 #pFolder <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did not like '~' notation)
 ```
-## The New Zealand electricity grid
-
-
-## Electricity supply must match demand
+## This needs a suitable title
 
 Temporal variation in electricity demand occurs at a variety of timescales in an electricity grid. 
 Throughout summer months, in hot and dry climates, electricity demand on average increases due to the increased use of air conditioners and irrigation systems.
@@ -77,7 +74,7 @@ One solution to this is to automate or remotely control the scheduling of applia
 This already occurs in New Zealand, to an extent, in the form of ripple control. 
 Under a ripple controlled system, local electricity distribution network companies provide a discounted electricity rate in order to be able to remotely cease the supply of electricity during peak periods or grid emergencies[@Orion2017]. 
 This is achieved through sending high frequency signals though the electricity lines to be interpreted by specialised receivers that then suppress the operation of the appliance they are connected to (usually hot water cylinders or irrigation systems).
-They use this system both to defer upgrades to their infrustructure that would otherwise be necessary, and also as a form of revenue, by selling into the reserves markets previously mentioned.
+They use this system both to defer upgrades to their infrustructure that would otherwise be necessary, and also as a form of revenue, by selling demand reduction capacity into the reserves markets previously mentioned.
 While this system as it currently operates is highly beneficial to the grid, it has been operating essentially unchanged since its introduction to New Zealand in the 1950's, and there is significant room for improvement utilising more recent technology[@Jack].
 
 The ability for an appliance to have its electricity demand times shifted on a daily scale with limited impact to the end user is referred to as 'flexibility'. Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders. Flexible devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand (for example into times where electricity is cheaper) with minimal impact to the end user.

@@ -44,12 +44,20 @@ Conventional techniques are commonly used, either some form of time series analy
 
 AI techniques are also common in electricity demand forecasting. Two very common AI methods used for this purpose[@Ahmad2014; @MatDaut2017; @Tardioli2015; @Amasyali2018] are ANNs[@Dervilis2018; @Chitsaz2015] and SVMs[@Aki2016; @Jain2009; @Zhang2016], however others use more novel AI methods such as ensemble bagging trees[@Wang2018], particle swarm optimisation[@Sepulveda2010], reinforcement learning[@Ruelens2018], cluster analysis[@McLoughlin2015], or dynamic Gaussian processes[@Dervilis2018].
 
-Some research has been done that compares a selection of models with one another.
+Some research has been done that compares a selection of electricity demand forecasting models with one another.
+Comparative research in [@Gelazanskas2015] considers only considers conventional methods for forecasting residential hot water demand, with ARIMA models featuring as highly regarded for this purpose.
+Research comparing AI methods showed SVMs tend to outperform ANNs in accuracy[@Ahmad2014] while having reasonable computational efficiency[@Ahmad2014], whereas ANNs in particular were noted as being computationally expensive[@Dervilis2018].
 While a comparison between AI methods in [@Gajowniczek2014] showed a that an ANN provides slightly more accurate forecasts when predicting a full day ahead, the SVM was most accurate when predicting the next hour. 
 Some comparative research considers both AI and conventional methods[@Dervilis2018; @Kaytez2015; @Massana2015]. 
 SVMs were compared against ANNs and linear regression in [@Kaytez2015; @Massana2015], and found to be the most accurate model.
 SVMs were not considered in [@Dervilis2018], which instead found an AI forecasting method called dynamic Gaussian processes to be by far the most accurate when predicting grid-level electricity load.
-Dynamic Gaussian processes were noted again in [@McLoughlin2013] as being unsuitable for building level demand forecasting.
-Research comparing AI methods showed SVMs tend to outperform ANNs in accuracy[@Ahmad2014] while having reasonable computational efficiency[@Ahmad2014], whereas ANNs in particular were noted as being computationally expensive[@Dervilis2018].
-Other comparative research considers only considers conventional forecasting methods, with ARIMA models consistantly featuring as highly regarded for this purpose[@Gelazanskas2015].
+Dynamic Gaussian processes however were noted in [@McLoughlin2013] as being unsuitable for building level demand forecasting, and thus, we may assume, also for appliance level forecasting.
 A comprehensive review of data-driven building energy consumption prediction studies[@Amasyali2018] shows SVMs consistantly outperforming ANNs in accuracy for demand forecasting, which is confirmed by another review in [@MatDaut2017]. 
+
+To the best of my knowledge, there is no existing literature that compares a range of models to forecast residential hot water electricity demand.
+Perhaps the research most similar to this thesis in the existing literature is that of Gelažanskas and Gamage[@Gelazanskas2015]. These researchers compare a number of time series analysis based forecasting models to predect volumetric residential hot water demand.
+While my thesis draws on their key findings, it differs in a number of ways, which are shown in Figure \@ref(fig:gelazanskasComparison).
+
+```{r gelazanskasComparison, out.width="100%", fig.cap="Comparison between this thesis and the most similar piece of existing literature"}
+knitr::include_graphics(paste0(pFolder, "gelazanskas.pdf"))
+```
