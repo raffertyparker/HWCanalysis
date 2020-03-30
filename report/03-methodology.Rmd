@@ -1,19 +1,11 @@
 # Methodology {#methodology}
-_Michael you mentioned this chapter could be broken into two, with the data analysis sections in their own chapter. If you still think this should happen, please give a rough indication about what should go where_ 
 
-This chapter begins by giving an introduction to the dataset that was used to fit and test the models, as well as describing some necessary preliminary cleaning of the data. It goes on to provide a more theoretical background as to the nature of our data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
+This chapter begins by giving an introduction to the dataset that was used to fit and test the models, as well as describing some necessary preliminary cleaning of the data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
 
 All data processing and modelling was conducted using the `R` programming language[@R-base].
 In particular, data extraction and processing used the packages `GREENGridData`[@R-GREENGridData], `dplyr`[@R-dplyr] and `data.table`[@R-data.table]. Time series manipulation and analysis used packages `lubridate`[@R-lubridate], `forecast`[@R-forecast], and `xts`[@R-xts]. Plots were created using the packages `ggplot2`[@R-ggplot2], `ggplotmisc`[@R-ggpmisc], and `ggExtra`[@R-gridExtra]. 
 <!--Significant consideration has been given to facilitating reproducibility of results, and all code is publicly available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. -->
-```{r loadFiles2, include=FALSE}
-filepathsPath <- dirname(getwd())
-#filepathsPath <- getwd()
-source(paste0(filepathsPath, "/filepaths.R"))
 
-#dFolder <- "~/HWCanalysis/Masters/data/"   # Data folder
-#pFolder <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did not like '~' notation)
-```
 <!-- Required to number equations in HTML files 
 -->
 <script type="text/x-mathjax-config">
@@ -133,32 +125,6 @@ library(lubridate)
 library(xts)
 ```
 
-### Data summary
-
-```{r means1, echo=FALSE}
-load(paste0(dFolder, "meansDT.Rda"))
-```
-
-```{r summary1, echo=FALSE}
-meansDT %>%
-  knitr::kable(caption = "Mean values of electricity demand for hot water and other appliances, rounded to nearest Watt", 
-               col.names = c("Household", "Hot water (W)", "Other appliances (W)"), 
-               digits = 0)
-```
-
-Table \@ref(tab:summary1) shows the mean values of hot water electricity demand and other appliance electricity demand for each household. Average demand varies significantly for each household, ranging from `r signif(min(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r signif(max(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`). The variation in hot water electricity demand can also be seen in the box plot shown in Figure \@ref(fig:demandBoxplot).
-
-```{r demandBoxplot, echo=FALSE, out.width='100%', fig.cap='Box plot of demand for each household'}
-knitr::include_graphics(paste0(pFolder, "averages/boxplot.png"))
-```
-
-
-```{r averagePlot, echo=FALSE, out.width='100%', fig.cap="Average half-hourly demand of hot water electricity for each household"}
-knitr::include_graphics(paste0(pFolder, "averages/averageDemand.png"))
-```
-
-Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. 
-
 ### Autocovariance of hot water use
 
 We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles (referred to as 'seasonality') are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising and quantifying cyclical behaviour of data, and is defined as
@@ -172,11 +138,7 @@ where $k$ is the lag value, $E$ is the expected value operator, and $\mu$ is the
 ![Autocovariance of all houses.](~/HWCanalysis/Masters/plots/acf_all_houses.png)
 -->
 
-```{r autocovariance, echo=FALSE, out.width='100%', fig.cap="Autocovariance of all households"}
-knitr::include_graphics(paste0(pFolder, "acfAllHouses.pdf"))
-```
-
-The results are interpreted by plotting $\gamma_k$ against the lag values. Figure \@ref(fig:autocovariance) indicates that our households are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals, as well as a weekly cycle (peaks increasing again towards the end of the plot). 
+The results are interpreted by plotting $\gamma_k$ against the lag values. 
 
 ### Frequency analysis
 
@@ -192,7 +154,7 @@ While some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many ha
 knitr::include_graphics(paste0(pFolder, "bothElecPlot.pdf"))
 ```
 Many households appeared to show instances whereby the electricity demand of other appliances increases before the hot water element switched on. This may be understood by considering general domestic behavioural patterns. Many people may choose, for example, to turn on the kettle before a shower in the morning, or cook dinner before doing the dishes in the evening. An example demonstrating this behaviour is given in Figure \@ref(fig:bothElecPlot).
-While this figure may not in itself be very compelling, we can make a more thorough exploration into the temporal relationship between hot water electricity demand and that of other appliances using the cross-covariance function.
+We can make a more thorough exploration into the temporal relationship between hot water electricity demand and that of other appliances using the cross-covariance function.
 
 In a similar fashion to the autocovariance function (Equation \@ref(eq:ACV)), the cross-covariance function of two variables $x, y$ is given by
 
@@ -201,19 +163,7 @@ In a similar fashion to the autocovariance function (Equation \@ref(eq:ACV)), th
 \end{equation}
 where variable $x$ lags variable $y$ by lag $k$[@Cowpertwait2009].
 
-Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use, often at lags of around half an hour.
-
-```{r crossCovariance, echo=FALSE, out.width='100%', fig.cap="Cross correlogram of all households"}
-knitr::include_graphics(paste0(pFolder, "ccfAllHouses.pdf"))
-```
-
-We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. 
-
-```{r ccvMaxLagPlot, echo=FALSE, out.width='100%', fig.cap="Lag at maximum correlation for each household (bin width 30 minutes)"}
-knitr::include_graphics(paste0(pFolder, "maxXcorAllHouses.pdf"))
-```
-
-The histogram of maximum cross-covarience for each household (Figure \@ref(fig:ccvMaxLagPlot)) shows that while many houses have the maximum value of their cross-covariances at the boundary (30 minutes), around half have maximums at longer timescales.
+Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. 
 
 
 ### STL decomposition {#STL}
@@ -238,7 +188,7 @@ As this work is concerned mainly with making predictions only half an hour into 
 Throughout this process I have placed strong emphasis on allowing reproducibility. 
 For this reason, any forecasting methods that required high capacity computational resources in order to successfully execute were not considered. 
 
-## Introduction to selected models
+## Introduction to selected models {#IntroToModels}
 
 This section outlines a broad introduction to the various models selected for use either implicitly or explicitly in this analysis. Refer to Cowpertwait and Metcalfe[@Cowpertwait2009] for further details regarding these models. _No ARIMAX or SVM in this book_
 
@@ -391,7 +341,22 @@ This may be expressed in terms of the backward shift operator in polynomial form
 Combining the predictive power of seasonal decomposition, external regressors, and time series analysis, we have an STL decomposition with ARIMAX model.
 This method decomposes the data into seasonal, trend and remainder components, (refer to Section \@ref(STL)), and then fits an ARIMAX model to the remainder using lagged values of other appliance electricity demand as the external regressors (refer to Section \@ref(ARIMAX)). This is then added to the seasonal and trend components to complete the model.
 
+### Artificial Neural Networks
+
+ANNs attempt to mimic biological learning mechanisms by processing a set of training data through clusters of artificial neurons, each of which individually receive (numerical) inputs, assign them certain weights, and then output the weighted value into other artificial neurons, which perform the same task, until eventually producing a final output.
+The weights assigned by each neuron are then iteratively adjusted in order to minimise the error of the final output.
+While ANNs are commonly used in electricity demand forecasting, literature suggests they tend to be outperformed in both accuracy and computational efficiency by support vector machines for this type of analysis. For this reason, I opted not to consider them in this comparative work, instead choosing support vector machines as my comparative AI method.
+
 ### Support vector machines
+
+Support vector machines classify data points by mapping them in hyperspace and distinguishing between them according to which side of a hyperplane they fall on, with the position of the classifying hyperplanes being constructed iteratively in order to maximise the perpendicular distance between each hyperplane and the closest samples on either side of it (refer to Figure \@ref(fig:SVMexample) for a linear example). 
+
+
+```{r SVMexample, out.width='100%', fig.cap="Example demonstrating the classifying mechanism of a SVM. Image by Larhmam - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=73710028"}
+knitr::include_graphics(paste0(pFolder, "SVMmargin.png"))
+```
+
+Non-linear partitions can also be constructed using a kernel function. 
 
 The process of training a non-linear SVM can be stated mathematically as follows:
 Given instances $\mathbf{x}_i ,  i= 1, . . . , l$ with labels $y_i \in \{1,-1\}$, solve the following quadratic optimization problem:
