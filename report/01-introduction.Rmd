@@ -185,11 +185,10 @@ It is an exploratory analysis with high regard given to reproducibility under th
 
 ## Thesis structure
 
-This chapter explains two key inefficiencies that forecasting of hot water electricity demand could help alleviate.
-The fol.... literature review highlights key research that tends to relevant matters addressed in this research project such as…..
-A methodology section follows, which does this and that….
-The main body of analysis is broadly broken into three sections. 
-Chapter \@ref(methodology) introduces the electricity demand data utilised in this work, explains the data cleaning and preparatory process, and then provides a broad overview of various relevant patterns and attributes of the data. It goes on to introduce the models utilised in the context of electricity demand, and describe the metrics by which the models are compared to one another.
+The introduction in this chapter explained two key inefficiencies that forecasting of hot water electricity demand could help alleviate. It also provided a brief introduction to the type of data and techniques used to make these forecasts.
+The following chapter is the Literature review. This highlights key research in relevent topics, in particular, hot water modelling, smart control of appliances, and electricity demand forecasting.
+The methodology is provided in Chapter \@ref(methodology). This chapter introduces the electricity demand dataset utilised in this work, and explains the data cleaning and preparatory process. It goes on to introduce the exploratory data analysis techniques and the forecasting models utilised in this research, and describe the metrics by which the models are compared to one another.
+_SPLIT RESULTS CHAPTERS_
 Chapter \@ref(results) demonstrates the effectiveness of a number of statistical models to forecast hot water electricity demand of each household using half-hour averaged data. This is currently the form which is stored and transmitted by smart meters in New Zealand currently. 
 Each forecasting model used is then compared to one another by a number or relevant metrics. These comparative results are provided in the Conclusion (Chapter \@ref(conclusion)). Potential further work is also detailed in this section.
 
