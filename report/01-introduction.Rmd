@@ -172,6 +172,7 @@ knitr::include_graphics(paste0(pFolder, "SVelecDemandForecasting.png"))
 
 ## Aims
 
+_Briefly summarise intro here_
 The aim of this project is use electricity demand data from New Zealand households to develop a computationally efficient, accurate, and physically meaningful method of predicting individual household hot water electricity demand using time series data at 30 minute resolution. 
 A number of methods will be explored and compared against one another, with comparative metrics taking into consideration both the suitability for incorporation into smart control systems, and for incorporation as demand simulation into physical models.
 
@@ -184,6 +185,9 @@ It is an exploratory analysis with high regard given to reproducibility under th
 
 ## Thesis structure
 
+This chapter explains two key inefficiencies that forecasting of hot water electricity demand could help alleviate.
+The fol.... literature review highlights key research that tends to relevant matters addressed in this research project such as…..
+A methodology section follows, which does this and that….
 The main body of analysis is broadly broken into three sections. 
 Chapter \@ref(methodology) introduces the electricity demand data utilised in this work, explains the data cleaning and preparatory process, and then provides a broad overview of various relevant patterns and attributes of the data. It goes on to introduce the models utilised in the context of electricity demand, and describe the metrics by which the models are compared to one another.
 Chapter \@ref(results) demonstrates the effectiveness of a number of statistical models to forecast hot water electricity demand of each household using half-hour averaged data. This is currently the form which is stored and transmitted by smart meters in New Zealand currently. 
