@@ -18,3 +18,4 @@ source(paste0(sFolder, "four_plot.R")) # Creates model comparison plots of 4 hou
 source(paste0(sFolder, "four_plot_SVM.R")) # Creates SVM plot of 4 households
 source(paste0(sFolder, "STL_plots.R")) # Creates STL plots
 source(paste0(sFolder, "residual_analysis.R")) 
+source(paste0(sFolder, "sin_example.R"))  
