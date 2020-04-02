@@ -1,12 +1,17 @@
 # Introduction
 
-My thesis is concerned with the building and comparison of various computer models which attempt to make predictions of the electricity demand of residential hot water cylinders.
-The reason why this is a worthwhile thing to be doing, put simply, is that it has the potential to increase efficiencies.
-When a resource must be readily available in a particular quantity at all times, while only a fraction of it is being utilised for most of these times, we tend to see inefficiencies. 
-A large tank of water being maintained at 65°C day and night, while only a portion of it is being used at particular times of day or week for the vast majority of the time, is thermally inefficient.
-An electricity grid that is built and maintained to generate and transmit enough electricity to cover periods of extremely high demand, while only a portion of this capacity is being used for the vast majority of the time, is economically inefficient.
+In order to reduce the risk of catastrophic climate change, the International Panel on Climate Change (IPCC) has recommended stabilising atmospheric CO$^2$ levels at 450 parts per million[IPCC2014]. In order to meet this target, it is critical we achieve deep electrification of transport and other industries that currently rely predominantly on fossil fuels for their energy supply[@Williams2012].
 
-This chapter explains these two inefficiencies in more detail and outlines the role that smarter control of hot water cylinders may play in alleviating these inefficiencies. It then goes on to explain the value that predictive modelling would bring to such a smart control system.
+Ensuring electricity is cheap and plentiful will assist the shift toward electrification.
+For this reason, it is paramount we reduce inefficiencies within electricity networks.
+This research is concerned with two such inefficiencies.
+The first is that of heat losses from residential hot water cylinders. Many households constantly maintain a large tank of water at around 65°C, while only requiring a portion of it at particular times of day or week. This is an example of energy inefficiency.
+The second is that of unecessary or premature capital expenditure on electricity networks.
+Electricity grids must be built and maintained with the capacity to generate and transmit enough electricity to cover periods of extremely high demand, while only a portion of this capacity is being used for the vast majority of the time. This is an example of economic inefficiency.
+
+This chapter explains these two inefficiencies in more detail and outlines the role that smarter control of hot water cylinders may play in alleviating them. It then goes on to explain the value that predictive computer models of residential hot water electricity demand would bring to such a smart control system.
+The research conducted for this thesis revolved around the construction and comparison of a variety of these predictive models.
+
 <!--
 Problem: One solution to the variability of electricity demand and supply problems is DSM, but current methods not sophisticated
 New approach: The growing field of data science along with the availability of electricity data and methods of analysing it could be used to help with more effective DSM
@@ -21,29 +26,33 @@ source(paste0(filepathsPath, "/filepaths.R"))
 #dFolder <- "~/HWCanalysis/Masters/data/"   # Data folder
 #pFolder <- "/home/parra358/HWCanalysis/Masters/plots/"  # Plots folder (laTeX did not like '~' notation)
 ```
-## This needs a suitable title
+## New Zealand electricity grid
 
 Temporal variation in electricity demand occurs at a variety of timescales in an electricity grid. 
 Throughout summer months, in hot and dry climates, electricity demand on average increases due to the increased use of air conditioners and irrigation systems.
 Throughout winter months, in cooler climates, electricity demand on average increases due to increased use of electric heaters.
 These average increases are more pronounced at certain times of day, generally reflected as two 'peaks' in the morning and evening, due to the effects of residential electricity demand.
+
 As electrical energy cannot be stored, electricity supply must match this fluctuating demand. This becomes progressively more expensive to achieve as peak demand increases[@Jack].
 The challenges associated with supplying electricity in order to effectively meet demand are likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015]. 
+
 Failure to match supply and demand may result in grid black-outs, as well as large-scale damage to electricity-using appliances that operate under specific alternating current (AC) frequencies.
 New Zealand's electricity system frequency must be maintained at or near 50 Hz. In general, when more electricity is generated than is being consumed the AC frequency increases, and when more electricity is being consumed than is generated the AC frequency drops.
 In the event of a large generator unexpectedly going offline, a high voltage direct current (HVDC) pole tripping, or other large disruptions to supply there must be reserve electricity available so that the frequency is maintained within an acceptable range (between 48 and 52 Hz).
-Ensuring that there is enough capacity to provide electricity at times of very high demand or during unexpected grid emergencies requires the building and maintenance of generation and transmission infrastructure that sits underutilised for the majority of the time. This a very costly and inefficient situation[@Strbac2008]. 
+Ensuring that there is enough capacity to provide electricity at times of very high demand or during unexpected grid emergencies requires the building and maintenance of generation and transmission infrastructure that sits underutilised for the majority of the time. This is a very costly and inefficient situation[@Strbac2008]. 
 
 ## Demand response
 
 There are currently a range of mechanisms in place to ensure that the supply of electricity balances with the varying demand[@Strbac2008], and that currents do not exceed transmission and distribution infrastructure constraints[@TranspowerNZ2015].
 One method to deal with the imbalance between the supply and demand of electricity is to adjust demand to meet supply. This is referred to as demand response. 
 The grid benefits in being able to rapidly decrease electricity load is reflected by the ability to monetize this capacity through various electricity markets.
-These markets were created in 1996 following privatisation of electricity grid.
+These markets were created in 1996 following privatisation of the electricity grid.
+
 The New Zealand electricity grid is composed of over 200 points at which electricity may enter or exit. These are referred to as the grid 'nodes'. 
 Electricity generators submit bids to supply electricity to each node at a particular cost during each half-hour period. These are then aggregated to form a supply curve for each node.
 Forecasts are made for the demand at each of these nodes, and the predicted quantity of electricity is purchased from generators to cover this demand[@ElectricityAuthority2011]. 
 All generators recieve the locational marginal price for their supply, that is, the highest price that ensures all demand for each particular node is met.
+
 Price variation occurs according to supply and demand. Prices rise when there is high electricity demand on the grid or there is limited availability of electricity resources with low marginal cost of production, such as those from renewable sources. Conversely, prices fall when electricity is cheap to produce, or total electricity demand is low. 
 These prices fluctuate wildly, with the Benmore node BEN2201 having prices ranging from \$0.02/MWh to \$894.38/MWh during 2017 for example.
 Electricity retailers purchase electricity from the generators on this spot market, and on-sell it to consumers. 
@@ -57,6 +66,7 @@ These reserves are bought and sold separate markets.
 One example of such markets is the 'instantaneous reserves' markets.
 Instantaneous reserves markets are national markets concerned with stabilising the grid alternating current (AC) frequency during times of severe demand peaks or grid emergencies [@EANZ2014].
 The systems operator will pay a premium for any electricity that can be made available during these periods, either through generators ramping up latent generating capacity, or, relevant to this thesis, consumers able to shed demand during these periods (known as interruptible load).
+
 The ability to assist with frequency keeping during these periods may be monetised in one of two markets.
 Interruptible load that is able to be shed within one second and remain reduced for sixty seconds is eligible to be traded in the fast instantaneous reserve (FIR) market.
 Interruptible load that is able to be shed within sixty seconds and remain reduced until instructed otherwise by the systems operator is eligible to be traded in the sustained instantaneous reserves (SIR) market.
@@ -78,18 +88,22 @@ They use this system both to defer upgrades to their infrustructure that would o
 While this system as it currently operates is highly beneficial to the grid, it has been operating essentially unchanged since its introduction to New Zealand in the 1950's, and there is significant room for improvement utilising more recent technology[@Jack].
 
 The ability for an appliance to have its electricity demand times shifted on a daily scale with limited impact to the end user is referred to as 'flexibility'. Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders. Flexible devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand (for example into times where electricity is cheaper) with minimal impact to the end user.
+
 With the rapid rise of 'internet of things' technology, whereby devices are interconnected and offer the ability to be controlled remotely, there is now the ability to automatically schedule flexible devices to facilitate a number of objectives. 
 Devices may be scheduled around availability of renewable energy sources for example, or optimised to minimise costs through participation in demand response markets.
 The ability to remotely control interconnected demand-flexible appliances within an electricity network is part of a new paradigm in electricity distribution known as the 'smart grid'.
-The smart grid is a power grid where energy producers, network companies and consumers are intelligently connected to each other. On the consumer side this largely enabled by advanced electricity meters, known as 'smart meters', which have the ability to store, display and transmit data associated with the electricity being consumed. 
+The smart grid is a power grid where energy producers, network companies and consumers are intelligently connected to each other. 
+
+On the consumer side the smart grid is largely enabled by advanced electricity meters, known as 'smart meters', which have the ability to store, display and transmit data associated with the electricity being consumed. 
 This two-way information communication is proposed to encourage the integration of distributed (generally renewable) power generation, and allow sophisticated metering and automation to proliferate[@Lund2015]. 
 The process of autonomously scheduling appliances for efficiency benefits is referred to as 'smart control'
 Due to the high flexibility of various residential appliances, smart control technology could thus enable significant demand shifting[@Dhulst2015].
 Smart control of residential hot water cylinders is particularly promising, as it is both flexible, and a key contributor to network demand peaks.
+
 In New Zealand, it is estimated that residential electricity usage contributes around half of peak demand[@ElectricityCommission2007] and residential hot water use is around 30% of residential energy used[@Pollard2002]. 
 A study by the Household Energy End Use Project (HEEP) showed that hot water usage makes up to 36% of residential peak demand[@Pollard2002], with other research suggesting it may be up to 50%[@Jack]. 
 In New Zealand, electric hot water cylinders (HWCs) are very common, with 91% of households having electricity as an energy source for water heating[@Pollard2002]. 
-Due to their ability to store large amounts of energy in the form of heat, hot water cylinders are generally the most 'flexible' appliances in New Zealand households[@Stephenson2017], rendering them perfect candidates for demand shifting.
+Due to their ability to store large amounts of energy in Computational efficiency can be thought of as the amount of computing energy necessary to process and analyse the data in the construction of the forecast. This is most inutively understood as the amount of time a computer with a particular processing capability will take to construct the forecast. the form of heat, hot water cylinders are generally the most 'flexible' appliances in New Zealand households[@Stephenson2017], rendering them perfect candidates for demand shifting.
 
 ## Predicting electricity demand
 
@@ -102,33 +116,36 @@ Any object that is hotter than its surroundings will suffer from heat loss, with
 Thus, as hot water loses heat energy to the environment faster than cooler water, storing hot water in excess of what is required is inefficient. 
 Simulations by Denis, Suard, Lomet and Chèze[@Denis2019] demonstrated average energy savings of up to 10% in hot water systems that only heated according to what was predicted to be required.
 The ability to store only as much hot water as will be required by the household (with the remainder of the tank being left as cooler water) therefore has the potential to reduce total hot water electricity consumption[@Denis2019]. 
+These predictions can be obtained through forecasting of time series data. 
 
 ## Forecasting from time series data
 
-Time series data is that which involves measurements of variables sequentially or at fixed intervals of time[@Cowpertwait2009].
-This data may then be processed, analysed and extrapolated in a manner that produces predictions of future events or occurrences, a process known as 'forecasting'. 
-There are number of different methods of forecasting time series data.
-Although the distinction is subtle, these methods may be broadly separated into two categories; (i) conventional, and (ii) artificial intelligence (AI)[@MatDaut2017].
-An important (but again, not clear-cut) distinction between these two methods is that of computational efficiency. 
-Computational efficiency can be thought of as the amount of computing energy necessary to process and analyse the data in the construction of the forecast. This is most inutively understood as the amount of time a computer with a particular processing capability will take to construct the forecast. 
-Conventional methods often require significant human input, generally requiring an initial data analysis, testing, and trial and error, but once the optimal model is discovered, it tends to be very computationally efficient.
-AI methods tend to require less human time to build the forecast, while requiring significantly more computational time.
+Time series data involves measurements of variables sequentially or at fixed intervals of time[@Cowpertwait2009].
+The time intervals between each measurement are known as the data 'resolution'. Time series data that had measurements recorded every hour, for example, would have a one hour resolution.
+Time series data may be processed, analysed and extrapolated in a manner that produces predictions of future events or occurrences, a process known as 'forecasting'.
+There are many different techniques whereby key aspects of the processing, analysis and extrapolation can be carried out algorithmically by a computer.
+Different techniques use different algorithms to carry out the forecasting processes, some of which use more computational resouces than others.
+When the construction of a forecasting model uses a comparatively small amount of processing resources, it can be referred to as 'computationally efficient'. 
+This is most inutively understood as the amount of time a computer with a particular processing capability will take to construct the forecast. 
+Although the distinction is subtle, time series forecasting methods may be broadly separated by their computational efficiencies into two categories; (i) conventional, and (ii) artificial intelligence (AI)[@MatDaut2017].
 
 ### Conventional forecasting methods
 
-Conventional forecasting may again be separated into two distinct techniques.
-The first, referred to as _causal_ modelling[@Hong2016], utilises data of separate but related (explanatory[^1]) variables and makes predictions based on basic statistical relationships between them. Regression analysis is a causal model commonly used in electricity forecasting, and may be understood as follows:
+Conventional methods often require significant human input, generally requiring an initial data analysis, testing, and trial and error. However, once an optimal conventional model is discovered, it can generally be constructed with reasonable computational efficiency. 
+There are two distinct conventional time series forecasting techniques utilised in this research; causal modelling, and time series analysis.
+Causal modelling utilises data of separate but related (explanatory[^1]) variables and makes predictions based on basic statistical relationships between them[@Hong2016]. Regression analysis is a causal model commonly used in electricity forecasting, and may be understood as follows:
 If there is the ability to know (or sufficiently accurately predict) the value(s) of the independent variable(s) at a particular future time, then a forecast for the dependent variable may be calculated at that same time based on the causal relationship between them.
 In the context of electricity demand forecasting, relevant predictable independent variables may be social factors such as public holidays, or (accurately forecasted) weather conditions[@Wei2018].
 However if there is no obtainable value(s) for the independent variable(s) at the future time for which a prediction is required, more subtle techniques must be employed. 
 One option is to establish a relationship between the value(s) of the independent variables and the following values of the dependent variable. In the context of DHW electricity demand forecasting, this may be the relationship between the electricity demand of other appliances, and subsequent values of DHW electricity demand.
 
-Another conventional forecasting method known as _time series analysis_ utilises the fundamental properties of only the time series data of the variable being predicted.
-On important technique used in time series analysis is the separation of the data into individual components, namely trend, cycles and 'noise'. 
-In the context of DHW electricity time series data, the trend would be a gradual increase (or decrease) in average hot water use over long periods of time, the cycles would be average daily use patterns such as morning and evening peaks previously mentioned, and the noise is any deviation of the data from the trend and cycle components (people not actually using hot water according to strict mathematical relationships).
+Another conventional forecasting method known as 'time series analysis' utilises the fundamental properties of only the time series data of the variable being predicted.
+One important technique used in time series analysis is the separation of the data into individual components, namely trend, cycles and 'noise'. 
+In the context of DHW electricity time series data, the trend would be a gradual increase (or decrease) in average hot water use over long periods of time. Cycles would be average daily use patterns such as morning and evening peaks previously mentioned. The noise is any deviation of the data from the combination of trend and cycle components (people not actually using hot water according to strict mathematical relationships).
+
 Additionally, forecasts may be made by understanding the relationships between a variable and its previous values. Autoregression (AR), moving average (MA), and a combination of the two (ARIMA) are commonly utilised techniques to obtain these relationships, which are expanded upon in Section \@ref(IntroToModels). In the context of DHW forecasting these methods may be best interpreted as an understanding of the lengths of time a water heater element will typically remain on (or off) for. 
 
-Conventional forecasting techniques are generally prized for being simple and interpretable, while taking minimal computing resources, but often require significant human input and are often outperformed in regards to accuracy by more advanced methods, such as artificial intelligence.
+Conventional forecasting techniques are generally prized for being simple and interpretable, while taking minimal computing resources, but often require significant human input. In addition, they are often outperformed in accuracy by the more advanced AI methods.
 
 [^1]: Multivariate data can be thought to be made up of both dependent and independent (or 'explanatory') variables. Broadly speaking, dependent variables are those we are interested in measuring or predicting (in this research, hot water electricity demand). Explanatory variables are those we expect to impact our dependent variables (in this research we use time and the electricity demand of other appliances).
 
@@ -139,9 +156,9 @@ knitr::include_graphics(paste0(pFolder, "artificial_neural_network_electricity_d
 ```
 
 Artificial Intelligence (AI) methods are those that use more mathematically complex techniques from the field of machine learning for forecasting.
-These methods can be considered separate from their conventional counterparts by their ability to process and establish relationships between data in a more autonomous fashion. 
-In general, AI methods are constructed more autonomously than than conventional forecasting methods, allowing minimal human input to obtain (often) highly accurate predictions.
-This comes with a trade-off however, as their outputs tend to be 'black box', generally providing less in the way of understanding underlying processes than many conventional methods obtained through utilising human intuition and statistics.
+These methods can be considered separate from their conventional counterparts by their ability to process and establish relationships between data with minimal human input. 
+While AI methods are generally constructed more autonomously than than conventional forecasting methods, they still have the ability to obtain (often) highly accurate predictions.
+There is a trade-off however, as their outputs tend to be 'black box', generally providing less in the way of understanding underlying processes than many conventional methods obtained through utilising human intuition and statistics.
 In addition, AI modelling can be hindered by the large amounts of computing resources necessary.
 
 <!--
@@ -155,7 +172,7 @@ knitr::include_graphics(paste0(pFolder, "SVelecDemandForecasting.png"))
 
 ## Aims
 
-The aim of this project is use electricity demand data from New Zealand households to develop an efficient, accurate, and physically meaningful method of predicting individual household hot water electricity demand using time series data at 30 minute resolution. 
+The aim of this project is use electricity demand data from New Zealand households to develop a computationally efficient, accurate, and physically meaningful method of predicting individual household hot water electricity demand using time series data at 30 minute resolution. 
 A number of methods will be explored and compared against one another, with comparative metrics taking into consideration both the suitability for incorporation into smart control systems, and for incorporation as demand simulation into physical models.
 
 <!--

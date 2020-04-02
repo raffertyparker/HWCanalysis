@@ -163,6 +163,8 @@ knitr::include_graphics(paste0(pFolder, "STLARIMA/allHousesResidual.pdf"))
 ```
 
 While still losing accuracy during peak periods, with a RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "STLARIMA"], 2)`%, this model had the lowest percentage increase in peak period RMSEs of all those considered in this analysis.
+Note that this model was the most accurate of a selection of time series methods used to forecast volumetric residential hot water demand in [@Gelazanskas2015].
+These results come to the same conclusion, with further accuracy improvements only possible by addition of an external regressor (a causal method) or through AI methods.
 
 ## ARIMAX with STL decomposition
 

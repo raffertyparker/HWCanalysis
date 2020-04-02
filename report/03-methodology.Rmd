@@ -1,6 +1,6 @@
 # Methodology {#methodology}
 
-This chapter begins by giving an introduction to the dataset that was used to fit and test the models, as well as describing some necessary preliminary cleaning of the data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to our context provided. Finally, the metrics by which the models are compared with one another are outlined.
+This chapter begins by giving an introduction to the dataset that was used to fit and test the models, as well as describing some necessary preliminary cleaning of the data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to the context of hot water electricity demand forecasting provided. Finally, the metrics by which the models are compared with one another are outlined.
 
 All data processing and modelling was conducted using the `R` programming language[@R-base].
 In particular, data extraction and processing used the packages `GREENGridData`[@R-GREENGridData], `dplyr`[@R-dplyr] and `data.table`[@R-data.table]. Time series manipulation and analysis used packages `lubridate`[@R-lubridate], `forecast`[@R-forecast], and `xts`[@R-xts]. Plots were created using the packages `ggplot2`[@R-ggplot2], `ggplotmisc`[@R-ggpmisc], and `ggExtra`[@R-gridExtra]. 
@@ -28,16 +28,6 @@ The data used for this thesis was collected from monitored submetered electrical
 
 In any data analysis, there are initial processes that should be undertaken in order to get a general overview of the data[@Cowpertwait2009]. This allows for an informed opinion to be made as to the best techniques to achieve the desired objectives of the analysis.
 This section explores our dataset for the purpose of ascertaining any patterns and attributes that may assist in our predictive modelling. It starts by explaining the cleaning and preparation process, then uses methods to compare and visualise cycles and correlations within relevant variables. The analysis draws upon a broader overview of the data available at https://cfsotago.github.io/GREENGridData/.
-
-### Time series overview and notation {#TSoverview}
-
-As this work is concerned with predictability and patterns within our data over time, we extensively utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] provides a good overview to the process.
-
-A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009]. Statistical models may be built to fit this data, providing the ability to predict a future value based on historical data values. Models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the _model_ of $\{x_t\}$. <!-- A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.-->
-The difference between an observed value and the value predicted by the model is formally known as the _residual_, and can be intuitively understood as the error in the value predicted by the model. Models that sufficiently capture the trend and cycles of the data should have a residual time series that approximates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean.
-The residual sum of squares (RSS) is the sum of the squares of all the residuals over the times considered.
-Many models considered in this research are fitted algorithmically in order to minimise the RSS subject to parameter constraints.
-
 
 ### Initial data cleaning
 Some of the houses in the original dataset are not suited to the purposes of this analysis. Three houses were removed immediately (`rf_15`, `rf_17` and `rf_46`) due to issues with the data collection process (see https://github.com/CfSOtago/GREENGridData/issues/21 and https://github.com/CfSOtago/GREENGridData/issues/19 for more information). 
@@ -89,11 +79,7 @@ DThead %>%
 While minor additional processing was necessary for particular models, the fundamental form of the data used throughout the analysis is the form shown in Table \@ref(tab:headDT).
 The `hHour` column is the timestamp, `linkID` represents the household, and `nonHWelec` and `HWelec` are the half-hour averaged electricity demand of other appliances and hot water, respectively.
 
-Data processing code can be viewed at `~/HWCanalysis/scripts/processing.R`. 
-
-_put this in the appendix_
-
-_Consider making a flow chart of data processing sequence_
+Data processing code can be viewed in Appendix. 
 
 ```{r load_pkg, include = FALSE}
 # List of packages required for this analysis
@@ -125,28 +111,58 @@ library(lubridate)
 library(xts)
 ```
 
-### Autocovariance of hot water use
+### Time series overview and notation {#TSoverview}
 
-We would expect hot water electricity use to be somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles (referred to as 'seasonality') are explored using two separate methods. The first is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising and quantifying cyclical behaviour of data, and is defined as
+As this work is concerned with predictability and patterns within our data over time, we extensively utilise time series data analysis methods. The book "Introductory Time Series With R"[@Cowpertwait2009] provides a good overview to the process.
+
+A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009]. Models may be constructed to fit this data, providing the ability to predict a future value based on historical data values. In this thesis, models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the _model_ of $\{x_t\}$. <!-- A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.-->
+
+The difference between an observed value and the value predicted by the model, $\hat x_t - x_t$, is formally known as the _residual. This can be intuitively understood as the error in the value predicted by the model. Models that sufficiently capture the trend and cycles of the data should have a residual time series that approximates _white noise_, where a white noise time series, $\{w_t : t = 1,2,...,n\}$ is a set of independent and identically distributed variables with zero mean.
+The residual sum of squares (RSS) is the sum of the squares of all the residuals over the times considered.
+Many models considered in this research are fitted algorithmically in order to minimise the RSS subject to parameter constraints.
+
+### Autocovariance
+
+We would expect residential hot water electricity demand to follow total residential electricity demand in being somewhat cyclic, with daily and weekly periodicity due to the routines of the household occupants. These cycles are referred to as 'seasonality'. This terminology is due to the historical reason that time series methods were often developed to analyse econometric and financial data which often vary with the seasons, for example an increase in house sales during summer months[@Wooldridge2009]. There are a number of different methods which allow us to explore seasonality within data. One method is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising and quantifying cyclical behaviour of data, and is defined as
 
 \begin{equation}
 \gamma_k = E[(x_t - \mu)(x_{t+k} - \mu)] ,
 (\#eq:ACV)
 \end{equation}
 where $k$ is the lag value, $E$ is the expected value operator, and $\mu$ is the mean of both $x_t$ and $x_{t+k}$.
+
+Let $X$ be a random variable with a finite number of finite outcomes $x_1, x_2, \ldots, x_k$ occurring with probabilities $p_1, p_2, \ldots, p_k,$ respectively. The expected value of $X$ is defined as
+
+:$\operatorname{E}[X] =\sum_{i=1}^k x_i\,p_i=x_1p_1 + x_2p_2 + \cdots + x_kp_k.$
 <!--
 ![Autocovariance of all houses.](~/HWCanalysis/Masters/plots/acf_all_houses.png)
 -->
 
-The results are interpreted by plotting $\gamma_k$ against the lag values. 
+The results of the autocovariance function are interpreted by plotting $\gamma_k$ against the lag values. 
 
-### Frequency analysis
+### Fourier analysis
 
-_I possibly need to either elaborate on the frequency analysis process (include equations etc) or remove this section. I don't use it in the main analysis any more so perhaps removal is best. Cycles are pretty well covered by STL and ACV._
+While autocovariance plots are valuable for preliminary data analysis, models that incorporate these cycles need more precise numerical values of these cycles. One method of obtaining usable cycle periods is through Fourier analysis.
+Fourier analysis offers us the ability to automate the process of determining cycles in our data. 
+It achieves this by representing a set of time series data in terms of sinusoidal functions[Bloomfield2000].
+While a description of the precise mechanics of how this is acheived is beyond the scope of this thesis, the general idea is as follows.
 
-While autocovariance plots are valuable for preliminary data analysis, models that incorporate these cycles need more precise numerical values of these cycles. One method of obtaining usable cycle periods is through frequency analysis.
-Frequency analysis offers us the ability to automate the process of determining cycles in our data. Through the TSA package 'periodogram' we can extract the most dominant cycle frequencies within our data. These may then be input into later models that have the option of seasonality. 
-While some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many have more erratic patterns, with some being over a year in duration (refer to Table \@ref(tab:frequencyAnalysis) provided in the Appendix). This is an interesting insight, however it poses a challenge for incorporating other electricity demand within a "one size fits all" predictive model for our households.
+```{r sineDemonstration, out.width="100%", fig.cap="Demonstration of the properties of sinusoids"}
+knitr::include_graphics(paste0(pFolder, "sinExample.pdf"))
+```
+
+A sinusoid, in the context of a time series, is given by the equation
+
+\begin{equation}
+  y = Rsin(ft + \phi),
+\end{equation}
+where $R$ is the amplitude of the sinusoid, $f$ is its frequency, $\phi$ is its phase, and t is time.
+Varying the amplitude increases the 'height' of the curve, varying the phase 'shifts' the curve horizontally, varying the frequency increases the frequency of peaks and troughs. These curves may be added to one another to get curves that demonstrate a combination of the properties of those they are composed of.
+An example is provided in Figure \@ref(fig:sineDemonstration).
+
+Fourier analysis attempts to replicate the data as a linear combination of sinusoids, optimising the parameters $R$, $f$ and $\phi$ in order to minimise the square of the residuals. Once the optimised composite function is fitted to the data, values for amplitude, frequencies and phases may be extracted. The dominant frequencies are those which correspond to the sinosoids with the highest amplitudes[@Brockwell1991].
+Through the TSA package 'periodogram' we can extract the most dominant cycle frequencies within our data. 
+These may then be input into later models that have the option of accounting for seasonality. 
 
 ### Cross covariance of hot water electricity demand with other appliance electricity demand
 

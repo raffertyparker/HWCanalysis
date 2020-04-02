@@ -9,6 +9,10 @@ If you feel it necessary to include an appendix, it goes here.
 
 # Appendix {#appendix}
 
+## Data processing
+
+This is the code used to process the data from the format available from the UK data service[@GREENGrid] into the format required to conduct this analysis.
+
 <!--
 ## Relevant code
 

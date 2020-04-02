@@ -17,12 +17,12 @@ meansDT %>%
 
 Table \@ref(tab:summary1) shows the mean values of hot water electricity demand and other appliance electricity demand for each household. Average demand varies significantly for each household, ranging from `r signif(min(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r signif(max(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`). The variation in hot water electricity demand can also be seen in the box plot shown in Figure \@ref(fig:demandBoxplot).
 
-```{r demandBoxplot, echo=FALSE, out.width='100%', fig.cap='Box plot of demand for each household'}
+```{r demandBoxplot, echo=FALSE, out.width='100%', fig.cap='Box plot of hot water electricity demand for each household'}
 knitr::include_graphics(paste0(pFolder, "averages/boxplot.png"))
 ```
 
 
-```{r averagePlot, echo=FALSE, out.width='100%', fig.cap="Average half-hourly demand of hot water electricity for each household"}
+```{r averagePlot, echo=FALSE, out.width='100%', fig.cap="Daily profile of hot water electricity demand for each household"}
 knitr::include_graphics(paste0(pFolder, "averages/averageDemand.png"))
 ```
 
@@ -30,11 +30,17 @@ Figure \@ref(fig:averagePlot) shows the average electricity demand over each hou
 
 ## Autocovariance
 
-```{r autocovariance, echo=FALSE, out.width='100%', fig.cap="Autocovariance of all households"}
+```{r autocovariance, echo=FALSE, out.width='100%', fig.cap="Autocovariance of hot water electricity demand for each household"}
 knitr::include_graphics(paste0(pFolder, "acfAllHouses.pdf"))
 ```
 
 Figure \@ref(fig:autocovariance) indicates that our households are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals, as well as a weekly cycle (peaks increasing again towards the end of the plot). 
+
+## Frequency analysis
+
+While some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many have more erratic patterns, with some being over a year in duration (refer to Table \@ref(tab:frequencyAnalysis) provided in the Appendix). This demonstrates the infeasibility of a "one size fits all" method of accommodating seasonality within a predictive model for our households.
+
+_Note how frequency analysis fits with ACF_
 
 ## Cross-covariance
 
