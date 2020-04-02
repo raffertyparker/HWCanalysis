@@ -1,7 +1,10 @@
 ################## TO DO ##################
 
 Fix plots so it prints ok
-Improve smart control section (actually define smart control in it for starters)
+Put data processing code in the appendix
+Make a flow chart of data processing sequence
+Improve smart control section 
+Include international context in introduction
 Some prelim analysis can be seperated into methodology/results
 put combined acv plots in appendix
 Include international context esp for demand response/elec grid
