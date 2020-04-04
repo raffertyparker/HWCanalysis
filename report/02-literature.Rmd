@@ -1,12 +1,13 @@
-# Literature review
+# Literature review {#lit-rev}
 
-The literature relevant to this thesis may best be considered as falling somewhere within three separate but overlapping categories: hot water cylinder modelling, smart control of appliances, and demand forecasting.
+The literature relevant to this thesis may best be considered as falling somewhere within three separate but overlapping categories: smart control of appliances, demand forecasting, and hot water cylinder modelling. _Make sure these three topics have separate sections_
 
 Hot water cylinder modelling refers to the process of building computer models that represent a hot water cylinder and its operation.
 In the wider context of computer modelling, these are referred to as 'physical' models.
 While all models are less accurate than the systems they replicate, analyses that utilise computer models have a number of crucial benefits over real-world alternatives.
 Firstly, a well-constructed computer model provides the ability to make an analysis regarding alterations to the physical system that may be difficult or expensive to carry out in reality. 
 Secondly, computer models provide the ability to ‘speed up’ the passing of time, and to be run ‘into the future’, two features currently unavailable when conducting real-world analyses. 
+_Consider adding diagram of physical HWC model_
 
 Generally speaking, a hot water cylinder model will consist of two components.
 First, a mathematical representation of the physical cylinder itself. At a minimum, this must take into consideration the inflows of cold and outflows of hot water, heat input into the cylinder from the element, and heat loss from the walls of the cylinder.
@@ -29,7 +30,7 @@ One such analysis a hot water cylinder model may be used for is as a simulation 
 These scenarios generally involve simulating the suppression of the element or adjustment of thermostat at key times in order to reduce grid peaks[@Roux2018; @Sepulveda2010, @Kepplinger2015], provide grid-beneficial (instantaneous response) services[@Kondoh2011], minimise costs under time-varying electricity prices[@Kepplinger2015; @Mohsenian-Rad2010; @OShaughnessy2018; @Sepulveda2010; @Cui2016; @Kapsalis2018], utilise low-carbon electricity[@Ramchurn2012; @Passenberg2016], and minimise ‘cold water events’ under a budget constraint[@Yu2013].
 Insulated hot water cylinders show high flexibility, and as such are good candidates for smart control, but similar objectives can be obtained with other thermal devices such as heating and air conditioning systems[@OShaughnessy2018; @Yu2013], as well as other devices such as electric vehicles and washing machines[@Cui2016; @Mohsenian-Rad2010].
 In order to effectively schedule appliances under smart control, reasonable estimates must be made as to when they are required to be utilised. An electric vehicle, for example, must be sufficiently charged before the next drive, and a hot water cylinder must be sufficiently hot before the next shower. Accurate predictions of these 'next' usage events provide a smart control system the ability to fine tune their optimisation algorithms to take full advantage of the demand flexibility without negatively impacting the end user.
-As such, demand forecasting in some form is common in smart control literature[@Cui2016; @Roux2018; @Arghira2012; @Kepplinger2015; @Ramchurn2012; @Sepulveda2010; @Yu2013; @Kapsalis2018; Passenberg2016].
+As such, demand forecasting in some form is common in smart control literature[@Cui2016; @Roux2018; @Arghira2012; @Kepplinger2015; @Ramchurn2012; @Sepulveda2010; @Yu2013; @Kapsalis2018; @Passenberg2016].
 
 Electricity demand forecasting itself is a large and active research area. 
 While much research is conducted relating to predicting grid-level[@DeFelice2013; @Jain2009], substation level[@Goude2014], or building level[@Popescu2016; @Gajowniczek2014; @Ahmad2014; @McLoughlin2013] demand, some has been done on predicting the demand of individual household appliances [@Arghira2012], including that of hot water cylinders[@Gelazanskas2015; @Lomet2015; @Aki2016; @Denis2019].
