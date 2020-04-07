@@ -3,7 +3,7 @@
 This chapter begins by giving an introduction to the dataset that was used to fit and test the models, as well as describing some necessary preliminary cleaning of the data. Mathematical descriptions of the methods and models utilised in the main body of work are then introduced, with applicability to the context of hot water electricity demand forecasting provided. Finally, the metrics by which the models are compared with one another are outlined.
 
 All data processing and modelling was conducted using the `R` programming language[@R-base].
-In particular, data extraction and processing used the packages `GREENGridData`[@R-GREENGridData], `dplyr`[@R-dplyr] and `data.table`[@R-data.table]. Time series manipulation and analysis used packages `lubridate`[@R-lubridate], `forecast`[@R-forecast], and `xts`[@R-xts]. Plots were created using the packages `ggplot2`[@R-ggplot2], `ggplotmisc`[@R-ggpmisc], and `ggExtra`[@R-gridExtra]. 
+In particular, data extraction and processing used the packages `GREENGridData`[@R-GREENGridData], `dplyr`[@R-dplyr] and `data.table`[@R-data.table]. Time series manipulation and analysis used packages `lubridate`[@R-lubridate], `forecast`[@R-forecast], and `xts`[@R-xts]. Plots were created using the packages `ggplot2`[@R-ggplot2], `ggplotmisc`[@R-ggpmisc], and `ggExtra`[@R-gridExtra]. Tables were created using `knitr`[@R-knitr] and `kableExtra`[@R-kableExtra].
 <!--Significant consideration has been given to facilitating reproducibility of results, and all code is publicly available under an Apache License (version 2.0) at https://github.com/raffertyparker/HWCanalysis. -->
 
 <!-- Required to number equations in HTML files 
@@ -138,7 +138,7 @@ Let $X$ be a random variable with a finite number of finite outcomes $x_1, x_2, 
 ![Autocovariance of all houses.](~/HWCanalysis/Masters/plots/acf_all_houses.png)
 -->
 
-The results of the autocovariance function are interpreted by plotting $\gamma_k$ against the lag values. 
+The results of the autocovariance function are interpreted by plotting $\gamma_k$ against the lag values. _cite package_
 
 ### Fourier analysis
 
@@ -164,6 +164,8 @@ Fourier analysis attempts to replicate the data as a linear combination of sinus
 Through the TSA package 'periodogram' we can extract the most dominant cycle frequencies within our data. 
 These may then be input into later models that have the option of accounting for seasonality. 
 
+_cite package_
+
 ### Cross covariance of hot water electricity demand with other appliance electricity demand
 
 ```{r bothElecPlot, echo=FALSE, out.width='100%', fig.cap="Electricity demand of hot water and other appliances over one day"}
@@ -181,10 +183,12 @@ where variable $x$ lags variable $y$ by lag $k$[@Cowpertwait2009].
 
 Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. 
 
+_cite package_
+
 
 ### STL decomposition {#STL}
 
-Another method that may be used to explore any cyclical effects or trends of time series data is that of STL decomposition. STL is an acronym for 'seasonal and trend decomposition using loess', whereby loess (short for 'local polynomial regression') is a method for estimating nonlinear relationships. 
+Another method that may be used to explore any cyclical effects or trends of time series data is that of STL decomposition. STL is an acronym for 'seasonal and trend decomposition using Loess', whereby Loess (short for 'local polynomial regression') is a method for estimating nonlinear relationships. 
 An STL decomposition separates the data into three components, referred to as the 'trend', 'seasonality', and 'remainder' (also referred to as 'random'), which added to one another make up the original data. 
 The trend represents low frequency changes in the data, along with longer term average shifts. 
 Seasonality refers to the cyclic behaviour of the data. The remainder is the deviation of the actual data from the addition of the trend and the seasonality.
@@ -206,7 +210,10 @@ For this reason, any forecasting methods that required high capacity computation
 
 ## Introduction to selected models {#IntroToModels}
 
-This section outlines a broad introduction to the various models selected for use either implicitly or explicitly in this analysis. Refer to Cowpertwait and Metcalfe[@Cowpertwait2009] for further details regarding these models. _No ARIMAX or SVM in this book_
+This section outlines a broad introduction to the various models selected for use either implicitly or explicitly in this analysis.
+For further details regarding SVM or ANN models, refer to [@Magoules2016].
+For further details regarding ARIMAX models, refer to [@DeFelice2013].
+Further details regarding all other models mentioned in this chapter can be found in [@Cowpertwait2009]. 
 
 ### Naive model {#naive}
 
@@ -221,12 +228,15 @@ where $\{w_t\}$ is a white noise series.
 Random walk models are more commonly used in simulations than forecasts. When used in simulations, a random walk model will artificially generate white noise to simulate a potential evolution of the variable in time.
 When used in forecasting however, this model assumes that the mean of the white noise is equal to zero, ($\{\overline w_t\} = 0$), and consequently that the dependant variable (hot water electricity demand, in our case) of the next timestep can be best predicted by the demand of the current timestep. _show figure demonstrating?_
 Due to their simplicity and ease of computation they are sometimes used in forecasting in this context as a 'benchmark' model, by which other models may be compared. For this reason, they are often referred to as 'naive' models.
+Naive models used in this research were created using the `naive` function within the `forecast` package[@R-forecast].
 
 ### Seasonal naive model
 
 In a similar manner to the naive model, the seasonal naive model makes a prediction from a single prior observation.
 The seasonal naive model however makes the assumption that for cyclic data, the most likely value of the the next timestep is that of the same time one cycle prior.
 For data that displays weekly seasonality, for example that of residential electricity demand, a seasonal naive model would thus predict that hot water demand is the same as it was the same time one week prior.
+
+Seasonal naive models were created using the `snaive` function from the `forecast` package[@R-forecast].
 
 ### Simple linear regression
 
@@ -241,6 +251,8 @@ x_t = \gamma_0 + \gamma_1 t .
 For time-series forecasting, simple linear regression can fit a line to historical values of the dependent (or 'response') variable in order to estimate future values. While this can be useful for determining general trends over longer periods of time, they cannot capture any regular shorter term fluctuations of time series data about this trend (seasonality). 
 
 Another way of utilising simple linear regression for time series forecasting is in the form of a causal model by introducing a seperate predictor variable. For our data, we separate electricity demand into hot water, and other appliances. Simple linear regression is a foundational method of exploring how the demand of other appliances at time $t$ can be used to predict hot water electricity demand at a time $t + 1$.
+
+Our simple linear regression models were constructed using the `lm` function from the `stats` package[@R-base].
 
 ### Moving average
 
@@ -301,7 +313,7 @@ This may be expressed in terms of the backward shift operator in polynomial form
 \end{equation}
 The previously described processes are frequently combined into what as known as an Autoregressive Integrated Moving Average (ARIMA).
 A time series $\{x_t\}$ is referred to as an $ARIMA(p,d,q)$ process if, when differenced $d$ times, it becomes an $ARMA(p,q)$ process.
-Autoregression and moving average processes may then be considered individually as special cases of an ARIMA process, $ARIMA(p,0,0)$ and $ARIMA(0,0,q)$ respectively.
+Autoregression and moving average processes may then be considered individually as special cases of an ARIMA process, $ARIMA(p,d,0)$ and $ARIMA(0,d,q)$ respectively.
 Values for $p,d,q$ are selected in order to best fit the data while minimising computational expense. Larger values of $p,q,d$ tend to increase accuracy, while taking longer to compute.
 The process of selecting optimal values for $p,d,q$ can be automated through minimising the Akaike Information Criterion (AIC)[@Akaike1974], where
 
@@ -310,7 +322,7 @@ The process of selecting optimal values for $p,d,q$ can be automated through min
   (\#eq:AIC)
 \end{equation}
 
-The R function `auto.arima`[@R-forecast] was used to automatically select the parameters $p,d,q$ which minimise the AIC specific to the particular data being modelled. This is done iteratively according to the algorithm outlined in ref[@RobJ.Hyndman2008]. Inputs for maximum values of $p$ and $q$ are necessary in order to bound processing time.
+The R function `auto.arima`[@R-forecast] was used to automatically select the parameters $p,d,q$ which minimise the AIC specific to the particular data being modelled. This is done iteratively according to the algorithm outlined in ref [@RobJ.Hyndman2008]. Inputs for maximum values of $p$ and $q$ are necessary in order to bound processing time. 
 
 In a similar manner to how trends can be removed through differencing at lag 1, seasonal effects within data (such as daily use patterns) can be removed by differencing at lag $s$, where $s$ is the length of the season.
 A seasonal ARIMA model may also introduce additional autoregressive and moving average terms at lag $s$, giving a model of the form $ARIMA(p,d,q)(P,D,Q)_s$, expressed using the backward shift operator as
@@ -351,17 +363,20 @@ This may be expressed in terms of the backward shift operator in polynomial form
 (\#eq:ARMAXpolyform)
 \end{equation}
 
+ARIMAX models were created using the `auto.arima` function from the `forecast` package[@R-forecast].
 
 ### STL decomposition with ARIMAX
 
 Combining the predictive power of seasonal decomposition, external regressors, and time series analysis, we have an STL decomposition with ARIMAX model.
 This method decomposes the data into seasonal, trend and remainder components, (refer to Section \@ref(STL)), and then fits an ARIMAX model to the remainder using lagged values of other appliance electricity demand as the external regressors (refer to Section \@ref(ARIMAX)). This is then added to the seasonal and trend components to complete the model.
+STL + ARIMAX models were created using the `stlm` function from the `forecast` package[@R-forecast].
 
 ### Artificial Neural Networks
 
 ANNs attempt to mimic biological learning mechanisms by processing a set of training data through clusters of artificial neurons, each of which individually receive (numerical) inputs, assign them certain weights, and then output the weighted value into other artificial neurons, which perform the same task, until eventually producing a final output.
 The weights assigned by each neuron are then iteratively adjusted in order to minimise the error of the final output.
-While ANNs are commonly used in electricity demand forecasting, literature suggests they tend to be outperformed in both accuracy and computational efficiency by support vector machines for this type of analysis. For this reason, I opted not to consider them in this comparative work, instead choosing support vector machines as my comparative AI method.
+While ANNs are commonly used in electricity demand forecasting, literature suggests they tend to be outperformed in both accuracy and computational efficiency by support vector machines for this type of analysis. 
+For this reason, I opted not to consider them in this comparative work, instead choosing support vector machines as my comparative AI method.
 
 ### Support vector machines
 
@@ -387,14 +402,31 @@ where $\bf{e}$ is the vector of all ones, $C$ is the upper bound of all variable
 
 Support vector machines were created using the `e1071` package[@e1071] using training algorithms detailed in Fan, Chen and Lin(2005)[@Fan2005].
 
+## Training and validating
+
+_Talk about the separation of data into training and validating here._
+
 ## Comparative metrics
 
 There are a number of different considerations that must be made when comparing models for the process of electricity demand forecasting. This section outlines those considered relevant to this work.
 
 ### Accuracy
 
-Perhaps the most important consideration in forecasting is the accuracy of the model. For this work, model accuracy is determined by the root mean square (RMS) of the residuals, averaged over each house, with lower values indicating higher accuracy.
-As demand response is most crucial during daily peak periods, additional analysis is carried out to ascertain the accuracy during grid peaks (defined as 7am to 9am, and 5pm to 8pm[@TranspowerNZ2015]). This is analysed as a percentage error increase between average RMSE and RMSE increase during peak times
+Perhaps the most important consideration in forecasting is the accuracy of the model. For this work, model accuracy is determined by the root mean square of the residuals, with lower values indicating higher accuracy. This is referred to as the 'root mean square error (RMSE). 
+The RMSE of predicted values $\hat x_t$, where actual values are $x_t$ and predictions are observed over T time periods, is given by:
+
+\begin{equation}
+  \operatorname{RMSE}=\sqrt{\frac{\sum_{t=1}^T (\hat x_t - x_t)^2}{T}}.
+  (\#eq:RMSE)
+\end{equation}
+
+For each model considered within this research, the average RMSE is taken over all households to provide the overall model RMSE.
+
+As demand response is most crucial during daily peak periods, additional analysis is carried out to ascertain the accuracy during grid peaks (defined as 7am to 9am, and 5pm to 8pm[@TranspowerNZ2015]). This was obtained by calculating the RMSE for all predictions that occurred during peak periods (denoted $RMSE_{peak}$). To assist comparisons, this is then used to calculate a percentage error increase (PEI) between the average RMSE and the average RMSE during peak times. This PEI is given by:
+
+\begin{equation}
+  PEI = \frac{RMSE_{peak} - RMSE}{RMSE} .
+\end{equation}
 
 ### Physical fidelity
 

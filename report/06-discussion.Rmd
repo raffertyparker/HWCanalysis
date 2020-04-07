@@ -1,5 +1,7 @@
 # Discussion
 
+Note that our seasonal naive model is outperformed by our naive model in accuracy. This is in contrast to the findings in [@Gelazanskas2015]. The reason for this may lie in the data itself, with the UK households having more weekly regularity than the NZ households used in this research. Alternatively, this discrepancy may lie in the differences in data resolution or forecast length.
+
 Unsurprisingly, increasing the complexity of the models tends to increase both the accuracy of the model, and the time taken to fit.
 Increasing computational time doesn't necessarily ensure increased accuracy however, as the SVM model has a fitting time that is two orders of magnitude higher than that of the conventional models, while being slightly outperformed by the STL + ARIMAX model in accuracy. 
 However, the STL + ARIMAX model required significantly more human input to devolop than the SVM did.

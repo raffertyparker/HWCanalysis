@@ -29,10 +29,9 @@ source(paste0(filepathsPath, "/filepaths.R"))
 ```
 ## Supply and demand of electricity in New Zealand
 
-Temporal variation in electricity demand occurs at a variety of timescales in an electricity grid. 
 Throughout summer months, in hot and dry climates, electricity demand on average increases due to the increased use of air conditioners and irrigation systems.
 Throughout winter months, in cooler climates, electricity demand on average increases due to increased use of electric heaters.
-These average increases are more pronounced at certain times of day, generally reflected as two 'peaks' in the morning and evening, due to the effects of residential electricity demand.
+These average increases are more pronounced at certain times of day, generally reflected as two 'peaks' in the morning and evening. This is due to the effects of high residential electricity demand during these periods.
 
 As electrical energy cannot be stored, electricity supply must match this fluctuating demand. This becomes progressively more expensive to achieve as peak demand increases[@Jack].
 The challenges associated with supplying electricity in order to effectively meet demand are likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015]. 
@@ -52,7 +51,7 @@ These markets were created in 1996 following privatisation of the electricity gr
 The New Zealand electricity grid is composed of over 200 points at which electricity may enter or exit. These are referred to as the grid 'nodes'. 
 Electricity generators submit bids on a spot market to supply electricity to each node at a particular cost during each half-hour period. These are then aggregated to form a supply curve for each node.
 Forecasts are made for the demand at each of these nodes, and the predicted quantity of electricity is purchased from generators to cover this demand[@ElectricityAuthority2011]. 
-All generators recieve the locational marginal price for their supply, that is, the highest price that ensures all demand for each particular node is met.
+All generators receive the locational marginal price for their supply, that is, the highest price that ensures all demand for each particular node is met.
 
 As demand forecasts can not be perfectly accurate, the systems operator must also purchase 'reserves', so that if demand is greater than predicted, they can continue to match demand with supply. 
 While these reserves are often in the form of generators running under capacity, they can also be in the form of electricity consumers providing the ability to reduce their demand if necessary.
@@ -82,7 +81,7 @@ This provides the capability for residential electricity consumers to be charged
 As of 2017, smart meters were installed in 62% of New Zealand households[@Stephenson2018].
 
 Peak (or 'congestion') period demand charges are another market-based mechanism for adjusting demand. 
-Large electricity users are often provided a discounted kWh price of electricity, while being charged high penalties for any electricity consumed during times where there is very high local network demand (known as 'congestion periods')[@Orion2017]. Once again, this provides market value to the ability to shift electricity demand in time. These demand charges can make up a significant protion of the electricity bill of a large consumer, and are a primary source of revenue for the systems operator[@Nair2008]. Currently, residential consumers are not directly exposed to these charges. Instead, the charges are 'bundled in' as a flat rate per kWh lines charge in the electricity bill. 
+Large electricity users are often provided a discounted kWh price of electricity, while being charged high penalties for any electricity consumed during times where there is very high local network demand (known as 'congestion periods')[@Orion2017]. Once again, this provides market value to the ability to shift electricity demand in time. These demand charges can make up a significant portion of the electricity bill of a large consumer, and are a primary source of revenue for the systems operator[@Nair2008]. Currently, residential consumers are not directly exposed to these charges. Instead, the charges are 'bundled in' as a flat rate per kWh lines charge in the electricity bill. 
 
 There have been proposals[@NewZealandElectricityCommission2009] that a market-based tactic to assist demand response efforts would be to encourage residential consumers to move to a real-time pricing plan that uses smart meters to send price signals in order to disincentivise peak-time or otherwise high-cost electricity usage. 
 Electricity company Flick in New Zealand is already providing this, offering customers with compatible smart-meters the spot-market electricity price (with additional base costs). An app that displays the current spot price is provided to customers, with the intention being that consumers attempt to reduce demand during times of comparatively high prices.
@@ -164,6 +163,7 @@ One option is to establish a relationship between the value(s) of the independen
 Another conventional forecasting method known as 'time series analysis' utilises the fundamental properties of only the time series data of the variable being predicted.
 One important technique used in time series analysis is the separation of the data into individual components, namely trend, cycles and 'noise'. 
 In the context of DHW electricity time series data, the trend would be a gradual increase (or decrease) in average hot water use over long periods of time. Cycles would be average daily use patterns such as morning and evening peaks previously mentioned. The noise is any deviation of the data from the combination of trend and cycle components (people not actually using hot water according to strict mathematical relationships).
+This method, sometimes refered to as 'decomposition', can be acheived using a technique called 'seasonal decomposition of time series by Loess' (STL), and is explained in more detail in Section \@ref(STL).
 
 Additionally, forecasts may be made by understanding the relationships between a variable and its previous values. Autoregression (AR), moving average (MA), and a combination of the two (ARIMA) are commonly utilised techniques to obtain these relationships, which are expanded upon in Section \@ref(IntroToModels). In the context of DHW forecasting these methods may be best interpreted as an understanding of the lengths of time a water heater element will typically remain on (or off) for. 
 
@@ -173,15 +173,18 @@ Conventional forecasting techniques are generally prized for being simple and in
 
 ### AI forecasting methods
 
-```{r ANNinDF, out.width='100%', include=FALSE, fig.cap="Documents in SCOPUS containing keywords: artificial neural network electricity demand forecasting"}
+```{r ANNinDF, out.width='100%', include=FALSE, fig.cap="Documents in SCOPUS containing all the keywords: artificial neural network electricity demand forecasting"}
 knitr::include_graphics(paste0(pFolder, "artificial_neural_network_electricity_demand_forecasting.png"))
 ```
 
 Artificial Intelligence (AI) methods are those that use more mathematically complex techniques from the field of machine learning for forecasting.
-These methods can be considered separate from their conventional counterparts by their ability to process and establish relationships between data with minimal human input. 
-While AI methods are generally constructed more autonomously than than conventional forecasting methods, they still have the ability to obtain (often) highly accurate predictions.
+These methods can be considered separate from their conventional counterparts by their ability to process and establish relationships between data autonomously.
+This allows them to be constructed with minimal human input or preexisting insight into features of the data.
+This is done through a method known as 'training'. To train an AI model, an algorithm iteratively adjusts parameters within the model such that the outputs (predictions) of the model best match the actual data, under certain prespecified constraints.
+The comparatively autonomous nature of AI methods does not necessarily make them inferior, as they still have the ability to obtain (often) highly accurate predictions.
 There is a trade-off however, as their outputs tend to be 'black box', generally providing less in the way of understanding underlying processes than many conventional methods obtained through utilising human intuition and statistics.
-In addition, AI modelling can be hindered by the large amounts of computing resources necessary.
+In addition, AI modelling can be hindered by the large amounts of computing resources necessary to carry out their training.
+Two AI models commonly used in electricity demand forecasting, namely support vector machines (SVMs) and artificial neural networks (ANNs), are explained in more detail in Section \@ref(#IntroToModels).
 
 ## Hot water demand simulations
 
@@ -189,13 +192,13 @@ Smartly controlling residential hot water cylinders is an active research topic.
 These demand patterns must be input as parameters into the computer model.
 In some cases, the parameters used to specify demand for these types of simulations are interchangeable with those we would obtain from a forecast of hot water electricity demand.
 Even when this is not strictly the case, the insights we can gain from models which predict hot water electricity demand are applicable when building models to replicate hot water demand.
-This suitability of forecasting parameters for inputs into demand simulations is examined in more detail in Chapter \@ref(lit-rev).
+This suitability of forecasting parameters for inputs into demand simulations for research purposes is examined in more detail in Chapter \@ref(lit-rev).
 
 ## Aims
 
 The ability to accurately predict the demand of flexible appliances such as hot water cylinders increases the viability of smartly controlling them.
 Increasing the viability of smart control technology hastens its uptake. This in turn assists in keeping electricity cheap and plentiful, which is crucial in the drive to electrify carbon-intensive industries.
-The research conducted for this thesis uses electricity demand time series data that has been previously collected from New Zealand households[@R-GREENGridData].
+The research conducted for this thesis uses existing electricity demand time series data that had been previously collected from New Zealand households[@R-GREENGridData].
 The aim is to use this data to develop a computationally efficient, accurate, and physically meaningful method of predicting individual household hot water electricity demand at 30 minute resolution. 
 A selection of time series analysis, causal, and AI forecasting methods will be explored and compared against one another. Comparative metrics take into consideration both the suitability for incorporation into smart control systems, and for incorporation as demand simulation into physical models.
 

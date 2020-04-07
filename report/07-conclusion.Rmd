@@ -7,7 +7,8 @@ The method this research suggests as being most promising for demand forecasting
 ## Potential for further work 
 
 The obvious next step for this work is to incorporate the recommended forecasting model into hot water cylinder smart control scenarios (either simulated or real-world) and determine the additional benefits it can provide over smart control without demand forecasting.
-In addition, there is potential for further exploration of these models for forecasting the demand of other flexible appliances, such as electric vehicles.
+There is also work to be done in translating parameters of the forecasting models into demand simulation parameters.
+In addition, there is potential for further exploration of the models considered in this work for forecasting the demand of other flexible appliances, such as electric vehicles.
 
 ### Generalised additive models
 _One article used this method. Was quite involved to describe and build, ran out of time. Not sure if worth mentioning_
