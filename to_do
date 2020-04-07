@@ -5,15 +5,11 @@ Provide references in conventional and AI forecasting sections in introduction
 Make sure electricity grid section in Intro mentions:
 Generation, Transmission, Distribution, Consumption, Deregulated market etc
 Put data processing code in the appendix
+Change "naive" model to "simple naive"
 Make a flow chart of data processing sequence
-Elaborate on suitability of forecasting paramets for simulations
-Improve smart control section 
-Include international context in introduction
-Some prelim analysis can be seperated into methodology/results
 put combined acv plots in appendix
-Include international context esp for demand response/elec grid
+Include international context in intro esp for demand response/elec grid
 Tie different models in discussion to literature
-Can then have two results chapters: prelim data analysis and modelling
 Include nomenclature at beginning (after list of tables?)
 Draw family tree/landscape of models, indicate if they have been used for elec data and which I have decided to use
 Elaborate on the process of sorting through existing work to choose the models I have chosen
