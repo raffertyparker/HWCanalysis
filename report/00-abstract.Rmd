@@ -1,13 +1,17 @@
 Electricity demand forecasting is frequently utilised to assist in maintaining a robust and efficient electricity grid.
 Traditionally, research in electricity demand forecasting ranged from country-wide grid-level down to individual buildings, with limited existing literature forecasting at the level of individual appliances.
 However with emerging technologies allowing smart control of appliances this is beginning to change, as accurate appliance-level demand forecasts have a number of benefits to smart control objectives.
+
 This research explores a number of existing forecasting methods to predict the electricity demand of residential hot water cylinders.
 Existing one minute resolution household electricity demand data was used that contains separately metered hot water demand to that of other household appliances. 
 This was averaged over half-hour periods to mimic data currently available from smart meters in New Zealand, and then separated according to date into 'training' and 'validating' sets.
+
 The models selected for comparison were chosen based on their suitability according to existing literature, as well as through preliminary exporatory analysis.
 Models were fitted to the training data and tested against the validating data to prevent inaccurate results from 'overfitting'.
 Every stage of the process was formulated to facilitate reuse of selected models and reproducibility of results. 
+
 Consideration was given to performance metrics other than forecast accuracy, such as the computational speed of model fitting and the suitablity of the model for providing deeper understanding of behavioural patterns of hot water use.
+
 It was found that in general, increasing the forecast accuracy of models reduced their performance in other metrics.
 A relationship was discovered between the electricity demand of other appliances and that of future hot water demand, which was incorporated into some models.
 A model incorporating seasonal decomposition with local polynomial regression, autoregressive integrated moving averages, and other electricity demand as an external regressor was the most accurate, while also performing highly in other metrics.
