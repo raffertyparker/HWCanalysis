@@ -123,6 +123,11 @@ knitr::include_graphics(paste0(pFolder, "ARIMA/allHousesResidual.pdf"))
 
 Examination of the aggregated daily average residuals shows that this model also underperforms during peak periods, with a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "ARIMA"], 2)`%.
 
+## Seasonal ARIMA
+
+The cyclic nature of hot water demand would suggest that the seasonal ARIMA model would be well suited for our purposes. In addition, as this model falls under the 'conventional' forecasting catagory, it would be reasonable to assume it was computationally efficient. However, preliminary modelling found that the seasonal ARIMA model was extremely computationally expensive. Households were taking upwards of 8 hours each to fit this model to their data. While this may be due to failings of a package-specific fitting algorithm, the seasonal ARIMA model was not pursued any further.
+
+
 ## ARIMAX model
 
 As for the ARIMA model, optimal values for parameters $p$, $d$, and $q$ (see Section \@ref(ARIMAmethodology)) differ for each household, and are provided in the Appendix. Maximum values for $p$, $d$ and $q$ are again fixed at 5, 2 and 5, respectively.

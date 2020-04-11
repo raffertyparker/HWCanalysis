@@ -7,3 +7,10 @@ Increasing computational time doesn't necessarily ensure increased accuracy howe
 However, the STL + ARIMAX model required significantly more human input to devolop than the SVM did.
 All models are less accurate during peak periods, however those that incorporate the STL decomposition have a smaller percentage increase in errors than others, due to the consideration of seasonal effects.
 The SVM model displayed the largest percentage increase in error during peak periods.
+
+## Simulation suitability
+
+The models utilised in this thesis assume the dependent variables are continuous and have no upper or lower bounds. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
+
+This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot) for an example of this behaviour.
+

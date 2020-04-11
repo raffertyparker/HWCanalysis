@@ -54,7 +54,8 @@ addPeaks <- function(p){
 
 
 
-models <- c("naive","seasonalNaive","simpleLinear", "ARIMA", "ARIMAX","STLARIMA", "STLARIMAX", "SVM")
+models <- c("naive","seasonalNaive","simpleLinear", 
+            "ARIMA", "ARIMAX","STLARIMA", "STLARIMAX", "SVM")
 #house <- "rf_06"
 #model <- "STLARIMAX"
 ###################################################################
@@ -96,7 +97,8 @@ for (model in models){
                             rf_29,rf_30,rf_31,rf_32,rf_33,rf_34,
                             rf_35,rf_36,rf_37,rf_38,rf_39,rf_40,
                             rf_42,rf_44,rf_45, ncol = 3)
-  ggsave(allHouses, width = 8.3, height = 11.7, filename = paste0(pFolder, model, "/allResiduals.pdf"))
+  ggsave(allHouses, width = 8.3, height = 11.7, 
+         filename = paste0(pFolder, model, "/allResiduals.pdf"))
   
   }
  
