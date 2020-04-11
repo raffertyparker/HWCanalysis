@@ -1,6 +1,15 @@
 ################## TO DO ##################
 
+Explain Fourier analysis/periodogram. Refer to MJs equations but don't rely on them.
+Include Javed2012 in lit rev
+Mention other countries (eg SA) in intro, perhaps HWC section
+Fix physical modelling section in intro and add to DHW section in lit rev
 Fix plots so it prints ok
+Impacts on service introduced in intro and #smart-cont-lit
+Elaborate on STL in methodology
+Remove references to causal modelling. Just call them regression models
+Combine the metrics "interpretability" and "physical fidelity" into one metric called "suitability for demand simulations" or similar
+Include residual analysis in methodology and results
 Provide references in conventional and AI forecasting sections in introduction
 Make sure electricity grid section in Intro mentions:
 Generation, Transmission, Distribution, Consumption, Deregulated market etc
@@ -19,4 +28,3 @@ Plot ACV of model residuals to check that seasonality is being accounted for
 -Join individual plots with grid.arrange
 Add other elec (dotted line) to linear model plot
 Clone github repository and rerun to check reproducibility
-Explain/reference frequency analysis/periodogram
