@@ -185,7 +185,7 @@ To fit with known properties of total residential electricity demand[@Jack2018],
 There are a number of different methods which allow us to explore seasonality within data. One method is autocovariance. Autocovariance compares the covariance of a stochastic process (such as our time series data of hot water electricity use) with itself at different time steps. This is a valuable tool for visualising and quantifying cyclical behaviour of data, and is defined as
 
 \begin{equation}
- \gamma_k = \operatorname{E}\big[(x_t - \mu) (x_{t+k} - \mu)\big]
+ \zeta_k = \operatorname{E}\big[(x_t - \mu) (x_{t+k} - \mu)\big]
   (\#eq:ACV),
 \end{equation}
 
@@ -194,7 +194,7 @@ where $k$ is the lag value, $\operatorname{E}$ is the expected value operator, a
 ![Autocovariance of all houses.](~/HWCanalysis/Masters/plots/acf_all_houses.png)
 -->
 
-The results of the autocovariance function are interpreted by plotting $\gamma_k$ against the lag values. This was obtained using the `Acf` function from the `forecast` package[@R-forecast].
+The results of the autocovariance function are interpreted by plotting $\zeta_k$ against the lag values. This was obtained using the `Acf` function from the `forecast` package[@R-forecast].
 
 ### Fourier analysis
 
@@ -471,20 +471,52 @@ For this reason, they were not included in this comparative work, with support v
 <!--
 $\hat x_t = w0+w1x1+w2x2+w3x3$
 -->
+Support vector machines classify data samples by mapping them in hyperspace, separating them by a hyperplane, and distinguishing between them according to which side of the hyperplane they fall on. 
+Essentially, this process allows a linear regression to be performed on data that may be highly nonlinear[@Smola1999].
+The position of the classifying hyperplane is constructed iteratively in order to maximise the perpendicular distance between the hyperplane and the closest samples on either side of it. For this reason, the classifying hyperplane is denoted the 'maximum margin' hyperplane.
+The vectors that run parallel to the hyperplane and contain the closest samples to it are known as 'support vectors'.
+When the data are not easily separated by a hyperplane in their current form, they may be transformed by a kernel function into a format that is more easily separable.
+A general introduction to SVMs can be found in [@James2017], an overview of SVMs for time series forecasting may be found in [@Smola1999], and practical information regarding SVM use for energy analysis can be found in [@Magoules2016].
+The SVMs used in this research were built in the following manner.
 
-Support vector machines classify data points by mapping them in hyperspace and distinguishing between them according to which side of a hyperplane they fall on. The position of the classifying hyperplanes are constructed iteratively in order to maximise the perpendicular distance between each hyperplane and the closest samples on either side of it.
-Figure \@ref(fig:SVMexample) provides a linear example of this. 
+The maximum margin hyperplane is denoted as $\Gamma$, which is defined mathematically in terms of the variables within our data as
 
-(ref:svm) Example demonstrating the classifying mechanism of a SVM[@Larham]
+\begin{equation}
+  \Gamma = \gamma_0 + \gamma_1 h_t + \gamma_2x_{t-1} + \gamma_3 x_{t-2} + \gamma_4y_{t-1} + \gamma_5 y_{t-2},
+  (\#eq:GammaOrig)
+\end{equation}
 
-```{r SVMexample, out.width='100%', fig.cap='(ref:svm)'}
-knitr::include_graphics(paste0(pFolder, "SVMmargin.png"))
-```
+where $h$ is the hour of day, $x$ and $y$ again denote hot water electricity and the electricity demand of other appliances respectively, and $\gamma$ refer to unknown weights that must be determined through the learning algorithm.
+Now $\Gamma$ is fitted iteratively in the following manner. 
 
-Non-linear partitions can also be constructed using a kernel function $K$. 
+For simplification, we denote $\textbf{z}_t$ to be the vector comprised of our data variables, $\textbf{z}_t := \{h_t, x_{t-1}, x_{t-2}, y_{t-1}, y_{t-2} \}$.
+Now Equation \@ref(eq:GammaOrig) can be expressed as
 
+\begin{equation}
+ \Gamma = b + \sum \alpha_i \Gamma_i K ( \textbf z_t (i), \mathbf z_t).
+ (\#eq:Gamma)
+\end{equation}
+
+In the context of iteratively fitting $\Gamma$, vector $\textbf z_t$ can be thought of as the most recent data sample provided to the fitting algorithm.
+Expressed in this manner, $\Gamma$ is defined by parameters $b$ and $\alpha_i$, and $\mathbf{z}_t(i)$ are the support vectors. $\Gamma_i$ is called the 'class value' of $\mathbf{z}(i)$, and only takes two values, $1$ or $-1$. This can be understood intuitively as classifying $\mathbf z_t$ according to whether it sits 'above' or 'below' $\Gamma$. 
+A Gaussian radial basis function was selected according to preliminary modelling as the optimal kernel function, $K$.
+This is defined as
+
+\begin{equation}
+  K = e^{(-|\textbf z_t(i)-\textbf z_t|^2)}.
+\end{equation}
+
+Parameters $b$ and $\alpha_i$ in Equation \@ref(eq:Gamma) are adjusted by solving a quadratic optimisation problem. This is outside the scope of this thesis, but may be found in [@Fan2005].
+Once these parameters have been optimised, the original weights $\gamma$ in Equation \@ref(eq:GammaOrig) can be determined.
+Following this, predictions for our hot water value $x_t$ can be obtained by inputting corresponding $\textbf z_t$ vector values of $h_t, x_{t-1}, x_{t-2}, y_{t-1}, y_{t-2}$ into Equation \@ref(eq:GammaOrig). In keeping with the notation of the rest of this chapter, we may then denote out model as
+
+\begin{equation}
+  \hat x_t = \Gamma(\textbf z_t).
+\end{equation}
+
+<!--
 The process of training a non-linear SVM can be stated mathematically as follows:
-Given instances $\mathbf{x}_i ,  i= 1, . . . , l$ with labels $y_i \in \{1,-1\}$, solve the following quadratic optimization problem:
+Given instances $\mathbf{z}_i ,  i= 1, . . . , l$ with labels $\Gamma_i \in \{1,-1\}$, solve the following quadratic optimization problem:
 \begin{equation*}
   \begin{aligned}
     \underset{\mathbf{\alpha}}{\text{min}} \quad & f(\mathbf{\alpha}) =\frac{1}{2}\mathbf{\alpha}^TQ\mathbf{\alpha}-\mathbf{e}^T\mathbf{\alpha} \\
@@ -492,13 +524,32 @@ Given instances $\mathbf{x}_i ,  i= 1, . . . , l$ with labels $y_i \in \{1,-1\}$
     & \mathbf{y}^T\mathbf{\alpha}= 0,
   \end{aligned}
 \end{equation*}
-where $\textbf{e}$ is the vector of all ones, $C$ is the upper bound of all variables, $Q$ is an $l$ by $l$ symmetric matrix with $Q_{ij} = y_i y_jK(\mathbf{x}_i,\mathbf{x}_j)$, and $K(\textbf{x}_i,\textbf{x}_j)$ is the kernel function[@Fan2005].
+where $\textbf{e}$ is the vector of all ones, $C$ is the upper bound of all variables, $Q$ is an $l$ by $l$ symmetric matrix with $Q_{ij} = \Gamma_i \Gamma_jK(\mathbf{z}_i,\mathbf{z}_j)$, and $K(\textbf{z}_i,\textbf{z}_j)$ is the kernel function[@Fan2005].
+
+
+Figure \@ref(fig:SVMexample) provides a linear example of this. 
+(ref:svm) Example demonstrating the classifying mechanism of a SVM[@Larham]
+
+```{r SVMexample, out.width='60%', fig.cap='(ref:svm)'}
+knitr::include_graphics(paste0(pFolder, "SVMmargin.png"))
+```
+Non-linear partitions can also be constructed using a kernel function $K$. 
+-->
 
 Support vector machines were created using the `svm` function from the `e1071` package[@e1071]. This function uses the training algorithms detailed in Fan, Chen and Lin(2005)[@Fan2005].
 
 ## Training and validating
 
-_Talk about the separation of data into training and validating here._
+When fitting a prediction model to data, a closer fit can usually be obtained by increasing the amount of parameters within the model. 
+An extreme example of this would be a highly complex model that hit every sample of data with zero, or close to zero errors.
+While a cursory look at at the residuals of this model might suggest it has high prediction powers, it may start to return large errors once used to predict data it has not encountered before.
+This is an example of 'overfitting' a model, whereby a model goes beyond capturing key statistical properties of the underlying data and begins fitting itself to the random fluctuations about these properties, the unpredictable white noise component.
+For this reason, it is good practice to fit a model to one set of data, and then test its accuracy by making predictions on a separate set[@James2017].
+These two separate sets are referred to as training data and validating data, respectively.
+
+Within this research, household data were separated chronologically. For each household, the first 80% of the data were used for model training, and the final 20% were used for validating. 
+All models within this research were built and tested in this manner, with the exception of the two naive models.
+As, by definition, the naive models had no chance of becoming overfit, they were simply tested against the validation data.
 
 ## Comparative metrics
 
@@ -506,7 +557,8 @@ There are a number of different considerations that must be made when comparing 
 
 ### Accuracy
 
-Perhaps the most important consideration in forecasting is the accuracy of the model. For this work, model accuracy is determined by the root mean square of the residuals, with lower values indicating higher accuracy. This is referred to as the 'root mean square error (RMSE). 
+Perhaps the most important consideration in forecasting is the accuracy of the model in predicting values from the set of validation data.
+For this work, model accuracy is determined by the root mean square of the residuals, with lower values indicating higher accuracy. This is referred to as the 'root mean square error (RMSE). 
 The RMSE of predicted values $\hat x_t$, where actual values are $x_t$ and predictions are observed over T time periods, is given by:
 
 \begin{equation}
@@ -514,7 +566,7 @@ The RMSE of predicted values $\hat x_t$, where actual values are $x_t$ and predi
   (\#eq:RMSE)
 \end{equation}
 
-For each model considered within this research, the average RMSE is taken over all households to provide the overall model RMSE.
+For each model considered within this research, the average RMSE of predictions is taken over all households to provide the overall model RMSE.
 
 As demand response is most crucial during daily peak periods, additional analysis is carried out to ascertain the accuracy during grid peaks (defined as 7am to 9am, and 5pm to 8pm[@TranspowerNZ2015]). This was obtained by calculating the RMSE for all predictions that occurred during peak periods (denoted $RMSE_{peak}$). To assist comparisons, this is then used to calculate a percentage error increase (PEI) between the average RMSE and the average RMSE during peak times. The PEI is given by:
 
