@@ -60,8 +60,8 @@
     ts_val <- as.xts(dt_val)
    # ts_fit <- ts_fit[3:nrow(ts_fit), ]
   #  ts_val <- ts_val[3:nrow(ts_val), ]
-    dt_fit$dow <- weekdays(dt_fit$hHour)
-    dt_val$dow <- weekdays(dt_val$hHour)
+ #   dt_fit$dow <- weekdays(dt_fit$hHour)
+ #   dt_val$dow <- weekdays(dt_val$hHour)
     hw_ts_fit <- ts(dt_fit$HWelec, frequency = 48)
     hw_ts_val <- ts(dt_val$HWelec, frequency = 48)
     
@@ -87,7 +87,7 @@
   
   Model <- "seasonalNaive"
   print(paste0("Now fitting ", Model, " model for household ", house, "..."))
-  ts_val_HW_seasonal <- ts(dt_val$HWelec, frequency = 48*7)
+  ts_val_HW_seasonal <- ts(dt_val$HWelec, frequency = 48)
   fitTime <- system.time(
     mdl <- snaive(ts_val_HW_seasonal, h = 1))[3] # Fits model and returns time taken to do so
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
@@ -110,7 +110,7 @@
   Model <- "simpleLinear"
   print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   fitTime <- system.time(
-    fitMdl <- lm(ts_val$HWelec~ts_val$nonHWshift1))[3] # Fits model and returns time taken to do so
+    fitMdl <- lm(ts_val$HWelec~ts_val$nonHWshift1 + ts_val$nonHWshift2))[3] # Fits model and returns time taken to do so
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
   saveRDS(fitMdl, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
   valMdl <- lm(fitMdl, data = ts_fit)
@@ -155,20 +155,18 @@
          ARIMApars <- Par,
          ARIMApars <- rbind(ARIMApars, Par))
   if (house == houses[length(houses)]){
-    ARIMApars <- ARIMApars[,c(4,1,2,3)]
+    ARIMApars <- ARIMApars[,c("household","p","d","q")]
     write_csv(ARIMApars, path = paste0(dFolder, "models/", Model, "/parameters.csv"))
   }
   
   Model <- "ARIMAX"
   print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   fitTime <- system.time(fitArimaX <- auto.arima(ts_fit$HWelec, 
-                                                xreg = as.matrix(cbind(ts_fit$nonHWelec, 
-                                                                       ts_fit$nonHWshift1, 
+                                                xreg = as.matrix(cbind(ts_fit$nonHWshift1, 
                                                                        ts_fit$nonHWshift2))))[3] # Fits model and returns time taken to do so
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
   saveRDS(fitArimaX, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
-  valArimaX <- Arima(ts_val$HWelec, xreg = as.matrix(cbind(ts_val$nonHWelec, 
-                                                          ts_val$nonHWshift1, 
+  valArimaX <- Arima(ts_val$HWelec, xreg = as.matrix(cbind(ts_val$nonHWshift1, 
                                                           ts_val$nonHWshift2)), model = fitArimaX)
   saveRDS(valArimaX, file = paste0(dFolder, "models/", Model,"/", house, "_validated_model.rds"))
   plotModel(valArimaX, Model)
@@ -189,7 +187,7 @@
          ARIMAXpars <- Par,
          ARIMAXpars <- rbind(ARIMAXpars, Par))
   if (house == houses[length(houses)]){
-    ARIMAXpars <- ARIMApars[,c(4,1,2,3)]
+    ARIMAXpars <- ARIMAXpars[,c("household","p","d","q")]
     write_csv(ARIMAXpars, path = paste0(dFolder, "models/", Model, "/parameters.csv"))
   }
   
@@ -220,7 +218,7 @@
          STL_ARIMApars <- Par,
          STL_ARIMApars <- rbind(STL_ARIMApars, Par))
   if (house == houses[length(houses)]){
-    ARIMApars <- STL_ARIMApars[,c(4,1,2,3)]
+    STL_ARIMApars <- STL_ARIMApars[,c("household","p","d","q")]
     write_csv(STL_ARIMApars, path = paste0(dFolder, "models/",  Model, "/parameters.csv"))
   }
   
@@ -228,14 +226,12 @@
   print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   fitTime <- system.time(
     fitSTLArimaX <- stlm(hw_ts_fit, s.window = 48, method = "arima",
-                        xreg = as.matrix(cbind(ts_fit$nonHWelec, 
-                                               ts_fit$nonHWshift1, 
+                        xreg = as.matrix(cbind(ts_fit$nonHWshift1, 
                                                ts_fit$nonHWshift2))))[3] # Fits model and returns time taken to do so
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
   saveRDS(fitSTLArimaX, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
   valSTLArimaX <- stlm(hw_ts_val, s.window = 48, method = "arima",
-                      xreg = as.matrix(cbind(ts_val$nonHWelec, 
-                                             ts_val$nonHWshift1, 
+                      xreg = as.matrix(cbind(ts_val$nonHWshift1, 
                                              ts_val$nonHWshift2)),
                       model = fitSTLArimaX)
   valSTLArimaX$hHour <- dt_val$hHour
@@ -258,7 +254,7 @@
          STL_ARIMAXpars <- Par,
          STL_ARIMAXpars <- rbind(STL_ARIMAXpars, Par))
   if (house == houses[length(houses)]){
-    STL_ARIMAXpars <- ARIMApars[,c(4,1,2,3)]
+    STL_ARIMAXpars <- STL_ARIMAXpars[,c("household","p","d","q")]
     write_csv(STL_ARIMAXpars, path = paste0(dFolder, "models/",  Model, "/parameters.csv"))
   }
   
@@ -266,7 +262,7 @@
   print(paste0("Now fitting ", Model, " model for household ", house, "..."))
   fitTime <- system.time(
     fitSVM <- svm(HWelec ~ dHour + nonHWshift1 + nonHWshift2
-                  + HWshift1 + HWshift2 + dow, dt_fit))[3]
+                  + HWshift1 + HWshift2, dt_fit))[3]
   dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
   saveRDS(fitSVM, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
   predicted_values <- predict(fitSVM, dt_val) # Make prediction on validating data from model
