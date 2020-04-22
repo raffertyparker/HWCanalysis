@@ -1,6 +1,9 @@
 # Preliminary data analysis {#prelimDA}
 
 This chapter explores the results from some of the preliminary data analysis that was carried out before starting to build models.
+A brief summary of the data is provided along with key visualisations regarding patterns of hot water use.
+Next, the results of the data analysis techniques introduced in Section \@ref(TSoverview) are presented.
+These results are discussed briefly in terms of their implication for model building.
 
 ## Data summary
 
@@ -15,7 +18,10 @@ meansDT %>%
                digits = 0)
 ```
 
-Table \@ref(tab:summary1) shows the mean values of hot water electricity demand and other appliance electricity demand for each household. Average demand varies significantly for each household, ranging from `r signif(min(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r signif(max(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`). The variation in hot water electricity demand can also be seen in the box plot shown in Figure \@ref(fig:demandBoxplot).
+Table \@ref(tab:summary1) shows the mean values of hot water electricity demand and other appliance electricity demand for each household. Average demand varies significantly for each household, ranging from `r signif(min(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == min(meansDT$HWelec)]`) to `r signif(max(meansDT$HWelec), 3)`W (household `r meansDT$linkID[meansDT$HWelec == max(meansDT$HWelec)]`). The variation in hot water electricity demand can also be seen in the box plot shown in Figure \@ref(fig:demandBoxplot). 
+This plot also gives an indication as to the maximium power output for each household.
+Assuming there was at least one instance during the year where the element was on for a full half hour, the far right hand side point of each household should correspond with its maximum power output.
+Figure \@ref(fig:demandBoxplot) indicates that most households have an appoximate maximum power output of either 2kW or 3kW.
 
 ```{r demandBoxplot, echo=FALSE, out.width='100%', fig.cap='Box plot of hot water electricity demand for each household'}
 knitr::include_graphics(paste0(pFolder, "averages/boxplot.png"))
@@ -28,33 +34,61 @@ knitr::include_graphics(paste0(pFolder, "averages/averageDemand.png"))
 
 Figure \@ref(fig:averagePlot) shows the average electricity demand over each hour of the day for each household. It can be seen that these demand profiles vary significantly, although many show two distinct peaks, generally during times of day where the grid as a whole experiences peaks. 
 
-## Autocovariance
+## Autocovariance {#ACVresults}
 
 ```{r autocovariance, echo=FALSE, out.width='100%', fig.cap="Autocovariance of hot water electricity demand for each household"}
 knitr::include_graphics(paste0(pFolder, "acfAllHouses.pdf"))
 ```
 
-Figure \@ref(fig:autocovariance) indicates that our households are strongly cyclic, with peaks in demand occurring on approximately daily (1440 minute) and 12-hourly (720 minute) intervals, as well as a weekly cycle (peaks increasing again towards the end of the plot). 
+Figure \@ref(fig:autocovariance) shows our households display strong seasonality, with peaks in demand occurring on approximately daily (48 half hours) and 12-hourly (24 half-hour) intervals. Some households also display a weekly cycle (peaks increasing again at 336 half-hours). 
 
-## Frequency analysis
+## Fourier analysis {#Fourierresults}
 
-While some houses have "expected" cycle values (12 hour, 24 hour, 7 day) many have more erratic patterns, with some being over a year in duration (refer to Table \@ref(tab:frequencyAnalysis) provided in the Appendix). This demonstrates the infeasibility of a "one size fits all" method of accommodating seasonality within a predictive model for our households.
+Using Fourier analysis methods introduced in Section \@ref(Fouriermeth), the three most dominant frequencies were determined from the data.
+Most households had either daily or 12 hourly frequencies as the most dominant frequencies, which concur with the autocovariance findings.
+Contrary to expectations, as well as suggestion by the autocavariance findings, weekly frequencies were not in the top three most dominant for any households.
+For two households, very long frequencies (49 weeks and 132 weeks) were returned as the most dominant. 
+It is unlikely that adding frequencies of this length would greatly improve the accuracy of a forecasting model, and could lead to very lengthy computation times.
+For this reason, caution must be taken when using frequencies obtained by this method in models.
 
-_Note how frequency analysis fits with ACF_
+For a list of the three most dominant frequencies for each household as determined by Fourier analysis, refer to Table \@ref(tab:frequencyAnalysis) in the Appendix.
 
-## Cross-covariance
+## Stationarity
 
-Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use, often at lags of around half an hour.
+Stationary time series data is that which does not have expected values or variances that change when applied to different sequential subsets of the data (refer to Section \@ref(Statmeth)).
+Due to non-zero trends in the data (refer to Figure \@ref(fig:STLPlot) for an example), all but one household in the dataset (`rf_40`) were determined to be non-stationary.
+Thus, when constructing ARIMA models, all households except `rf_40` required first-order differencing.
+This can be seen in Tables \@ref(tab:ARIMAparameters) through \@ref(tab:STLARIMAXparameters) in the Appendix.
 
-```{r crossCovariance, echo=FALSE, out.width='100%', fig.cap="Cross correlogram of all households"}
+## Cross-covariance {#CCVres}
+
+Cross-covariance is our method of determining how much hot water electricity demand is correlated with other electricity demand at different time lags.
+If reasonable cross-correllation is found between hot water electricity demand and lagging values of other appliance electricity demand, this relation may be used to predict future values of hot water electricity demand based on current values of other electricity demand.
+
+Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use, with the maximum value of  cross-correlation often at lags of around half an hour.
+This may be determined by the slight increase that many households display after lag zero, before dropping off again. 
+
+```{r crossCovariance, echo=FALSE, out.width='100%', fig.cap="Cross correlogram of each household"}
 knitr::include_graphics(paste0(pFolder, "ccfAllHouses.pdf"))
 ```
 
-We can also check to see whether half-hour in advance is the optimum length of time in advance to make predictions from. Figure \@ref(fig:crossCovariance) indicates that for many houses, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. 
+Numerical values were obtained of the lag at which cross-correlation is highest.
+These were then plotted as a histogram in Figure \@ref(fig:crossCovariance).
+This figure indicates that for many households, hot water electricity is correlated with non hot water electricity at longer timescales, as can be seen by the locations of the local maximums. However, most households show their highest cross-correlations within lags of half an hour.
 
 ```{r ccvMaxLagPlot, echo=FALSE, out.width='100%', fig.cap="Lag at maximum correlation for each household (bin width 30 minutes)"}
 knitr::include_graphics(paste0(pFolder, "maxXcorAllHouses.pdf"))
 ```
 
-The histogram of maximum cross-covarience for each household (Figure \@ref(fig:ccvMaxLagPlot)) shows that while many houses have the maximum value of their cross-covariances at the boundary (30 minutes), around half have maximums at longer timescales.
+The histogram of maximum cross-covarience for each household (Figure \@ref(fig:ccvMaxLagPlot)) shows that while many houses have the maximum value of their cross-covariances at the boundary (30 minutes), some have maximums at longer timescales.
+In particular, four households show cross-covariance at 12 hour (720 minute) or longer timescales.
 
+From these results, we may infer that a regression model which incorporates the previous two values of other electricity demand should be sufficient for capturing this effect for most households.
+
+## Implications for model building
+
+This chapter presented results from some key methods used to understand patterns within time series data.
+It was shown that hot water electricity demand displays strongly cyclic behaviour on daily timescales.
+It was also shown that hot water electricity demand correlates with previous values of other appliances' electricity demand.
+
+The following chapter displays the results obtained from models that incorporate these components of the data, while striving to perform well in other metrics outlined in Section \@ref(metrics).
