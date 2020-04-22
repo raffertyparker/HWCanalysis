@@ -1,0 +1,12 @@
+# Glossary {#glossary}
+
+Flexibility - the ability for an appliance to shift its electricity demand in time with little impact to the end user
+RMSE - accuracy metric, "root mean squared error". See Equation \@ref(eq:RMSE)
+White noise - a set of independent and identically distributed variables with an expected value of zero
+Backshift operator - Shifts value to a previous one in the series - see equation \@ref(eq:BSO) 
+Residual - error in the model, $\hat x_t - x_t$
+$y_t$ - electricity demand of other appliances at time $t$
+RSS - residual sum of squares
+SVM - support vector machine
+ANN - artificial neural network
+AIC - Akaike Information Criterion

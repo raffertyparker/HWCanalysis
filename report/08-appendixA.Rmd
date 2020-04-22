@@ -1,0 +1,83 @@
+`r if(knitr:::is_latex_output()) '\\appendix'`
+
+`r if(!knitr:::is_latex_output()) '# (APPENDIX) Appendix {-}'` 
+
+<!--
+If you feel it necessary to include an appendix, it goes here.
+-->
+
+
+# Tables and parameters {#tables}
+
+
+## Autocovariance lag
+
+
+```{r frequencyAnalysis, echo=FALSE, out.width='100%'}
+library(kableExtra)
+load(file=paste0(dFolder, "freq_DF.Rda"))
+freq_DF %>%
+  knitr::kable(col.names = c("Household", "Dominance", "Frequency (hours)"),
+               digits = 2,
+               caption = "Three dominant cycle periods for each household, as determined using frequency analysis",
+               longtable = TRUE)
+```
+
+
+## Cross-covariance lag
+
+Table \@ref(tab:ccvMaxLagTable) and the corresponding Figure \@ref(fig:ccvMaxLagPlot) in Chapter \@ref(methodology) have been constructed by taking the maximum cross covariance value for each house, restricted to lag values above 30 minutes, as this is the minimum lag after which these predictions may be useful for participation in demand response markets in New Zealand.
+
+```{r loadCCVdata, echo=FALSE}
+load(paste0(dFolder, "ccv_max.Rda"))
+maxCor <- maxCor[, c(2,1,3)]
+```
+
+```{r ccvMaxLagTable, echo=FALSE}
+maxCor %>%
+  knitr::kable(col.names =  c("Household", "Lag", "Cross covariance"),
+        caption = "Lag time and correlation value at point of maximum crosscovariance")
+```
+
+It can be seen that many households have optimal lags greater than one hour. To reduce computational time and model complexity, only half-hour and one-hour lags were considered in this analysis. Household-specific lag values of external regressors could be incorporated into the model as further work.
+
+
+## Modelling parameters
+
+```{R load_parameter_data, echo=FALSE}
+ARIMApar <- read.csv(paste0(dFolder, "models/ARIMA/parameters.csv"))
+ARIMAXpar <- read.csv(paste0(dFolder, "models/ARIMAX/parameters.csv"))
+STLARIMApar <- read.csv(paste0(dFolder, "models/STLARIMA/parameters.csv"))
+STLARIMAXpar <- read.csv(paste0(dFolder, "models/STLARIMAX/parameters.csv"))
+```
+
+```{r ARIMAparameters, echo=FALSE}
+ARIMApar %>%
+  knitr::kable(caption = "Automatically determined parameters for the ARIMA models")
+```
+Table \@ref(tab:(ARIMAparameters) show the ARIMA parameters that minimise the AIC as selected by the `auto.arima` function.
+As described in Chapter \@ref(methodology), $p$ refers to the order of autogression, $d$ refers to the order of differencing necessary to obtain stationarity, and $q$ is the order of moving average.
+Similarly, Tables \@ref(tab:ARIMAXparameters), \@ref(STLARIMAparameters) and \@ref(STLARIMAXparameters) show the parameters for the ARIMAX, STL + ARIMA, and STL + ARIMAX models repectively.
+
+```{r ARIMAXparameters, echo=FALSE}
+ARIMAXpar %>%
+  knitr::kable(caption = "Automatically determined parameters for the ARIMAX models")
+```
+
+```{r STLARIMAparameters, echo=FALSE}
+STLARIMApar %>%
+  knitr::kable(caption = "Automatically determined parameters for the STL + ARIMA models")
+```
+
+```{r STLARIMAXparameters, echo=FALSE}
+STLARIMAXpar %>%
+  knitr::kable(caption = "Automatically determined parameters for the STL + ARIMAX models")
+```
+
+
+# Relevant code {#code}
+
+## Data processing
+
+This is the code used to process the data from the format available from the UK data service[@GREENGrid] into the format required to conduct this analysis.
+
