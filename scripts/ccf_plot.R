@@ -46,7 +46,7 @@ save(maxCor, file = paset0(dFolder, "ccv_max.Rda"))
 
 ggplot(maxCor, aes(x = lag,fill=household)) +
   geom_histogram() + 
-  labs(x = "Lag (minutes)", y = "Count", fill = "Household")
+  labs(x = "Lag (minutes)", y = "Count", fill = "")
 ggsave(paste0(pFolder, "maxXcorAllHouses.pdf"))
 
 # This could do with being edited to feed variables into a function
@@ -54,16 +54,22 @@ ggsave(paste0(pFolder, "maxXcorAllHouses.pdf"))
 
 ggplot(ccvDT[ccvDT$lag > 0, ], aes(lag,value,colour=household)) +
   geom_line() + 
-  labs(x = "Lag (minutes)", y = "Cross-covariance", colour = "House")
+  labs(x = "Lag (minutes)", y = "Cross-covariance", colour = "") +
+  theme(legend.position="top") +
+  guides(colour=guide_legend(nrow=3,byrow=TRUE))
 ggsave(paste0(pFolder, "ccfAllHouses.pdf"))
 ggsave(paste0(pFolder, "ccfAllHouses.png"))
 
 ggplot(ccvDT[ccvDT$lag > 0 & ccvDT$lag < 60, ], aes(lag,value,colour=household)) +
   geom_line() + 
-  labs(x = "Lag (minutes)", y = "Cross-covariance", colour = "House")
+  labs(x = "Lag (minutes)", y = "Cross-covariance", colour = "") +
+  theme(legend.position="top") +
+  guides(colour=guide_legend(nrow=3,byrow=TRUE))
 ggsave(paste0(pFolder, "ccfAllHouses1Hour.pdf"))
 
 ggplot(ccvDT[ccvDT$lag > 0 & ccvDT$lag < 120, ], aes(lag,value,colour=household)) +
   geom_line() + 
-  labs(x = "Lag (minutes)", y = "Cross-covariance", colour = "House")
+  labs(x = "Lag (minutes)", y = "Cross-covariance", colour = "") +
+  theme(legend.position="top") +
+  guides(colour=guide_legend(nrow=3,byrow=TRUE))
 ggsave(paste0(pFolder, "ccfAllHouses2Hour.pdf"))

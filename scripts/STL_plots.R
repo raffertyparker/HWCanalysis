@@ -40,7 +40,7 @@ decomp.HW <- decompose(ts.HW)
 
 t <- decomp.HW
 strt <- 48 # Start 1 day in
-len <- strt + 48*7*2 # take data for an additional 2 weeks
+len <- strt + 48*7*1 # Adjust according to number of weeks
 
 t$x <- as.ts(t$x[strt:len])
 t$seasonal <- as.ts(t$seasonal[strt:len])
