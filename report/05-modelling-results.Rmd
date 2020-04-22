@@ -10,74 +10,96 @@ knitr::opts_chunk$set(echo=TRUE, engine.path = list(python = '/anaconda/bin/pyth
 DFsummary <- readRDS(paste0(dFolder, "allModelSummaryStats.rds"))
 dfSummary <- readRDS(paste0(dFolder, "allHouseModelStats.rds"))
 ```
-This chapter uses a selection of models fitted to our half hour averaged data in order to forecast the demand of the following half hour.
+Existing research in Chapter \@ref(lit-rev) provided a guide to which data analysis techniques would be effective for achieving the aims of this thesis.
+Chapter \@ref(methodology) described these techniques in more detail.
+Chapter \@ref(prelimDA) presented results from preliminary data analyses, and noted the implications of these results on forecasting models.
+Using these preliminary results, the forecasting models described in Section \@ref(IntroToModels) were fitted to the set of training data (see Section \@ref(trainAndVal)) for each household.
+The ability of these models to predict hot water half hour in advance was then tested against the set of validating data.
+
+This chapter presents the results of these predictions, and compared the models against one another according to the metrics outlined in Section \@ref(metrics).
 
 ## Naive model
 
-In our naive model we assume no drift, and only attempt to predict one (half hour) time step onto the future. From Equation \@ref(eq:randomWalk), we get 
+As discussed in Section \@ref(naivemeth), we use a simple random walk as a naive model by which to compare the performance of other models to.
+When used to predict the following time step, the random walk given in Equation \@ref(eq:randomWalk) becomes $\hat x_{t+1} = x_t$.
+<!--
 \begin{equation}
 \hat x_{t+1} = x_t .
 \end{equation}
-
-```{r randomWalk, echo=FALSE, out.width='100%', fig.cap="Actual electricity use and naive model approximation over one day for four households"}
+-->
+```{r randomWalk, echo=FALSE, out.width='100%', fig.cap="Actual hot water electricity demand and naive model estimation over one day for four households"}
 knitr::include_graphics(paste0(pFolder, "naive/fourHouses.pdf"))
 ```
 
-As can be seen in Figure \@ref(fig:randomWalk), this method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same avaraged output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistently 'missing' the actual values.
+In Figure \@ref(fig:randomWalk), we show an example plot of the model's prediction of demand compared to actual demand.
+This method is reasonably effective for some houses, in particular those that have long periods where the element power has roughly the same avaraged output. In contrast, households that exhibit frequent oscillation of element power are very poorly modelled by this method, with the predicted values consistently 'missing' the actual values.
 
-The naive model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "naive"], 2)`W.
+The naive model has RMSEs ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "naive"]), 2)`W, with the average over all households being `r round(DFsummary$RMSE[DFsummary$model == "naive"], 2)`W.
+During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "naive"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "naive"]), 2)`W, with the average over all households being `r round(DFsummary$peakRMSE[DFsummary$model == "naive"], 2)`W.
+Examination of the daily profile of residuals (see Figure \@ref(naiveResiduals)) shows that this model performs quite poorly during peak periods, with RMSEs during peak periods being `r round(DFsummary$pcErrorIncrease[DFsummary$model == "naive"], 0)`% greater than average RMSEs.
 
-During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "naive"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "naive"]), 2)`W, with the average being `r round(DFsummary$peakRMSE[DFsummary$model == "naive"], 2)`W.
-
-The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, although no illumination as to underlying behavioural properties are provided by this model. The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "naive"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "naive"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "naive"], 2)`s.
-
-```{r naiveResiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the naive model"}
+The model precisely mimics the actual data with a half-hour lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, although no illumination as to underlying behavioural properties are actually provided by this model. 
+The computational times to fit models to each household were effectively negligible for this model.
+<!--
+varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "naive"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "naive"]), 2)`s, with the average over all households taking `r round(DFsummary$fittingTime[DFsummary$model == "naive"], 2)`s.
+-->
+```{r naiveResiduals, echo=FALSE, out.width='100%', fig.cap="Daily profile of residuals for the naive model (peak periods shaded)"}
 knitr::include_graphics(paste0(pFolder, "naive/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model performs quite poorly during peak periods, with RMSE during peak periods being `r round(DFsummary$pcErrorIncrease[DFsummary$model == "naive"], 2)`% greater than average.
-
 ## Seasonal naive
-
-Similarly to our naive model, the seasonal naive model predicts one (half hour) time step onto the future utilising only one prior observation. Where the seasonal naive differs is that it assumes the most likely value for hot water demand will be the value at that same time one week prior, giving $\hat x_{t+1} = x_{t-(48 \times 7) + 1}$. 
+<!--
+For data that display weekly seasonality, for example that of residential electricity demand, a seasonal naive model would thus predict that hot water demand is the same as it was the same time one week prior. For data at half-hour resolution, one week before the current time step is $48 \times 7 = 336$ time steps prior, thus-->
+Similarly to our naive model, the seasonal naive model predicts one (half hour) time step onto the future utilising only one prior observation. Where the seasonal naive differs is that it assumes the most likely value for hot water demand will be the value at that same time one period prior.
+Using the results in Section \@ref(ACVresults) we chose the period length to be one day, thus Equation \@ref(eq:snaive) becomes $\hat x_{t} = x_{t-48}$. 
 
 ```{r seasonalNaivePlot, echo=FALSE, out.width='100%', fig.cap="Actual electricity use and seasonal naive model approximation over one day for four households"}
 knitr::include_graphics(paste0(pFolder, "seasonalNaive/fourHouses.pdf"))
 ```
 
-As can be seen in Figure \@ref(fig:seasonalNaivePlot), this method is reasonably ineffective, although in some instances it makes very accurate predictions of the initial instance of the element turning on, usually a difficult task. 
+As can be seen in Figure \@ref(fig:seasonalNaivePlot), this method is quite ineffective, although in some instances it makes very accurate predictions of the initial instance of the element turning on. 
 
-The seasonal naive model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "seasonalNaive"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "seasonalNaive"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "seasonalNaive"], 2)`W.
+The seasonal naive model has RMSEs ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "seasonalNaive"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "seasonalNaive"]), 2)`W. The average RMSE over all households is `r round(DFsummary$RMSE[DFsummary$model == "seasonalNaive"], 2)`W, corresponding to a `r round((DFsummary$RMSE[DFsummary$model == "seasonalNaive"] - DFsummary$RMSE[DFsummary$model == "naive"])/DFsummary$RMSE[DFsummary$model == "naive"], 2)*100`% decrease in accuracy compared to the naive model.
+During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "seasonalNaive"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "seasonalNaive"]), 2)`W, with the average over all households being `r round(DFsummary$peakRMSE[DFsummary$model == "seasonalNaive"], 2)`W.
+Despite attempting to consider cyclic effects, this model performs very poorly during peak periods, with a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "seasonalNaive"], 0)`%, slightly higher than that of the naive model. This is indicated in the daily profile of residuals in Figure \@ref(fig:seasonalNaiveResiduals).
 
-During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "seasonalNaive"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "seasonalNaive"]), 2)`W, with the average being `r round(DFsummary$peakRMSE[DFsummary$model == "seasonalNaive"], 2)`W.
-
-The model precisely mimics the actual data with a week long lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, but the only illumination this model provides into behavioural properties of hot water use are with respect to how strictly a household follows weekly cycles of demand. The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "seasonalNaive"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "seasonalNaive"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "seasonalNaive"], 2)`s.
-
-```{r seasonalNaiveResiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the seasonal naive model"}
+The model precisely mimics the actual data with a week long lag, and therefore scores highly for physical fidelity. Interpretability is high as this model is represented by a very simple equation, but the only illumination this model provides into behavioural properties of hot water use are with respect to how strictly a household follows weekly cycles of demand. The computational time to fit models to each household was negligible for this model.
+<!--
+varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "seasonalNaive"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "seasonalNaive"]), 2)`s, with the average over all households taking `r round(DFsummary$fittingTime[DFsummary$model == "seasonalNaive"], 2)`s.
+-->
+```{r seasonalNaiveResiduals, echo=FALSE, out.width='100%', fig.cap="Daily profile of residuals for the seasonal naive model (peak periods shaded)"}
 knitr::include_graphics(paste0(pFolder, "seasonalNaive/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that despite attempting to consider cyclic effects, this model performs very poorly during peak periods, with a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "seasonalNaive"], 2)`%, slightly higher than that of the naive model.
 
-## Simple linear regression
+## Simple linear regression {#SLRres}
 
-While simple linear regression is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using time series data that displays cyclic behaviour, such as residential electricity demand.
-Where it may be useful, however, is in predicting the relationship between hot water electricity demand and non hot water electricity demand.
-The significance of the cross-correlogram (Fig. \@ref(fig:crossCovariance)) in the initial positive lags suggests we may be able to construct a simple linear model which forecasts hot water electricity use based on the previous half-hour's non hot water electricity use.
+<!--
+While simple linear regression of univariate data is a useful method of analysing data that has a roughly linear trend, it is generally inadequate when constructed using time series data that displays cyclic behaviour, such as residential electricity demand.
+Where it may be useful, however, is in a mulitvariate from, by predicting the relationship between hot water electricity demand and non hot water electricity demand.
+-->
 
+From equation \@ref(eq:simpleLinearRegression), along with the results obtained in Section \@ref(CCVres), a simple linear model is constructed which forecasts hot water electricity use based on the previous two half-hour values of other appliance electricity use, i.e. 
+
+\begin{equation}
+  \hat x_{t} = \gamma_0 + \gamma_1 y_{t-1} + \gamma_2 y_{t-2}.
+(\#eq:SLRres)
+\end{equation}
+
+<!--
 ```{r linearRelations, echo=FALSE, out.width='100%', fig.cap="Linear relation between non hot water electricity and half-hour lagged hot water electricity for household 13"}
 knitr::include_graphics(paste0(pFolder, "rf_13LinearPlot.png"))
 ```
 
 Figure \@ref(fig:linearRelations) shows a simple linear regression of current non hot water electricity demand with the following half-hour's hot water electricity demand. This is shown to demonstrate the ability to use current electricity demand to predict hot water electricity demand over the next half hour. Note the low $R^2$ value suggesting that, in it's current form, this model would be rather inadequate at forecasting demand.
 
+-->
 ```{r simpleLinear, echo=FALSE, out.width='100%', fig.cap="Performance of simple linear regression model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "simpleLinear/fourHouses.pdf"))
 ```
 Figure \@ref(fig:simpleLinear) shows the effectiveness of this model for four separate households. 
 <!--
 Different households used!
-
 Note that the top two households in the figure, `rf_13` and `rf_30`, show the model fitting reasonable poorly with the data. 
 Household `rf_13` appears to predict increase in hot water electricity demand before it actually occurs. 
 This should be compared to Figure \@ref(fig:crossCovariance), which shows the correllation between hot water and not hot water electricity peaking at around 200 minutes lag for this household.
@@ -85,128 +107,181 @@ Household `rf_30` shows a model which appears to be very unresponsive to the dat
 This indicates that for some households, a correlation lag of greater than 30 mins may increase accuracy. 
 Households `rf_42` and `rf_44` show a more accurate model result, however due to the presence of a non-zero y intercept these models will always consistently overestimate hot water electricity whenever the true value is zero.
 -->
-The simple linear regression model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "simpleLinear"], 2)`W.
+The simple linear regression model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "simpleLinear"]), 2)`W, with the average over all households being `r round(DFsummary$RMSE[DFsummary$model == "simpleLinear"], 2)`W. This corresponds to a `r round((DFsummary$RMSE[DFsummary$model == "simpleLinear"] - DFsummary$RMSE[DFsummary$model == "naive"])/DFsummary$RMSE[DFsummary$model == "naive"], 2)*100`% increase in accuracy compared to the naive model.
+During peak periods this model performed particularly poorly, as can be seen in Figure \@ref(simpleLinearResiduals). Peak-time RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "simpleLinear"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "simpleLinear"]), 2)`W, with the average over all households being `r round(DFsummary$peakRMSE[DFsummary$model == "simpleLinear"], 2)`W. This corresponds to a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "simpleLinear"], 0)`%.
 
-During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "simpleLinear"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "simpleLinear"]), 2)`W, with the average being `r round(DFsummary$peakRMSE[DFsummary$model == "simpleLinear"], 2)`W.
+The model does not accurately capture zero values, and is significantly smoother than the actual data, however no negative values are present. It scores low for physical fidelity. 
+Interpretability is high, as the output can be understood easily by Equation \@ref(eq:SLRres).  
+The computational time to fit models can be considered negligible.
+<!--
+to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "simpleLinear"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "simpleLinear"]), 2)`s, with the average over all households taking `r round(DFsummary$fittingTime[DFsummary$model == "simpleLinear"], 2)`s.
+-->
+While this model would not be a very effective means of predicting hot water electricity demand on its own, it does outperform the naive model in accuracy.
+This suggests that linear regression of other electricity demand may be effective as an input into more complex models that take other aspects of the data into consideration. 
 
-The model does not accurately capture zero values, and is significantly smoother than the actual data, however no negative values are present. It therefore scores low to moderate for physical fidelity. 
-Interpretability is high, as the output can be understood by the simple equation $\hat x_{t+1} = \alpha_0 + \alpha_1 w_t$, where $w_t$ is non hot water electricity at time $t$.  The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "simpleLinear"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "simpleLinear"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "simpleLinear"], 2)`s.
-
-Notably, this model has lower RMSE's than the Naive model.
-In addition, this model lends itself to being utilised as an input into more complex models that take other parameters into consideration. 
-
-```{r simpleLinearResiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the simple linear regression model"}
+```{r simpleLinearResiduals, echo=FALSE, out.width='100%', fig.cap="Daily profile of residuals for the simple linear regression model (peak periods shaded)"}
 knitr::include_graphics(paste0(pFolder, "simpleLinear/allHousesResidual.pdf"))
 ```
 
-This model performed particularly poorly during peak periods, with a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "simpleLinear"], 2)`%.
 
 ## ARIMA model
 
-As each household has different usage patterns and characteristics, optimal values for parameters $p$, $d$, and $q$ (see Section \@ref(ARIMAmethodology)) differ for each household.
-Parameters are selected in order to minimise the AIC (Equation \@ref(eq:AIC)) are provided in the Appendix. To restrict computational expense in model fitting, maximum values for $p$, $d$ and $q$ are fixed at 5, 2 and 5, respectively.
+In accordance with the procedure outlined in Section \@ref(ARIMAmethodology), ARIMA models were fitted to data from each household.
+As each household has different usage patterns and characteristics, optimal values for parameters $p$, $d$, and $q$ differ for each household.
+Parameters are selected in order to minimise the AIC (Equation \@ref(eq:AIC)), and are provided in Table \@ref(tab:ARIMAparameters) in the Appendix. To restrict computational expense in model fitting, maximum values for $p$, $d$ and $q$ are fixed at 5, 2 and 5, respectively.
 
-The ARIMA model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "ARIMA"], 2)`W.
+The ARIMA model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "ARIMA"]), 2)`W, with the average over all households being `r round(DFsummary$RMSE[DFsummary$model == "ARIMA"], 2)`W.
+This corresponds to a `r round((DFsummary$RMSE[DFsummary$model == "ARIMA"] - DFsummary$RMSE[DFsummary$model == "naive"])/DFsummary$RMSE[DFsummary$model == "naive"], 2)*100`% increase in accuracy compared to the naive model.
+During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "ARIMA"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "ARIMA"]), 2)`W, with the average over all households being `r round(DFsummary$peakRMSE[DFsummary$model == "ARIMA"], 2)`W.
+This corresponds to a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "ARIMA"], 0)`%.
+This underperformance during peak periods is reiterated in the daily profile of residuals in Figure \@ref(fig:ARIMAresiduals).
 
-During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "ARIMA"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "ARIMA"]), 2)`W, with the average being `r round(DFsummary$peakRMSE[DFsummary$model == "ARIMA"], 2)`W.
-
-The model does not often predict the initial instance of the element turning on, and is somewhat smoother than the actual data. In addition, occasional negative values or values above that capable of the element occur. It scores low to moderate for physical fidelity. 
-Interpretability is moderate, as, given familiarity with the model, the output can be understood by the value of the $p$, $d$ and $q$ parameters. The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "ARIMA"], 2)`s.
+When considering the general shape of the model when compared to the data in Figure \@ref(fig:ARIMAplot), we see that the model returns values that are somewhat smoother than the actual data. 
+However, this effect is far less pronounced than that of the linear regression model (Figure \@ref(fig:simpleLinear)).
+Occasional negative values or values above that capable of the element occur. This model therefore scores low to moderate for physical fidelity. 
+Interpretability is moderate, as, given familiarity with the model, the output can be understood by the value of the $p$, $d$ and $q$ parameters. 
+The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "ARIMA"]), 2)`s, with the average over all households taking `r round(DFsummary$fittingTime[DFsummary$model == "ARIMA"], 2)`s.
 
 ```{r ARIMAplot, echo=FALSE, out.width='100%', fig.cap="Performance of ARIMA model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "/ARIMA/fourHouses.pdf"))
 ```
 
-```{r ARIMAresiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the ARIMA model"}
+```{r ARIMAresiduals, echo=FALSE, out.width='100%', fig.cap="Daily profile of residuals for the ARIMA model (peak periods shaded)"}
 knitr::include_graphics(paste0(pFolder, "ARIMA/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model also underperforms during peak periods, with a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "ARIMA"], 2)`%.
+## Seasonal ARIMA {#SARIMAres}
 
-## Seasonal ARIMA
-
-The cyclic nature of hot water demand would suggest that the seasonal ARIMA model would be well suited for our purposes. In addition, as this model falls under the 'conventional' forecasting catagory, it would be reasonable to assume it was computationally efficient. However, preliminary modelling found that the seasonal ARIMA model was extremely computationally expensive. Households were taking upwards of 8 hours each to fit this model to their data. While this may be due to failings of a package-specific fitting algorithm, the seasonal ARIMA model was not pursued any further.
-
+The periodic nature of hot water electricity demand presented in Section \@ref(ACVresults) suggests that the seasonal ARIMA model would provide more accurate predicitions than the standard ARIMA model for this data. In addition, as this model falls under the 'conventional' forecasting catagory, it would be reasonable to assume it was computationally efficient. However, preliminary modelling found that the seasonal ARIMA model took an extremely long time to fit, with households taking upwards of 8 hours each to have this model fitted to their data.
+Significant effort was made to overcome this to no avail, thus the seasonal ARIMA model was not pursued any further.
+Seasonality of data was instead taken into consideration with an ARIMA model through the STL method, the results of which are in Section \@ref(STLARIMAres).
 
 ## ARIMAX model
 
-As for the ARIMA model, optimal values for parameters $p$, $d$, and $q$ (see Section \@ref(ARIMAmethodology)) differ for each household, and are provided in the Appendix. Maximum values for $p$, $d$ and $q$ are again fixed at 5, 2 and 5, respectively.
+As described in Section \@ref(ARIMAXmeth), the ARIMAX model may be considered as a linear regression model with an ARIMA model fitted to its errors.
+In accordance with the results in Section \@ref(CCVres), the previous two values of other electricity demand were included as the regressors.
+Thus Equation \@ref(eq:ARIMAX) becomes
+\begin{equation}
+  \hat x_t = \gamma_1y_{t-1} + \gamma_2y_{t-2} + \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q}.
+  (\#eq:ARIMAXres)
+\end{equation}
 
-The ARIMAX model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "ARIMAX"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "ARIMAX"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "ARIMAX"], 2)`W.
+As for the ARIMA model, optimal values for parameters $p$, $d$, and $q$ (see Section \@ref(ARIMAmethodology)) differ for each household, and are provided in the Appendix (Table \@ref(tab:ARIMAXparameters)). Maximum values for $p$, $d$ and $q$ are again fixed at 5, 2 and 5, respectively.
+In accordance with the results in Section \@ref(CCVres), the previous two values of other electricity demand were provided as regressors.
 
-During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "ARIMAX"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "ARIMAX"]), 2)`W, with the average being `r round(DFsummary$peakRMSE[DFsummary$model == "ARIMAX"], 2)`W.
+The ARIMAX model has RMSE ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "ARIMAX"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "ARIMAX"]), 2)`W, with the average over all households being `r round(DFsummary$RMSE[DFsummary$model == "ARIMAX"], 2)`W.
+This corresponds to a `r round((DFsummary$RMSE[DFsummary$model == "ARIMAX"] - DFsummary$RMSE[DFsummary$model == "naive"])/DFsummary$RMSE[DFsummary$model == "naive"], 2)*100`% increase in accuracy compared to the naive model.
+During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "ARIMAX"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "ARIMAX"]), 2)`W, with the average over all households being `r round(DFsummary$peakRMSE[DFsummary$model == "ARIMAX"], 2)`W.
+This corresponds to a peak-time increase in RMSE of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "ARIMAX"], 0)`%, indicating that the addition of the external regressors assists in peak-time accuracy when compared to the ARIMA model. 
+Daily profiles of residuals are provided for reference in Figure \@ref(fig:ARIMAXresiduals).
 
-The model is slightly better than the ARIMA at predicting the initial instance of the element turning on, and shows similar behaviour with respect to the model being smoother than the actual data. Occasional negative values or values above that capable of the element occur. It scores low to moderate for physical fidelity. 
-Interpretability is moderate, as the output can be understood by the value of the $p$, $d$ and $q$ parameters, along with the values given to the regressors. The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "ARIMAX"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "ARIMAX"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "ARIMAX"], 2)`s.
+The model shows similar behaviour to the ARIMA model with respect to the predictions being smoother than the actual data. 
+Occasional negative values or values above that capable of the element occur. It scores low to moderate for physical fidelity. 
+Interpretability is moderate, as the output can be understood by the value of the $p$, $d$ and $q$ parameters, along with the values given to the regressors. 
+The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "ARIMAX"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "ARIMAX"]), 2)`s, with the average over all households taking `r round(DFsummary$fittingTime[DFsummary$model == "ARIMAX"], 2)`s.
 
 ```{r ARIMAXplot, echo=FALSE, out.width='100%', fig.cap="Performance of ARIMAX model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "/ARIMAX/fourHouses.pdf"))
 ```
 
-```{r ARIMAXresiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the ARIMAX model"}
+```{r ARIMAXresiduals, echo=FALSE, out.width='100%', fig.cap="Daily profile of residuals for the ARIMAX model (peak periods shaded)"}
 knitr::include_graphics(paste0(pFolder, "ARIMAX/allHousesResidual.pdf"))
 ```
 
-The addition of the external regressor provides a very slight increase of accuracy during peak periods compared to the ARIMA model, with an increase in RMSE of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "ARIMAX"], 2)`%.
+## ARIMA with STL decomposition {#STLARIMAres}
 
-## ARIMA with STL decomposition
+In accordance with the methods in Section \@ref(SARIMAmeth) and the results from Chapter \@ref(prelimDA), ARIMA models were fitted to household data that had been decomposed using the STL method. 
+Parameters for the ARIMA component of the model are provided in Table \@ref(tab:STLARIMAparameters) in the Appendix. 
+Performance of these models for four households are shown in Figure \@ref(STLARIMAplot).
 
-Our STL + ARIMA model had RMSEs ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "STLARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "STLARIMA"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "STLARIMA"], 2)`W.
+Our STL + ARIMA models had RMSEs ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "STLARIMA"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "STLARIMA"]), 2)`W, with the average over all households being `r round(DFsummary$RMSE[DFsummary$model == "STLARIMA"], 2)`W.
+This corresponds to a `r round((DFsummary$RMSE[DFsummary$model == "STLARIMA"] - DFsummary$RMSE[DFsummary$model == "naive"])/DFsummary$RMSE[DFsummary$model == "naive"], 2)*100`% increase in accuracy compared to the naive model.
+During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "STLARIMA"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "STLARIMA"]), 2)`W, with the average over all households being `r round(DFsummary$peakRMSE[DFsummary$model == "STLARIMA"], 2)`W.
+While still losing accuracy during peak periods, with a RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "STLARIMA"], 0)`%, this model had the lowest percentage increase in peak period RMSEs of all those considered in this analysis.
+A daily profile of residuals is provided in Figure \@ref(STLARIMAresiduals).
+Note that this model was the most accurate of a selection of time series methods used to forecast volumetric residential hot water demand in [@Gelazanskas2015].
+These results come to the same conclusion, with further accuracy improvements only achieved in this research by the addition of an external regressor or through AI methods.
 
-During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "STLARIMA"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "STLARIMA"]), 2)`W, with the average being `r round(DFsummary$peakRMSE[DFsummary$model == "STLARIMA"], 2)`W.
-
-It performs slightly worse than the standard ARIMA model for physical fidelity. Although more instances where the initial instance of the element turning on is predicted, it is also more likely to return negative values or values above that capable of the element. It therefore scores low for physical fidelity. 
+This model performs slightly worse than the standard ARIMA model for physical fidelity, as it is more likely to return negative values or values above that capable of the element. It therefore scores low for physical fidelity. 
 This model is understandable as the sum of the seasonal and trend components, with an ARIMA modelled remainder. Parameters for all these elements are available, giving a general understanding of underlying patterns in the data, however it is somewhat convoluted. Interpretability therefore scores low to moderate. 
-The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "STLARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "STLARIMA"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "STLARIMA"], 2)`s.
+The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "STLARIMA"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "STLARIMA"]), 2)`s, with the average over all households taking `r round(DFsummary$fittingTime[DFsummary$model == "STLARIMA"], 2)`s.
 
 ```{r STLARIMAplot, echo=FALSE, out.width='100%', fig.cap="Performance of STL + ARIMA model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "STLARIMA/fourHouses.pdf"))
 ```
 
-```{r STLARIMAresiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the STLARIMA model"}
+```{r STLARIMAresiduals, echo=FALSE, out.width='100%', fig.cap="Daily profile of residuals for the STLARIMA model (peak periods shaded)"}
 knitr::include_graphics(paste0(pFolder, "STLARIMA/allHousesResidual.pdf"))
 ```
 
-While still losing accuracy during peak periods, with a RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "STLARIMA"], 2)`%, this model had the lowest percentage increase in peak period RMSEs of all those considered in this analysis.
-Note that this model was the most accurate of a selection of time series methods used to forecast volumetric residential hot water demand in [@Gelazanskas2015].
-These results come to the same conclusion, with further accuracy improvements only possible by addition of an external regressor (a causal method) or through AI methods.
-
 ## ARIMAX with STL decomposition
 
-Our STL + ARIMAX model had RMSEs ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "STLARIMAX"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "STLARIMAX"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "STLARIMAX"], 2)`W.
+The most complex conventional forecasting method considered was the STL + ARIMAX model outlined in Section \@ref(STLARIMAXmeth).
+This model decomposed data using the STL method in Section \@ref(STLmeth), then fits an ARIMAX model to the remainder component.
+As with the other models that incorporated regression, the previous two values of other electricity demand were selected as the regressor variables.
+Parameters for the ARIMA component of the model can be found in Table \@ref(tab:STLARIMAXparameters).
+The performance of the model for four households is shown in Figure \@ref(STLARIMAXplot).
 
-During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "STLARIMAX"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "STLARIMAX"]), 2)`W, with the average being `r round(DFsummary$peakRMSE[DFsummary$model == "STLARIMAX"], 2)`W.
+Our STL + ARIMAX model had RMSEs ranging between `r round(min(dfSummary$RMSE[dfSummary$model == "STLARIMAX"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "STLARIMAX"]), 2)`W, with the average over all households being `r round(DFsummary$RMSE[DFsummary$model == "STLARIMAX"], 2)`W.
+This corresponds to a `r round((DFsummary$RMSE[DFsummary$model == "STLARIMAX"] - DFsummary$RMSE[DFsummary$model == "naive"])/DFsummary$RMSE[DFsummary$model == "naive"], 2)*100`% increase in accuracy compared to the naive model.
+During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "STLARIMAX"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "STLARIMAX"]), 2)`W, with the average over all households being `r round(DFsummary$peakRMSE[DFsummary$model == "STLARIMAX"], 2)`W.
+This corresponds to a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "STLARIMAX"], 0)`%. This is slightly more than that of the same model without the external regressor (STL + ARIMA).
 
-This model essentially performs the same as the ARIMA + STL model for physical fidelity. Although more instances where the initial instance of the element turning on is predicted, it is also more likely to return negative values or values above that capable of the element. It therefore scores low for physical fidelity. 
+This model essentially performs the same as the ARIMA + STL model for physical fidelity. It can be quite effective in predicting initial instances of the element turning on, although it is also more likely to return negative values or values above that capable of the element. It therefore scores low for physical fidelity. 
 This model is understandable as the sum of the seasonal and trend components, with an ARIMA modelled remainder. Parameters for all these elements are available, giving a general understanding of underlying patterns in the data, however it is somewhat convoluted. Interpretability therefore scores low to moderate. 
-The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "STLARIMAX"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "STLARIMAX"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "STLARIMAX"], 2)`s.
+The computational time to fit models to each household varied between `r round(min(dfSummary$fittingTime[dfSummary$model == "STLARIMAX"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "STLARIMAX"]), 2)`s, with the average over all households taking `r round(DFsummary$fittingTime[DFsummary$model == "STLARIMAX"], 2)`s.
 ```{r STLARIMAXplot, echo=FALSE, out.width='100%', fig.cap="Performance of STL + ARIMAX model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "/STLARIMAX/fourHouses.pdf"))
 ```
 
-```{r STLARIMAXresiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the STLARIMAX model"}
+```{r STLARIMAXresiduals, echo=FALSE, out.width='100%', fig.cap="Daily profile of residuals for the STLARIMAX model (peak periods shaded)"}
 knitr::include_graphics(paste0(pFolder, "STLARIMAX/allHousesResidual.pdf"))
 ```
 
-This method had a peak period RMSE increase of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "STLARIMAX"], 2)`%, which, interestingly, is slightly more than the same model without the external regressor.
-
 ## SVM model
 
-The SVM model was the most accurate model considered, with RMSEs ranging between between `r round(min(dfSummary$RMSE[dfSummary$model == "SVM"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "SVM"]), 2)`W, with the average being `r round(DFsummary$RMSE[DFsummary$model == "SVM"], 2)`W.
+Representing AI methods is the SVM model, described in Section \@ref(SVMmeth).
+Using the lagged values of $x$ and $y$ as determined by the results in Chapter \@ref(prelimDA), the classifying hyperplane determined in Equation \@ref(eq:GammaOrig) becomes
 
-During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "SVM"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "SVM"]), 2)`W, with the average being `r round(DFsummary$peakRMSE[DFsummary$model == "SVM"], 2)`W.
+\begin{equation}
+  \Gamma = \gamma_0 + \gamma_1 h_t + \gamma_2x_{t-1} + \gamma_3 x_{t-2} + \gamma_4y_{t-1} + \gamma_5 y_{t-2}.
+\end{equation}
 
-The model is slightly smoother than the actual data, and seldom displays negative values or values above what is capable of the element. It scores moderate to high for physical fidelity. 
-This model is essentially "black box", providing very limited insight as to its selected parameters and their significance. As such, it scores low for interpretability. 
+The SVM was the most accurate model considered, with RMSEs ranging between between `r round(min(dfSummary$RMSE[dfSummary$model == "SVM"]), 2)`W and `r round(max(dfSummary$RMSE[dfSummary$model == "SVM"]), 2)`W. The average over all households was `r round(DFsummary$RMSE[DFsummary$model == "SVM"], 2)`W.
+This corresponds to a `r round((DFsummary$RMSE[DFsummary$model == "SVM"] - DFsummary$RMSE[DFsummary$model == "naive"])/DFsummary$RMSE[DFsummary$model == "naive"], 2)*100`% increase in accuracy compared to the naive model.
+The performance of this model for four households can be seen in Figure \@ref(fig:SVMplot).
+During peak periods, RMSEs ranged between `r round(min(dfSummary$peakRMSE[dfSummary$model == "SVM"]), 2)`W and `r round(max(dfSummary$peakRMSE[dfSummary$model == "SVM"]), 2)`W, with the average over all households being `r round(DFsummary$peakRMSE[DFsummary$model == "SVM"], 2)`W.
+This model had the highest increase in peak period RMSEs of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "SVM"], 0)`%, which is indicated by the daily profile of residuals in Figure \@ref(SVMresiduals).
 
-The computational time to fit models to each household was very high, varying between `r round(min(dfSummary$fittingTime[dfSummary$model == "SVM"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "SVM"]), 2)`s, with the average taking `r round(DFsummary$fittingTime[DFsummary$model == "SVM"], 2)`s. 
+The model is slightly smoother than the actual data, and seldom displays negative values or values above what is capable of the element. It scores highly for physical fidelity. 
+This model is essentially "black box", providing very limited insight as to its selected parameters and their significance. As such, it scores very low for interpretability. 
+The computational time to fit models to each household was very high, varying between `r round(min(dfSummary$fittingTime[dfSummary$model == "SVM"]), 2)`s and `r round(max(dfSummary$fittingTime[dfSummary$model == "SVM"]), 2)`s, with the average over all households taking `r round(DFsummary$fittingTime[DFsummary$model == "SVM"], 2)`s. 
 
 ```{r SVMplot, echo=FALSE, out.width='100%', fig.cap="Performance of SVM model for four households over four separate days"}
 knitr::include_graphics(paste0(pFolder, "/SVM/fourHouses.pdf"))
 ```
 
-```{r SVMresiduals, echo=FALSE, out.width='100%', fig.cap="Aggregated half-hourly average residuals for the SVM model"}
+```{r SVMresiduals, echo=FALSE, out.width='100%', fig.cap="Daily profile of residuals for the SVM model (peak periods shaded)"}
 knitr::include_graphics(paste0(pFolder, "SVM/allHousesResidual.pdf"))
 ```
 
-Examination of the aggregated daily average residuals shows that this model had the highest increase in peak period RMSEs of `r round(DFsummary$pcErrorIncrease[DFsummary$model == "SVM"], 2)`%.
+## Summary
+
+```{r summaryTab}
+df <- DFsummary[, c("model", "RMSE", "peakRMSE", "pcErrorIncrease", "fittingTime")]
+df$model <- c("ARIMA", "ARIMAX", "Naive", "Seasonal naive", "Simple linear", "STL + ARIMA", "STL + ARIMAX", "SVM")
+df <- arrange(df, fittingTime)
+sn <- df[1, ]
+df[1, ] <- df[2, ]
+df[2, ] <- sn
+df %>%
+  knitr::kable(caption = "Average quantitative performance of each model", 
+               col.names = c("Model", "RMSE (W)", "peak period RMSE (W)", "PEI (%)", "Fitting time (s)"),
+               digits = 2)
+```
+
+This chapter presented the results of the models considered in this research. Quantitive values for accuracy and computational speed were provided along with a qualitative assessment of physical fidelity and interpretability. 
+Values for the quantitative metrics are provided in Table \@ref(tab:summaryTab).
+
+Figures demonstrating the performance of four households were included to provide an intuition to the shape and general performance of each model. Daily profiles of model residuals were also provided for each household. These highlight the performance of the model during peak periods, as these are the periods where smart control for demand response is most critical.
+Following on from these results is Chapter \@ref(Discussion), the discussion chapter, whereby these results are compared with one another in more detail, and the implications of these results to the aims of this thesis are elucidated.

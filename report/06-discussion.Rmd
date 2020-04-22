@@ -1,16 +1,45 @@
-# Discussion
+# Discussion {#Discussion}
 
-Note that our seasonal naive model is outperformed by our naive model in accuracy. This is in contrast to the findings in [@Gelazanskas2015]. The reason for this may lie in the data itself, with the UK households having more weekly regularity than the NZ households used in this research. Alternatively, this discrepancy may lie in the differences in data resolution or forecast length.
+The aims of this research was to use existing household electricity demand data, processed to mimic the format of that collected and transmitted by smart meters to  "...develop an accurate, physically meaningful and quick to compute method of predicting individual household hot water electricity demand...".
+This was framed under the broader context of assisting smart control objectives, including the construction of demand simulations.
 
-Unsurprisingly, increasing the complexity of the models tends to increase both the accuracy of the model, and the time taken to fit.
-Increasing computational time doesn't necessarily ensure increased accuracy however, as the SVM model has a fitting time that is two orders of magnitude higher than that of the conventional models, while being slightly outperformed by the STL + ARIMAX model in accuracy. 
-However, the STL + ARIMAX model required significantly more human input to devolop than the SVM did.
-All models are less accurate during peak periods, however those that incorporate the STL decomposition have a smaller percentage increase in errors than others, due to the consideration of seasonal effects.
-The SVM model displayed the largest percentage increase in error during peak periods.
+## Interpretations
 
-## Simulation suitability
+Contrary to the results in [@Gelazanskas2015], the seasonal naive model was less accurate than the naive model. 
+The reason for this discrepancy may lie in the data itself, with the UK households having more weekly regularity than the NZ households used in this research. Alternatively, this discrepancy may lie in the differences in data resolution or forecast length.
 
-The models utilised in this thesis assume the dependent variables are continuous and have no upper or lower bounds. In particular, while being fit to simply minimise the RSS, they may predict values that are greater than the maximum element power or less than zero, and series' of values that are 'smoother' than the original data. 
+In general, the most accurate model considered was SVMs. 
+This wasn't suprising, as the suitability of SVMs for electricity demand forecasting was noted in existing literature[@Kaytez2015; @Massana2015], and was a large reason why they were selected as the comparative AI method.
+However, during peak times of day the SVM is outperformed in accuracy by models that incorporate STL decomposition.
+SVMs would therefore be the most recommended model in a situation where accuracy of prediction during non-peak periods is the highest consideration.
+The SVM model also closely resembles the physical process, providing the most realistic 'looking' predictions of all (non-naive) models considered.
+However, when other metrics are taken into consideration, the SVM model falls short.
+The average number of seconds taken to fit the model to a household (`r round(DFsummary$fittingTime[DFsummary$model == "SVM"], 0)`s) was at least two orders of magnitude higher than any other model considered.
+While `r round(DFsummary$fittingTime[DFsummary$model == "SVM"], 0)`s doesn't seem too long when considering a small amount of households, this may become prohibitive when applied to hundreds of thousands or millions of households, even with higher powered computing capacity.
+In addition, this model is has very low interpretability, and therefore would not be of much use in gaining deeper insights into behavioural patterns around domestic hot water use.
 
-This is particularly pronounced when considering data at 1 minute resolution. At this timescale, the true nature of the hot water element as an "on/off" device becomes apparent. See Figure \@ref(fig:elementPlot) for an example of this behaviour.
+The inclusion of lagged values of other appliance electricity demand as a regressor to improve predictions of hot water electricity demand appears to be unique to this thesis, and may be considered an integral result.
+While linear regression of lagged values of other appliances was relatively ineffective predictive model on its own (refer to \@ref(SLRres)), it provided an accuracy boost to models that were already relatively accurate, such as the STL + ARIMA model highly regarded in [@Gelazanskas2015].
+The STL + ARIMAX built upon the STL + ARIMA model by adding lagged values of other appliance electricity demand as an external regressor. 
+This addition provided it with accuracy almost rivalling SVMs, and surpassing SVMs during peak periods. 
+In terms of additional accuracy improvements over the STL + ARIMA model, the external regressor improves RMSE by `r round(DFsummary$RMSE[DFsummary$model == "STLARIMA"] - DFsummary$RMSE[DFsummary$model == "STLARIMAX"], 2)`W on average, and by `r round(DFsummary$peakRMSE[DFsummary$model == "STLARIMA"] - DFsummary$peakRMSE[DFsummary$model == "STLARIMAX"], 2)`W during grid peaks.
+While the STL + ARIMAX had the slowest average computational speed of the conventional models, it was still vastly quicker than that of the SVM.
+The STL + ARIMAX model has quite a few parameters, and while not indecipherable, their interpretation would require decent familiarity with the model to interpret. 
+This model would provide insights into underlying behavioural properties if properly interpreted, however simpler models would be better suited for this purpose.
+Where the STL + ARIMAX model really falls short is in its physical fidelity.
+Many values are predicted that are impossible for the element to achieve, and the model has a notably different shape to the underlying data.
 
+As no single model scored highly across all comparative metrics, we must come to terms with trade-offs. 
+Up to a point[^1], increasing the complexity of a model tends to improve accuracy, while lowering interpretablity slowing computation.
+Trade-offs regarding the physical fidelity metric are less clear.
+While the physical fidelity of ARIMA-based models decrease with increasing model complexity, the SVM model is both highly complex while still showing high physical fidelity. 
+
+[^1]:Eventually, due to overfitting, adding additional parameters to a model will begin to lower accuracy while also still lowering performance in interpretation and computational speed.
+
+## Recommendations
+
+While an 'all-purpose' model that scores highly in all metrics was not discovered, these results provide guidelines to choosing a suitable model for residential hot water electricity demand. 
+The STL + ARIMAX model provided comparatively accurate predictions during peak periods, while remaining reasonably fast to compute, and thus would be the recommended model for most predictive purposes.
+To the best of our knowledge this model has not been used within existing literature for demand forecasting.
+The SVM provides slightly more accurate predictions outside of peak periods at the cost of significantly slower model fitting.
+When determining statistical properties of data for simulating demand or other reseach purposes, it would likely be best to utilise parameters from STL + ARIMA, along with results from preliminary data analysis in Chapter \@ref(prelimDA). 
