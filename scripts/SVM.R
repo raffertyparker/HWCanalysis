@@ -31,8 +31,8 @@ DFsummary <- data.frame(model=character(),
                         memSize=numeric(),
                         stringsAsFactors=FALSE)
 #names(DFsummary) <- c("model", "household", "RMSE", "fittingTime", "memSize")
-#for (house in houses){
-house <- houses[1]  
+for (house in houses){
+#house <- houses[1]  
   
   dt_fit <- as.data.table(readr::read_csv(paste0(dFile,"households/fitting/",house,
                                                  "_at_30_min_for_fitting.csv")))
@@ -58,12 +58,12 @@ house <- houses[1]
   Model <- "SVM"  
   fitTime <- system.time(
     fitSVM <- svm(HWelec ~ dHour + nonHWshift1 + nonHWshift2
-                  + HWshift1 + HWshift2 + dow, dt_fit))[3]
-  dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
-  saveRDS(fitSVM, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
+                  + HWshift1 + HWshift2, dt_fit))[3]
+ # dir.create(paste0(dFolder, "models/", Model,"/"), showWarnings = FALSE)
+#  saveRDS(fitSVM, file = paste0(dFolder, "models/", Model,"/", house, "_fitted_model.rds"))
   predicted_values <- predict(fitSVM, dt_val)
   SVMresidual <- dt_val$HWelec[3:nrow(dt_val)] - predicted_values
-  plotModelSVM(dt_val, predicted_values)
+  #plotModelSVM(dt_val, predicted_values)
   sVec <- data.frame(model=Model,
                      household=house,
                      RMSE=sqrt(mean(SVMresidual^2)),
@@ -71,4 +71,4 @@ house <- houses[1]
                      memSize=as.numeric(object.size(fitSVM)),
                      stringsAsFactors=FALSE)
   DFsummary <- rbind(DFsummary, sVec)
-  
+}
