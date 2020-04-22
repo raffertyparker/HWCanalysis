@@ -1,30 +1,47 @@
 ################## TO DO ##################
 
-Explain Fourier analysis/periodogram. Refer to MJs equations but don't rely on them.
-Include Javed2012 in lit rev
-Mention other countries (eg SA) in intro, perhaps HWC section
-Fix physical modelling section in intro and add to DHW section in lit rev
+General:
 Fix plots so it prints ok
-Impacts on service introduced in intro and #smart-cont-lit
-Elaborate on STL in methodology
-Remove references to causal modelling. Just call them regression models
-Combine the metrics "interpretability" and "physical fidelity" into one metric called "suitability for demand simulations" or similar
-Include residual analysis in methodology and results
-Provide references in conventional and AI forecasting sections in introduction
-Make sure electricity grid section in Intro mentions:
-Generation, Transmission, Distribution, Consumption, Deregulated market etc
-Put data processing code in the appendix
-Change "naive" model to "simple naive"
-Make a flow chart of data processing sequence
-put combined acv plots in appendix
-Include international context in intro esp for demand response/elec grid
-Tie different models in discussion to literature
 Include nomenclature at beginning (after list of tables?)
+Make sure every chapter has an intro and summary
+- where are we up to? 
+- where are we going next?
+
+Intro:
+Mention other countries (eg SA)
+Provide references in conventional and AI forecasting sections 
+Make sure electricity grid section covers Generation, Transmission, Distribution, Consumption, Deregulated market
+
+Lit review:
+Make clear the reasoning behind starting with simple models and building complexity
+Expand on demand forecasting
+How good are the existing models and what are they used for?
+With existing research in mind, why is mine worthwhile?
+Provide intro to difference between simulation and forecast
+
+Methodology:
+Create illustrative examples to justify increase of model complexity
+Introduce residual analysis
+Make a flow chart of data processing sequence
 Draw family tree/landscape of models, indicate if they have been used for elec data and which I have decided to use
 Elaborate on the process of sorting through existing work to choose the models I have chosen
-Look at variance etc of DFsummary
-modelling.R may be better separated into individual functions that are called on as opposed to one huge page worth
-Plot ACV of model residuals to check that seasonality is being accounted for
+
+Results:
+Include residual analysis
+-Plot ACV of model residuals to check that seasonality is being accounted for
 -Join individual plots with grid.arrange
+
+Discussion:
+Tie different models to literature
+
+Appendix:
+Include code (data processing and modelling)
+Include combined ACV plots
+
+Possible (low priority):
+Remove references to causal modelling. Just call them regression models
+Combine the metrics "interpretability" and "physical fidelity" into one metric called "suitability for demand simulations" or similar
+Look at variance etc of dfSummary
+modelling.R would be better separated into individual functions that are called on as opposed to one huge page worth
 Add other elec (dotted line) to linear model plot
 Clone github repository and rerun to check reproducibility
