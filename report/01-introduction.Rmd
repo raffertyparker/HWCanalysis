@@ -1,6 +1,6 @@
 # Introduction
 
-In order to reduce the risk of catastrophic climate change, the International Panel on Climate Change (IPCC) has recommended stabilising atmospheric CO$^2$ levels at 450 parts per million[IPCC2014]. In order to meet this target, it is critical we achieve deep electrification of transport and other industries that currently rely predominantly on fossil fuels for their energy supply[@Williams2012].
+In order to reduce the risk of catastrophic climate change, the International Panel on Climate Change (IPCC) has recommended stabilising atmospheric CO$^2$ levels at 450 parts per million[@IPCC2014]. In order to meet this target, it is critical we achieve deep electrification of transport and other industries that currently rely predominantly on fossil fuels for their energy supply[@Williams2012].
 
 Ensuring electricity is cheap and plentiful will assist the shift toward electrification.
 For this reason, it is paramount we reduce inefficiencies within electricity networks.
@@ -34,7 +34,7 @@ Throughout winter months, in cooler climates, electricity demand on average incr
 These average increases are more pronounced at certain times of day, generally reflected as two 'peaks' in the morning and evening. This is due to the effects of high residential electricity demand during these periods.
 
 As electrical energy cannot be stored, electricity supply must match this fluctuating demand. This becomes progressively more expensive to achieve as peak demand increases[@Jack].
-In New Zealand, each additional kW of this peak-time demand is estimated to cost $187 per year in additional costs[Jack2016].
+In New Zealand, each additional kW of this peak-time demand is estimated to cost $187 per year in additional costs[@Jack2016].
 The challenges associated with supplying electricity in order to effectively meet demand are likely to be exacerbated by the predicted increase of renewable energy in the grid, as renewable energy generation is often reliant on weather conditions, and consequently can not easily be shifted to meet demand[@Lund2015]. 
 
 Failure to match supply and demand may result in grid black-outs, as well as large-scale damage to electricity-using appliances that operate under specific alternating current (AC) frequencies.
@@ -102,7 +102,8 @@ This provides the physical capability to temporally shift hot water electricity 
 
 ### Smart control
 
-The ability for an appliance to have its electricity demand times shifted on a daily scale with limited impact to the end user is referred to as 'flexibility'. Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders. Flexible devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand (for example into times where electricity is cheaper) with minimal impact to the end user.
+The ability for an appliance to have its electricity demand times shifted on a daily scale with limited impact to the end user is referred to as 'flexibility'. Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders. 
+Flexible devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand for electricity with minimal impact to the end user (referred to as 'impacts on service').
 
 With the rapid rise of 'internet of things' technology, whereby devices are interconnected and offer the ability to be controlled remotely, there is now the ability to automatically schedule flexible devices to facilitate a number of objectives. 
 Devices may be scheduled around availability of renewable energy sources for example, or optimised to minimise costs through participation in demand response markets.
@@ -132,6 +133,10 @@ The ability to store only as much hot water as will be required by the household
 
 ## Predicting electricity demand
 
+There are many different techniques whereby key aspects of the processing, analysis and extrapolation can be carried out algorithmically by a computer.
+Different techniques use different algorithms to carry out the forecasting processes, some of which use more computational resources than others.
+This is most inutively understood as the amount of time a computer with a particular processing capability will take to construct the forecast. 
+
 It is not strictly necessary to predict electricity demand in order to smartly control electricity using appliances.
 However, accurate demand predictions would allow devices to be controlled according to the usage patterns of individual houses[@Lomet2015]. 
 This is beneficial within a smart control system as it would provide additional capacity for control while reducing negative effects on service[@Gelazanskas2015]. 
@@ -140,33 +145,30 @@ Demand predictions could allow more accurate bids as to an estimated capacity fo
 
 Following the roll-out of smart meters in New Zealand, there is now the ability to collect and process essentially 'real-time' data on hot water electricity consumption for individual consumers. 
 This allows ripple control (or a similar system) to be personalised to individual household usage patterns, with intelligent control systems including predicted demand in their algorithms.
-There are a number of techniques commonly used for predicting hot water electricity demand. These may be broadly separated into the catagories (i) physical modelling, (ii) conventional forecasting, and (iii) artificial intelligence (AI)[@MatDaut2017].
+
+Techniques commonly used for predicting hot water electricity demand may be broadly separated into the catagories (i) physical modelling, (ii) conventional forecasting, and (iii) artificial intelligence (AI)[@MatDaut2017].
 
 ### Physical modelling
 
-_This whole section needs editing to fit where it now sits._
+Smartly controlling residential hot water cylinders is an active research topic[@Jack2018; @Roux2018; @Roux2017; @Sepulveda2010; @Gelazanskas2016]. 
+Much of this research uses computer models that mathematically replicate a hot water cylinder and its operation under standard residential hot water demand patterns.
+These models may then be used to simulate the impacts of smart control, as well as provide forecasts of electricity demand.
 
-Smartly controlling residential hot water cylinders is an active research topic[CITE]. Much of this research uses computer models that replicate a hot water cylinder and its operation under standard residential hot water demand patterns.
-These demand patterns must be input as parameters into the computer model.
-In some cases, the parameters used to specify demand for these types of simulations are interchangeable with those we would obtain from a forecast of hot water electricity demand.
-Even when this is not strictly the case, the insights we can gain from models which predict hot water electricity demand are applicable when building models to replicate hot water demand.
-This suitability of forecasting parameters for inputs into demand simulations for research purposes is examined in more detail in Chapter \@ref(lit-rev).
-
-There are many different techniques whereby key aspects of the processing, analysis and extrapolation can be carried out algorithmically by a computer.
-Different techniques use different algorithms to carry out the forecasting processes, some of which use more computational resouces than others.
-When the construction of a forecasting model uses a comparatively small amount of processing resources, it can be referred to as 'computationally efficient'. 
-This is most inutively understood as the amount of time a computer with a particular processing capability will take to construct the forecast. 
-Although the distinction is subtle, time series forecasting methods may be broadly separated by their computational efficiencies into two categories, AI and conventional.
-
+In order to physically replicate water flows within the model, generalised hot water demand patterns must be input as model parameters.
+These demand patterns are often based on simple statistical or mathematatical relationships related to time, with some artificially generated 'randomness' for added realism.
+Uncovering underlying patterns within data that can be represented as simple statistical or mathematical relationships is the primary focus of conventional forecasting methods.
 
 ### Conventional forecasting methods
 
+Rather than building a predictive model based on prior knowledge of physical characteristics of a system, conventional forecasting methods make predictions using time series data.
 Time series data involves measurements of variables sequentially or at fixed intervals of time[@Cowpertwait2009].
 The time intervals between each measurement are known as the data 'resolution'. Time series data that had measurements recorded every hour, for example, would have a one hour resolution.
 Time series data may be processed, analysed and extrapolated in a manner that produces predictions of future events or occurrences, a process known as 'forecasting'.
 
-Conventional forecasting methods involve discovering underlying statistical properties of data, which are then used to make predictions of the future.
-These methods often require significant human input, generally requiring an initial data analysis, testing, and trial and error. However, once an optimal conventional model is discovered, it can generally be constructed with reasonable computational efficiency. 
+Conventional forecasting methods involve discovering underlying statistical properties of time series data.
+These methods often require significant human input, generally requiring an initial data analysis, testing, and trial and error. However, once an optimal conventional model is discovered, it can generally be constructed with reasonable computational speed.
+In addition, the insights that are gained from from conventional forecasting methods may be applicable to physical models.
+
 There are two distinct conventional time series forecasting techniques utilised in this research; causal modelling, and time series analysis.
 Causal modelling utilises data of separate but related (explanatory[^1]) variables and makes predictions based on basic statistical relationships between them[@Hong2016]. Regression analysis is a causal model commonly used in electricity forecasting, and may be understood as follows:
 If there is the ability to know (or sufficiently accurately predict) the value(s) of the independent variable(s) at a particular future time, then a forecast for the dependent variable may be calculated at that same time based on the causal relationship between them.
@@ -199,14 +201,14 @@ This is done through a method known as 'training'. To train an AI model, an algo
 The comparatively autonomous nature of AI methods does not necessarily make them inferior, as they still have the ability to obtain (often) highly accurate predictions.
 There is a trade-off however, as their outputs tend to be 'black box', generally providing less in the way of understanding underlying processes than many conventional methods obtained through utilising human intuition and statistics.
 In addition, AI modelling can be hindered by the large amounts of computing resources necessary to carry out their training.
-Two AI models commonly used in electricity demand forecasting, namely support vector machines (SVMs) and artificial neural networks (ANNs), are explained in more detail in Section \@ref(IntroToModels).
+Two AI models commonly used in electricity demand forecasting, namely artificial neural networks (ANNs) and support vector machines (SVMs), are explained in more detail in Sections \@ref(edf) and \@ref(SVMmeth).
 
-## Aims
+## Aims {#Aims}
 
 The ability to accurately predict the demand of flexible appliances such as hot water cylinders increases the viability of smartly controlling them.
 Increasing the viability of smart control technology hastens its uptake. This in turn assists in keeping electricity cheap and plentiful, which is crucial in the drive to electrify carbon-intensive industries.
-The research conducted for this thesis uses existing electricity demand time series data that had been previously collected from New Zealand households[@R-GREENGridData].
-The aim is to use this data to develop a computationally efficient, accurate, and physically meaningful method of predicting individual household hot water electricity demand at 30 minute resolution. 
+The research conducted for this thesis uses existing electricity demand time series data that had been collected from New Zealand households in a previous study[@GREENGrid].
+The aim is to use this data to develop an accurate, interpretable, physically meaningful and quick to compute method of predicting individual household hot water electricity demand at 30 minute resolution. 
 A selection of conventional forecasting methods will be explored and compared against both a simple benchmark model and a more complex AI method. Comparative metrics take into consideration both the suitability for incorporation into smart control systems, and for incorporation as demand simulation into physical models.
 
 <!--
@@ -225,6 +227,6 @@ Chapter \@ref(prelimDA) shows the results obtained from the preliminary data ana
 Chapter \@ref(results) presents the results from a selection of forecasting models used to predict hot water electricity demand of each individual household in our dataset. 
 Chapter \@ref(discussion) provides comparisons of the models based on the metrics outlined in Chapter \@ref(methodology), with optimal models for different purposes presented.
 A summary of the background and aspirations of this thesis and its results are provided in the conclusion (Chapter \@ref(conclusion)). Potential further work is also detailed in this section.
-Relevant tables, including model parameters and some data attributes, are provided in Appendix \.
+Relevant tables, including model parameters and some data attributes, are provided in the Appendix.
 
 
