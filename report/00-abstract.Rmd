@@ -3,15 +3,20 @@ Traditionally, research in electricity demand forecasting ranged from country-wi
 However with emerging technologies allowing smart control of appliances this is beginning to change, as accurate appliance-level demand forecasts have a number of benefits to smart control objectives.
 
 This research explores a number of existing forecasting methods to predict the electricity demand of residential hot water cylinders.
-Existing one minute resolution household electricity demand data was used that contains separately metered hot water demand to that of other household appliances. 
-This was averaged over half-hour periods to mimic data currently available from smart meters in New Zealand, and then separated according to date into 'training' and 'validating' sets.
+Existing one minute resolution household electricity demand data that was previously collected for the NZ GREEN Grid study was used.
+From this data were selected 22 suitable households whereby hot water electricity demand was separately metered to the demand of other household appliances. 
+Data were averaged over half-hour periods to mimic data currently available from smart meters in New Zealand. Data from each household were then separated chronologically into 'training' and 'validating' sets.
 
-The models selected for comparison were chosen based on their suitability according to existing literature, as well as through preliminary exporatory analysis.
+The models selected for comparison were chosen based on their suitability according to existing literature, as well as through preliminary exploratory analysis.
+A range of conventional forecasting models were included for comparison. These were composed of autoregressive integrated moving averages (ARIMA), linear regression, and seasonal and trend decomposition with local polynomial regression (STL).
+In addition, one artificial intelligence model was included, namely support vector machines (SVM).
+A random walk model was also included as a naive benchmark model for comparative purposes.
+
 Models were fitted to the training data and tested against the validating data to prevent inaccurate results from 'overfitting'.
-Every stage of the process was formulated to facilitate reuse of selected models and reproducibility of results. 
-
-Consideration was given to performance metrics other than forecast accuracy, such as the computational speed of model fitting and the suitablity of the model for providing deeper understanding of behavioural patterns of hot water use.
+Consideration was given to performance metrics other than forecast accuracy, such as the computational speed of model fitting and the suitability of the model for providing deeper understanding of behavioural patterns of hot water use.
 
 It was found that in general, increasing the forecast accuracy of models reduced their performance in other metrics.
 A relationship was discovered between the electricity demand of other appliances and that of future hot water demand, which was incorporated into some models.
-A model incorporating seasonal decomposition with local polynomial regression, autoregressive integrated moving averages, and other electricity demand as an external regressor was the most accurate, while also performing highly in other metrics.
+The naive model had a root mean square error (RMSE) of 600W.
+SVMs were found to be the most accurate model, with RMSEs averaging around 500W, however they performed very poorly in other metrics.
+The most complex conventional model incorporated STL with ARIMA while including other electricity demand as an external regressor. This performed almost as well as SVMs in accuracy, while performing reasonably well in other metrics.
