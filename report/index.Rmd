@@ -7,13 +7,13 @@ advisor: 'Michael W. Jack'
 #altadvisor: 'Your Other Advisor'
 department: 'Physics'
 degree: 'Master of Science'
-title: 'Predictive models for residential hot water electricity forecasting'
+title: 'Predictive models for residential hot water electricity demand forecasting'
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 output: 
   thesisdown::thesis_pdf: default
 #  thesisdown::thesis_gitbook: default
-  thesisdown::thesis_word: default
+#  thesisdown::thesis_word: default
 #  thesisdown::thesis_epub: default
 # If you are creating a PDF you'll need to write your preliminary content (e.g., abstract, acknowledgements) here or
 # use code similar to line 22-23 for the .RMD files. If you are NOT producing a PDF, you can delete or silence lines 21-32 in this YAML header.
@@ -31,7 +31,7 @@ preface: |
 # Specify the location of the bibliography below
 bibliography: bib/thesis.bib
 # Download your specific csl file and refer to it in the line below.
-csl: csl/ieee.csl
+csl: csl/ieee-with-url.csl
 lot: true
 lof: true
 # If you prefer blank lines between paragraphs, un-silence lines  40-41 (this requires package tikz)
