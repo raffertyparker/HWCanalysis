@@ -1,22 +1,22 @@
 # Simple linear regression bivariate models.
 # Has been assimilated into modelling.R
 
-if (!exists("dFile")){
-  dFile <- "~/HWCanalysis/data/" 
+if (!exists("dFolder")){
+  dFolder <- "~/HWCanalysis/data/" 
 }
-if (!exists("pFile")){
-  pFile <- "~/HWCanalysis/plots/" 
+if (!exists("pFolder")){
+  pFolder <- "~/HWCanalysis/plots/" 
 }
-if (!exists("sFile")){
-  sFile <- "~/HWCanalysis/scripts/" 
+if (!exists("sFolder")){
+  sFolder <- "~/HWCanalysis/scripts/" 
 }
 if (!exists("DT_hh")){
-  load(paste0(dFile, "DT_hh.Rda"))
+  load(paste0(dFolder, "DT_hh.Rda"))
 }
 
 DT_hh$nonHWshift <- shift(DT_hh$nonHWelec)
 #sdResSL <- list()
-load(paste0(dFile, "houses.Rda"))
+load(paste0(dFolder, "houses.Rda"))
 for (house in houses){
   mdl <- lm(DT_hh$HWelec[DT_hh$linkID == house]~DT_hh$nonHWshift[DT_hh$linkID == house])
 #  sdResSL[[house]] <- sd(resid(mdl), na.rm = TRUE)
@@ -28,28 +28,28 @@ for (house in houses){
   pMdl <- dplyr::arrange(pMdl, Time)
   assign(house, mdl)
   get(house) %>%
-    saveRDS(file = paste0(dFile, "models/simpleLinear/", house, "_at_30.rds"))
+    saveRDS(file = paste0(dFolder, "models/simpleLinear/", house, "_at_30.rds"))
   assign(house, pMdl)
   get(house) %>%
-    saveRDS(file = paste0(dFile, "models/simpleLinear/", house, "_at_30_for_plotting.rds"))
+    saveRDS(file = paste0(dFolder, "models/simpleLinear/", house, "_at_30_for_plotting.rds"))
   p <- ggplot(data = get(house)[48:(48*3), ], aes(x = Time)) +
     geom_line(aes(y = value, colour = variable)) +
     labs(y = "Power (W)", colour = "")
-  ggsave(filename = paste0(pFile, "simpleLinear/", house, "SL.pdf"))
+  ggsave(filename = paste0(pFolder, "simpleLinear/", house, "SL.pdf"))
 }
 
 #sdResSL <- as.data.frame(sdResSL)
 #sdResSL <- as.data.frame(t(sdResSL)) # transposes for ease of computation
-#save(sdResSL, file = paste0(dFile, "models/simpleLinear/sdResSL.Rda"))
+#save(sdResSL, file = paste0(dFolder, "models/simpleLinear/sdResSL.Rda"))
 
 proc.time() <- SLproc
 for (house in unique(DT_hh$linkID)){
   p <- lm(DT_hh$HWelec[DT_hh$linkID == house]~DT_hh$nonHWshift[DT_hh$linkID == house])
 }
 SLproc <- proc.time()
-save(SLproc, file=paste0(dFile, "models/simpleLinear/procTime.Rda"))
+save(SLproc, file=paste0(dFolder, "models/simpleLinear/procTime.Rda"))
 
-source(paste0(sFile, "four_plot.R"))
+source(paste0(sFolder, "four_plot.R"))
 # good range of houses: 31, 13, 45, 42
 fourPlot("simpleLinear", rf_30, rf_13, rf_42, rf_44)
 
@@ -73,7 +73,7 @@ ggplotRegression <- function (fit) {
 }
 
 ggplotRegression(mdl)
-ggsave(paste0(pFile, "simpleLinear/rf_13_scatterplot.pdf"))
+ggsave(paste0(pFolder, "simpleLinear/rf_13_scatterplot.pdf"))
 
 
 fit1 <- lm(DT_hh$HWelec[DT_hh$linkID == house]~DT_hh$nonHWshift[DT_hh$linkID == house])
