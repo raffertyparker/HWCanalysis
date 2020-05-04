@@ -23,7 +23,7 @@ My_Theme = theme(
   axis.title.y = element_text(size = 20),
   strip.text = element_blank())
 
-theme_set(theme_minimal())
+theme_set(theme_minimal(base_size = 14))
 
 #modelName <- "naive" # For manual creation 
 Model <- "SVM" 

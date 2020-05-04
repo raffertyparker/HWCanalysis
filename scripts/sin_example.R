@@ -1,7 +1,7 @@
 # This creates sinusoid example plot
 
 library(ggplot2)
-theme_set(theme_minimal())
+theme_set(theme_minimal(base_size = 14))
 
 t <- seq(1,20,0.1)
 a <- sin(t)

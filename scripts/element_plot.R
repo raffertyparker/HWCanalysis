@@ -18,7 +18,7 @@ library(data.table)
 library(ggplot2)
 library(gridExtra)
 
-theme_set(theme_minimal())
+theme_set(theme_minimal(base_size = 14))
 oneDay <- DT[dateTime_nz %between% c("2015-08-01", "2015-08-02") & linkID == "rf_06"]
 
 # HW elec and other appliance elec plot

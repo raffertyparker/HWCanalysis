@@ -4,7 +4,7 @@ dFolder <- "~/HWCanalysis/data/"
 pFolder <- "/home/parra358/HWCanalysis/plots/"  
 library(ggplot2)
 library(gridExtra)
-theme_set(theme_minimal())
+theme_set(theme_minimal(base_size = 14))
 
 df <- readr::read_csv(paste0(dFolder, "households/validating/rf_22_at_30_min_for_validating.csv"))
 df$total <- df$nonHWelec + df$HWelec

@@ -14,7 +14,7 @@ library(dplyr)
 library(gridExtra)
 #library(forecast)
 
-theme_set(theme_minimal())
+theme_set(theme_minimal(base_size = 14))
 
 load(paste0(dFolder, "houses.Rda"))
 for (house in houses){
