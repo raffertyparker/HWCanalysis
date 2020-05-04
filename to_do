@@ -1,23 +1,24 @@
 ################## TO DO ##################
 
 General:
+Answer the question: how much extra could be obtained for DR using this system?
+Fix title page 
+- include logo etc
+- no need to 'approve for division'
+- no preface necessasry
 Fix plots so it prints ok
 Include nomenclature at beginning (after list of tables?)
 Make sure every chapter has an intro and summary
 - where are we up to? 
 - where are we going next?
 
-Intro:
-Mention other countries (eg SA)
-Provide references in conventional and AI forecasting sections 
-Make sure electricity grid section covers Generation, Transmission, Distribution, Consumption, Deregulated market
+Intro: 
+Mention other countries eg SA 
 
 Lit review:
-Make clear the reasoning behind starting with simple models and building complexity
 Expand on demand forecasting
 How good are the existing models and what are they used for?
 With existing research in mind, why is mine worthwhile?
-Provide intro to difference between simulation and forecast
 
 Methodology:
 Create illustrative examples to justify increase of model complexity
@@ -27,12 +28,20 @@ Draw family tree/landscape of models, indicate if they have been used for elec d
 Elaborate on the process of sorting through existing work to choose the models I have chosen
 
 Results:
+Get to the bottom of the SARIMA failure
+Make sure boxplot caption is displayed
 Include residual analysis
 -Plot ACV of model residuals to check that seasonality is being accounted for
 -Join individual plots with grid.arrange
 
 Discussion:
+Estimate potential benefits to NZ
+-Use article that ascertains how many cylinders nec for X MW
+-Use this to make estimate of value for each DR market
 Tie different models to literature
+Discuss aggregation
+include plots/averages/twodayXX.png to show why seasonalnaive no good
+Provide overview of the how the results of this research can be incorporated into a SC system
 
 Appendix:
 Include code (data processing and modelling)
