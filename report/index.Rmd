@@ -2,12 +2,12 @@
 author: 'Rafferty J. W. Parker'
 date: 'April 2020'
 institution: 'The University of Otago'
-division: 'Energy Science and Technology'
-advisor: 'Michael W. Jack'
+division: 'Science'
+advisor: 'Dr. Michael W. Jack'
 #altadvisor: 'Your Other Advisor'
-department: 'Physics'
+#department: 'Physics'
 degree: 'Master of Science'
-title: 'Predictive models for residential hot water electricity demand forecasting'
+title: 'A comparative study of electricity demand forecasting models for residential hot water at the individual household level'
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 output: 
