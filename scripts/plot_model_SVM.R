@@ -1,4 +1,5 @@
 # This takes model outputs and plots a day worth
+# No longer needed SVM can now be plotted with original plot_model.R
 plotModelSVM <- function(dt, fitted){
   require(lubridate)
   nRows <- nrow(dt)
