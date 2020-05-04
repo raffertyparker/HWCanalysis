@@ -1,22 +1,17 @@
-Electricity demand forecasting is frequently utilised to assist in maintaining a robust and efficient electricity grid.
-Traditionally, research in electricity demand forecasting ranged from country-wide grid-level down to individual buildings, with limited existing literature forecasting at the level of individual appliances.
-However with emerging technologies allowing smart control of appliances this is beginning to change, as accurate appliance-level demand forecasts have a number of benefits to smart control objectives.
+Electricity demand forecasting is utilised to assist in maintaining a robust and efficient electricity grid.
+Research on electricity demand forecasting has traditionally ranged from country-wide grid-level down to individual buildings, with limited existing literature focussed at the level of individual appliances.
+However, with emerging technologies allowing smart control of appliances this is beginning to change. Smartly control of appliances can improve energy efficiency and provide beneficial cost-reducing services to an electricity grid. When incorporated into a smart control system, accurate appliance-level demand forecasts allow more control with less impacts on service.
 
-This research explores a number of existing forecasting methods to predict the electricity demand of residential hot water cylinders.
-Existing one minute resolution household electricity demand data that was previously collected for the NZ GREEN Grid study was used.
-From this data were selected 22 suitable households whereby hot water electricity demand was separately metered to the demand of other household appliances. 
-Data were averaged over half-hour periods to mimic data currently available from smart meters in New Zealand. Data from each household were then separated chronologically into 'training' and 'validating' sets.
+In New Zealand, electric hot water cylinders which are present in ~80% of households are currently controlled en-mass using ripple-control as part of centralised demand response programmes to reduce demand at peak times. Smart control of individual cylinders could result in a larger response with more nuanced control and less chance of households running out of hot water. This thesis applies a number of existing forecasting methods to the problem of forecasting the electricity demand of residential hot water cylinders at the individual household level. 
 
-The models selected for comparison were chosen based on their suitability according to existing literature, as well as through preliminary exploratory analysis.
-A range of conventional forecasting models were included for comparison. These were composed of autoregressive integrated moving averages (ARIMA), linear regression, and seasonal and trend decomposition with local polynomial regression (STL).
-In addition, one artificial intelligence model was included, namely support vector machines (SVM).
-A random walk model was also included as a naive benchmark model for comparative purposes.
+The forecasting models selected for analysis in this thesis were chosen based on their suitability according to existing literature, as well as through preliminary exploratory analysis.
+A range of conventional forecasting models were assessed including autoregressive integrated moving averages (ARIMA), linear regression, and seasonal and trend decomposition with local polynomial regression (STL).
+In addition, one artificial intelligence model was also assessed, namely support vector machines (SVM).
+A random walk model was included as a naive benchmark model for comparative purposes.
 
-Models were fitted to the training data and tested against the validating data to prevent inaccurate results from 'overfitting'.
-Consideration was given to performance metrics other than forecast accuracy, such as the computational speed of model fitting and the suitability of the model for providing deeper understanding of behavioural patterns of hot water use.
+Existing one minute resolution household electricity demand data that was previously collected in the GREEN Grid study was used for model development.
+We selected 22 suitable households from this dataset where the demand of electric hot water cylinders was separately metered.  Data was averaged over half-hour periods to mimic data currently available from smart meters in New Zealand. The hot water demand data from each household was separated chronologically into 'training' and 'validating' sets. Models were fitted to the training data and tested against the validating data to prevent inaccurate results from 'overfitting’. The models were compared based on forecast accuracy and other performance metrics, such as the computational speed of model fitting and the suitability of the model for providing deeper understanding of behavioural patterns of hot water use.
 
-It was found that in general, increasing the forecast accuracy of models reduced their performance in other metrics.
-A relationship was discovered between the electricity demand of other appliances and that of future hot water demand, which was incorporated into some models.
-The naive model had a root mean square error (RMSE) of 600W.
-SVMs were found to be the most accurate model, with RMSEs averaging around 500W, however they performed very poorly in other metrics.
-The most complex conventional model incorporated STL with ARIMA while including other electricity demand as an external regressor. This performed almost as well as SVMs in accuracy, while performing reasonably well in other metrics.
+A relationship was discovered between the electricity demand of other appliances in the household and future hot water demand, which was incorporated into some models.
+SVMs were found to be the most accurate model, with 16% lower errors than the naive model, however they performed very poorly in other metrics.
+The most complex conventional model incorporated STL with ARIMA while including other electricity demand as an external regressor. This performed almost as well as SVMs in accuracy, while also performing reasonably well in other metrics, and would be the recommended model for use in smart control.

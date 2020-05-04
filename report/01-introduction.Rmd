@@ -1,4 +1,4 @@
-# Introduction
+# Introduction {#Intro}
 
 In order to reduce the risk of catastrophic climate change, the International Panel on Climate Change (IPCC) has recommended stabilising atmospheric CO$^2$ levels at 450 parts per million[@IPCC2014]. In order to meet this target, it is critical we achieve deep electrification of transport and other industries that currently rely predominantly on fossil fuels for their energy supply[@Williams2012].
 
@@ -9,9 +9,14 @@ The first is that of unnecessary or premature capital expenditure on electricity
 Electricity grids must be built and maintained with the capacity to generate and transmit enough electricity to cover periods of extremely high demand, while only a portion of this capacity is being used for the vast majority of the time. This is an example of economic inefficiency.
 The second is that of heat losses from residential hot water cylinders. Many households constantly maintain a large tank of water at around 65°C, while only requiring a portion of it at particular times of day or week. This is an example of energy inefficiency.
 
-
-This chapter explains these two inefficiencies in more detail and outlines the role that smarter control of hot water cylinders may play in alleviating them. It then goes on to explain the value that predictive computer models of residential hot water electricity demand would bring to such a smart control system.
+This chapter explains these two inefficiencies in more detail and outlines the role that smarter control of hot water cylinders may play in alleviating them. 
+It then goes on to explain the value that predictive computer models of residential hot water electricity demand would bring to such a smart control system.
 The research conducted for this thesis revolved around the construction and comparison of a variety of these predictive models.
+
+The data used to construct and test these models was collected from households in New Zealands part of a previous study[@GREENGrid].
+New Zealand has a high percentage of both electric hot water cylinders and households with smart electricity meters, and therefore would be an ideal candidate for the kind of smart control system these predictive models would improve.
+As such, the introduction is presented from a New Zealand context.
+However, these methods prperly implimented would improve economic efficiencies of any electricity network with a high proportion of electric hot water cylinders, and energy efficiencies of hot water cylinders in general.
 
 <!--
 Problem: One solution to the variability of electricity demand and supply problems is DSM, but current methods not sophisticated
@@ -42,7 +47,7 @@ New Zealand's electricity system frequency must be maintained at or near 50 Hz. 
 In the event of a large generator unexpectedly going offline, a high voltage direct current (HVDC) pole tripping, or other large disruptions to supply there must be reserve electricity available so that the frequency is maintained within an acceptable range (between 48 and 52 Hz).
 Ensuring that there is enough capacity to provide electricity at times of very high demand or during unexpected grid emergencies requires the building and maintenance of generation and transmission infrastructure that sits underutilised for the majority of the time. This is a very costly and inefficient situation[@Strbac2008]. 
 
-## Demand response
+## Demand response {#DRIntro}
 
 There are currently a range of mechanisms in place to ensure that the supply of electricity balances with the varying demand[@Strbac2008], and that currents do not exceed transmission and distribution infrastructure constraints[@TranspowerNZ2015].
 One method to deal with the imbalance between the supply and demand of electricity is to adjust demand to meet supply. This is referred to as demand response. 
@@ -122,14 +127,14 @@ In New Zealand, electric hot water cylinders (HWCs) are very common, with 91% of
 A study by the Household Energy End Use Project (HEEP) showed that hot water usage makes up to 36% of residential peak demand[@Pollard2002], with other research suggesting it may be up to 50%[@Jack]. 
 Smart control of residential hot water cylinders is thus particularly promising for demand response, as it is both flexible, and a key contributor to network demand peaks[@Stephenson2017].
 
-## Increasing energy efficiency
+## Increasing energy efficiency {#enEfficiencyIntro}
 
 In addition to assisting demand response objectives, personalised control of hot water cylinders can improve their efficiency by only heating as much water as is required by the household. 
 Any object that is hotter than its surroundings will suffer from heat loss, with the amount of heat lost being proportional to the difference in temperature between the body and the surroundings. 
 Thus, as hot water loses heat energy to the environment faster than cooler water, storing hot water in excess of what is required is inefficient. 
 
-Smart control simulations have demonstrated energy savings of up to 10% in hot water systems that only heated according to what was predicted to be required. These savings could be increased up to 17% with perfectly accurate predictions[@Denis2019].
-The ability to store only as much hot water as will be required by the household (with the remainder of the tank being left as cooler water) therefore has the potential to reduce total hot water electricity consumption[@Denis2019]. 
+Smart control simulations have demonstrated energy savings of up to 12% in hot water systems that only heated according to what was predicted to be required[@Kepplinger2015]. These savings could be increased up to 17% with perfectly accurate predictions[@Denis2019].
+The ability to store only as much hot water as will be required by the household (with the remainder of the tank being left as cooler water) therefore has the potential to reduce total hot water electricity consumption. 
 
 ## Predicting electricity demand
 
@@ -179,9 +184,9 @@ One option is to establish a relationship between the value(s) of the independen
 Another conventional forecasting method known as 'time series analysis' utilises the fundamental properties of only the time series data of the variable being predicted.
 One important technique used in time series analysis is the separation of the data into individual components, namely trend, cycles and 'noise'. 
 In the context of DHW electricity time series data, the trend would be a gradual increase (or decrease) in average hot water use over long periods of time. Cycles would be average daily use patterns such as morning and evening peaks previously mentioned. The noise is any deviation of the data from the combination of trend and cycle components (people not actually using hot water according to strict mathematical relationships).
-This method, sometimes refered to as 'decomposition', can be acheived using a technique called 'seasonal decomposition of time series by Loess' (STL), and is explained in more detail in Section \@ref(STL).
+This method, sometimes refered to as 'decomposition', can be acheived using a technique called 'seasonal decomposition of time series by Loess' (STL), and is explained in more detail in Section \@ref(STLmeth).
 
-Additionally, forecasts may be made by understanding the relationships between a variable and its previous values. Autoregression (AR), moving average (MA), and a combination of the two (ARIMA) are commonly utilised techniques to obtain these relationships, which are expanded upon in Section \@ref(IntroToModels). In the context of DHW forecasting these methods may be best interpreted as an understanding of the lengths of time a water heater element will typically remain on (or off) for. 
+Additionally, forecasts may be made by understanding the relationships between a variable and its previous values. Autoregression (AR), moving average (MA), and a combination of the two (ARIMA) are techniques commonly utilised in electricity demand forecasting to obtain these relationships[@Lomet2015; @Arghira2012; @Popescu2016, @Denis2019], which are expanded upon in Section \@ref(IntroToModels). In the context of DHW forecasting these methods may be best interpreted as an understanding of the lengths of time a water heater element will typically remain on (or off) for. 
 
 Conventional forecasting techniques are generally prized for being simple and interpretable, while taking minimal computing resources, but often require significant human input. In addition, they are often outperformed in accuracy by the more advanced AI methods.
 
@@ -225,8 +230,8 @@ The following chapter presents relevant literature. It highlights key research i
 Chapter \@ref(methodology) presents my methodology. It introduces the electricity demand dataset utilised in this work, and explains the data cleaning and preparatory process. It then describes the exploratory data analysis techniques and the forecasting models utilised, and the metrics by which the models are compared to one another.
 Chapter \@ref(prelimDA) shows the results obtained from the preliminary data analysis methods. It also briefly discusses the implications these results have for selecting appropriate forecasting models.
 Chapter \@ref(results) presents the results from a selection of forecasting models used to predict hot water electricity demand of each individual household in our dataset. 
-Chapter \@ref(discussion) provides comparisons of the models based on the metrics outlined in Chapter \@ref(methodology), with optimal models for different purposes presented.
-A summary of the background and aspirations of this thesis and its results are provided in the conclusion (Chapter \@ref(conclusion)). Potential further work is also detailed in this section.
-Relevant tables, including model parameters and some data attributes, are provided in the Appendix.
+The discussion in Chapter \@ref(Discussion) provides comparisons of the models based on the metrics outlined in Chapter \@ref(methodology), with optimal models for different purposes presented. It also clarifies the role that results from this thesis may play in a smart control system.
+A summary of the background and aspirations of this thesis and its results are provide along with potential further work in the conclusion (Chapter \@ref(conclusion)).
+Relevant code and tables, including model parameters and some data attributes, are provided in the Appendix.
 
 

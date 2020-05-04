@@ -1,7 +1,8 @@
 # Discussion {#Discussion}
 
-The aims of this research was to use existing household electricity demand data, processed to mimic the format of that collected and transmitted by smart meters to  "...develop an accurate, physically meaningful and quick to compute method of predicting individual household hot water electricity demand...".
-This was framed under the broader context of assisting smart control objectives, including the construction of demand simulations.
+The aims of this research was to use existing household electricity demand data, processed to mimic the format of that collected and transmitted by smart meters to develop a method of predicting household level hot water electricity demand that was sufficiently accurate, physically meaningful and quick to compute.
+The purpose of this model was presented under the broader context of assisting smart control objectives, including the construction of demand simulations.
+This chapter provides commentary on results presented in Chapter \@ref(results), in particular their performance against the metrics presented in Section \@ref(metrics) and implications on the broader objectives introduced in Chapter \@ref(Intro).
 
 ## Interpretations
 
@@ -9,7 +10,7 @@ Contrary to the results in [@Gelazanskas2015], the seasonal naive model was less
 The reason for this discrepancy may lie in the data itself, with the UK households having more weekly regularity than the NZ households used in this research. Alternatively, this discrepancy may lie in the differences in data resolution or forecast length.
 
 In general, the most accurate model considered was SVMs. 
-This wasn't suprising, as the suitability of SVMs for electricity demand forecasting was noted in existing literature[@Kaytez2015; @Massana2015], and was a large reason why they were selected as the comparative AI method.
+This wasn't suprising, as the suitability of SVMs for electricity demand forecasting was already noted in existing literature[@Kaytez2015; @Massana2015], and was a large reason why they were selected as the comparative AI method.
 However, during peak times of day the SVM is outperformed in accuracy by models that incorporate STL decomposition.
 SVMs would therefore be the most recommended model in a situation where accuracy of prediction during non-peak periods is the highest consideration.
 The SVM model also closely resembles the physical process, providing the most realistic 'looking' predictions of all (non-naive) models considered.
@@ -26,15 +27,16 @@ In terms of additional accuracy improvements over the STL + ARIMA model, the ext
 While the STL + ARIMAX had the slowest average computational speed of the conventional models, it was still vastly quicker than that of the SVM.
 The STL + ARIMAX model has quite a few parameters, and while not indecipherable, their interpretation would require decent familiarity with the model to interpret. 
 This model would provide insights into underlying behavioural properties if properly interpreted, however simpler models would be better suited for this purpose.
+In particular, the three separate models which make up the STL + ARIMAX, namely linear regression of other appliance demand, STL, and ARIMA, could individually provide these insights in a manner that was easier to interpret.
 Where the STL + ARIMAX model really falls short is in its physical fidelity.
 Many values are predicted that are impossible for the element to achieve, and the model has a notably different shape to the underlying data.
 
 As no single model scored highly across all comparative metrics, we must come to terms with trade-offs. 
-Up to a point[^1], increasing the complexity of a model tends to improve accuracy, while lowering interpretablity slowing computation.
+Up to a point, increasing the complexity of a model tends to improve accuracy, while lowering interpretablity slowing computation.
+Eventually though, due to overfitting, adding additional parameters to a model will begin to lower accuracy while also still lowering performance in interpretation and computational speed.
 Trade-offs regarding the physical fidelity metric are less clear.
 While the physical fidelity of ARIMA-based models decrease with increasing model complexity, the SVM model is both highly complex while still showing high physical fidelity. 
 
-[^1]:Eventually, due to overfitting, adding additional parameters to a model will begin to lower accuracy while also still lowering performance in interpretation and computational speed.
 
 ## Recommendations
 
@@ -43,3 +45,65 @@ The STL + ARIMAX model provided comparatively accurate predictions during peak p
 To the best of our knowledge this model has not been used within existing literature for demand forecasting.
 The SVM provides slightly more accurate predictions outside of peak periods at the cost of significantly slower model fitting.
 When determining statistical properties of data for simulating demand or other reseach purposes, it would likely be best to utilise parameters from STL + ARIMA, along with results from preliminary data analysis in Chapter \@ref(prelimDA). 
+
+## Notes on implimentation {#implimentation}
+
+This section provides a brief overview of how this research may be incorporated into a demand response system using technologies currently in existence in New Zealand.
+First, it must be acknowledged that there are certain limitations of the models as they have been presented when applied directly to a smart control scenario.
+
+In order to participate in demand response markets discussed in Section \@ref(DRIntro)), accurate predictions of the capacity to reduce load must be made.
+When forecasting demand for this purpose, accuracy improvements would be gained by aggregating household data[@Gelazanskas2015].
+The assumption could be made that comparative rankings of models would be similar using aggregated household data, however additional research would be needed to confirm this.
+
+It must also be noted that to maximise demand-shifting capabilities while minimising negative impacts on service, predictions of the electricity demand of the hot water cylinder is not sufficient. What is necessary is an accurate prediction of whether there will be sufficient hot water in the tank to cover demand.
+It is for this reason that much emphasis has been given to the ability of prediction models to be incorporated into physical models.
+
+The smart control system envisaged throughout this research would take real-time (half-hour resolution) data from smart meters with separately metered hot water.
+Predictive models would be fitted to this data, but rather than be used to make a prediction of electricity demand, their parameters would instead be used in a physical model to predict volumetric hot water demand.
+This physical model would then have the capability of simulating the amount of hot water remaining in the tank under proposed demand response scenarios.
+Suppose, for example, that there is the ability to suppress the hot water element of a particular household over the next half hour, with an associated financial recompense for this.
+The physical model would have the ability to predict the amount of time the element could be suppressed before the tank would become cold, which would in turn be incorporated into the control algorithm as a constraint.
+A similar method would be necessary when controlling to improve energy efficiency (see Section \@ref(enEfficiencyIntro)). A physical model can predict the volumetric hot water demand of the following few hours, ensuring that the volume of hot water in the tank will match this demand with some additional capacity to accomodate prediction errors.
+
+The decision to model individual households in order to predict demand over the following half hour was then ultimately one of compromise.
+In an envisaged smart control for demand response scenario, there would likely be two separate prediction models working interactively.
+The first would use aggregated household smart meter data in order to predict aggregate hot water electricity demand for the next half hour.
+This would be used to ascertain the amount of power that would be available for demand response.
+The second would use household level data within a physical model to predict the volume of hot water in each cylinder over the next few hours.
+These would create a safeguard so that if the hot water volume of a particular household was forecast to become low, its element would not be suppressed.
+Due to space and constraints, the models in this research were introduced and compared as if they would be performing both of these functions.
+Results presented in this work should instead be thought of as a foundation by which to build these separate models upon.
+
+The use of physical models alongside forecasting models in a smart control algorithm has been previously proposed in [@Kepplinger2015]. 
+This research used residential hot water demand forecasts with Austrian electricity spot price data as inputs in a smart control simulation. 
+This was optimised to arbitrage spot market electricity prices and/or reduce overall energy demand.
+Cost savings of up to 12% were demonstrated when optimising for price arbitrage, and energy savings of up to 12% were demonstrated when optimising for energy efficiency.
+While [@Kepplinger2015] used Austrian electricity spot price data, it may be assumed that similar savings are possible in New Zealand.
+In addition, New Zealand has additional demand response markets (instantaneous reserves and congestion period), further improving the economics of this system.
+
+Under current New Zealand electricity market structures, a rough estimate can be made of overall income/cost savings available from this system, and which market actors stand to benefit.
+Drawing on prior research in this area[@Dortans2018], charging during prescribed times of day saves around \$40 per household per year in spot price arbitrage, and \$75 per household per year in reduced congestion period (CPD) charges.
+
+
+```{r implimentation, echo=FALSE}
+df1 <- data.frame(Benefits = c("Grid efficiency", "Spot price arbitrage", "IR market participation", "CPD response", "Energy efficiency"),
+                  Generators = c("False", "Depends", "False", "False", "False"), 
+                  Systems_operator = c("True", "False", "False", "False", "False"),
+                  Lines_companies = c("True", "False", "True","True","True"),
+                  Retailers = c("False", "True","True","True","False"),
+                  Residential_consumer = c("False", "True","False","False", "True"))
+library(kableExtra)
+df1 %>%
+ knitr::kable(caption = "Benefits of smart control to various grid actors") 
+#  landscape("latex") %>%
+#  kable_styling() 
+#  row_spec(0, bold = TRUE)) %>% 
+#  column_spec(2, width = "3em") %>%
+# kable_styling() 
+```
+
+<!--
+While residential consumers currently have the option to be exposed to spot prices of electricity, this is still a niche option.
+We then assume in this analysis that residential consumers maintain their current status, whereby hot water electricity is provided at a discounted flat (non-varying) rate under the arrangment that the element can be suppressed at particular times to assist demand response.
+
+

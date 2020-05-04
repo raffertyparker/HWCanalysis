@@ -3,7 +3,7 @@
 Smart control of hot water cylinders has a role to play in a smooth and cost-effective transition to a low-carbon society.
 To best realise this potential, we need the ability to make accurate demand forecasts at the level of individual cylinders.
 
-This thesis set out to build and compare a selection of models to forecast residential hot water electricity demand using only data in the format currently available from smart meters in New Zealand. The primary goal was to discover an 'optimal' hot water electricity demand model for incorporation into a smart-control system. In addition, models were compared according to their suitability for incorporation in physical simulations.
+This thesis set out to build and compare a selection of models to forecast residential hot water electricity demand using only data in the format currently available from smart meters in New Zealand. The primary goal was to discover an 'optimal' hot water electricity demand model for incorporation into a smart-control system. Models were compared according to their suitability for incorporation in physical simulations.
 
 The method this research suggests as being most promising for demand forecasting was STL decomposition of the hot water demand data into seasonal, trend and remainder components, modelling the remainder as an ARIMAX process with lagged values of other electricity demand as an external variable, and subsequent recomposition of the ARIMAX modelled remainder with the seasonal and trend components. This method (referred to as STL + ARIMAX) provided a combination of accuracy, computational speed and interpretability that was unmatched in other methods considered. It was, however, outperformed by a number of other methods in physical fidelity, with the output containing values unobtainable by the cylinder element, as well as having higher stochasticity than the data, which was exacerbated by the model incorporating other appliance demand as an external regressor. 
 When considering incorporation into demand simulations however, this model may not be the most suitable. 
@@ -12,7 +12,8 @@ Instead, the STL + ARIMA model (with no external regressor) would provide suffic
 ## Potential for further work 
 
 The obvious next step for this work is to incorporate the recommended forecasting model into hot water cylinder smart control scenarios (either simulated or real-world) and determine the additional benefits it can provide over smart control without demand forecasting.
-There is also work to be done in translating parameters of the forecasting models into demand simulation parameters.
+As part of this process, work must be done in translating parameters of the forecasting models into demand simulation parameters.
+These models should also be compared using aggregate household data, to ensure comparative rankings remain.
 In addition, there is potential for further exploration of the models considered in this work for forecasting the demand of other flexible appliances, such as electric vehicles.
 
 <!--

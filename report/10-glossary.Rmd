@@ -10,3 +10,4 @@ RSS - residual sum of squares
 SVM - support vector machine
 ANN - artificial neural network
 AIC - Akaike Information Criterion
+PEI - percentage error increase, see Eq. \@ref(eq:PEI)

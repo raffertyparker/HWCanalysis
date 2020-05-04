@@ -5,8 +5,8 @@ While the research conducted for this thesis did not involve any smart control, 
 As such, this chapter begins by noting key literature relating to smart control off appliances, and any relevant findings.
 Next, Section \@ref(edf) presents literature relating to electricity demand forecasting. Section \@ref(edf) begins by briefly reiterating how forecasting models are constructed, and then lists a selection of models used in electricity demand forecasting. It then notes other work whereby models were compared with one another, and the results of these comparisons.
 Following this is Section \@ref(DHWM), which presents key literature regarding domestic hot water simulations. Section \@ref(DHWM) describes a selection of physical hot water models used in research simulations, and explains their interrelation with demand forecasting models.
-Finally, Section \@ref(contrib) provides an explanation as to where the research in this thesis fits in relation to existing literature.
-One piece of existing research in particular, that of [@Gelazanskas2015], inspired much of the research in this thesis. A number of its methodologies were replicated, and its key findings were built upon in this work. As such, [@Gelazanskas2015] is examined in some detail in Section \@ref(contrib), with differences between it and this work made clear.
+Finally, Section \@ref(similarlit) notes existing research most similar to this thesis. 
+One piece of existing research in particular, that of [@Gelazanskas2015], inspired much of the research in this thesis. A number of its methodologies were replicated, and its key findings were built upon in this work. To conclude this chapter, differences between [@Gelazanskas2015] and this work made clear.
 
 ## Smart control {#smart-cont-lit}
 
@@ -23,13 +23,28 @@ Insulated hot water cylinders show high flexibility, and as such are good candid
 In order to effectively schedule appliances under smart control, reasonable estimates must be made as to when they are required to be utilised. An electric vehicle, for example, must be sufficiently charged before the next drive, clothes must be washed and dry in time for their next use, and a hot water cylinder must be sufficiently hot before the next shower. Accurate predictions of these 'next' usage events provide a smart control system the ability to fine tune their optimisation algorithms to take full advantage of the demand flexibility without negatively impacting the end user.
 As such, demand forecasting of appliances in some form is common in smart control literature[@Cui2016; @Roux2018; @Arghira2012; @Kepplinger2015; @Sepulveda2010; @Yu2013; @Kapsalis2018; @Passenberg2016; @Gelazanskas2016].
 
+As a physical roll-out of smart controllers would be prohibitively expensive for research purposes, much existing smart control research uses simulations to determine the potential of smart control.
+
+In the context of researching a physical system under smart control, simulations are created using known physical and statistical properties of the system.
+Physical properties are determined through understanding of the physics of the system.
+Statistical properties tend to be determined using existing data of the system, or relevant subsets of the system.
+Simulations then use these properties to create (simulate) new data that mimics that which would be obtained if this system was contructed in reality. 
+Parameters of the system being simulated are able to be altered to see how this affects the outputs being studied[@JackDew2018].
+This process is elaborated on in the context of simulating domestic hot water cylinders in Section \@ref(DHWM).
+
+While simulations may be projected into the future, and therefore used for forecasting, they tend to artificially create fluctuations about the outputs that would have been provided using purely the statistical properties.
+This provides more realistic outputs, as real world systems almost never behave nicely according to their statistical properties.
+However, the addition of these fluctuations (known as 'noise') is not necessary when the purpose is minimising the error in the prediction of a future value.
+Instead, when attempting to minimise the error of a prediction, more simple forecasting models can be utilised.
+
 ## Electricity demand forecasting {#edf}
 <!--
 Many hot water electricity demand forecasting techniques use similar methods to the simulated hot water demand component of the physical models mentioned at the beginning of this section.
 The key difference is in their purpose. Rather than being run in order to simulate flow events for a physical model, they are projected into the future to obtain forecasts of demand.
 When used in this manner, there is no need to be replicating physical characteristics of the hot water cylinder, thus these models focus only on understanding mathematical relationships within existing demand data. 
 -->
-Electricity demand models are constructed using existing electricity demand data, and, in some cases, other relevant data sources that span the same period of time. The models are 'fitted' to the existing dataset such that they best replicate the existing demand data under certain constraints. Once this is completed, these models may then be projected forward in time to where no electricity demand data exists in order to make predictions.
+In general, forecasting models are constructed using existing data of the variable being predicted, and, in some cases, other relevant data (regressors) that span the same period of time. The models are 'fitted' to the existing dataset such that discrepancies between the existing data and the model are minimised. Once this is completed, these models may then be projected forward in time to where no data exists in order to make predictions.
+Models of this type are often fitted to electricity demand data (and any relevant regressors) for the purposes of predicting electricity demand.
 
 While much research is conducted relating to predicting grid-level[@DeFelice2013; @Jain2009], substation level[@Goude2014], or building level[@Popescu2016; @Gajowniczek2014; @Ahmad2014; @McLoughlin2013] demand, some work has also been done on predicting the demand of individual household appliances [@Arghira2012], including that of hot water cylinders[@Lomet2015; @Aki2016; @Denis2019].
 
@@ -39,7 +54,7 @@ As mentioned in Section \@ref(smart-cont-lit), appliance or equipment level elec
 Additional purposes for appliance level forecasting include the detection of faults, and minimisation of operation and maintanence costs[@Molina-Solana2017].
 
 There is currently no consensus on the 'optimal' method for forecasting electricity demand.
-Conventional techniques that are commonly used are either some form of time series analysis such as ARIMA[@Lomet2015; @Arghira2012; @Popescu2016, @Denis2019], regression[@Wei2015; @McLoughlin2015; @Kaytez2015; @Dervilis2018; @Massana2015], or a combination of the two[@DeFelice2013].
+Conventional techniques that are commonly used are either some form of time series analysis such as ARIMA[@Lomet2015; @Arghira2012; @Popescu2016, @Denis2019], regression analysis[@Wei2015; @McLoughlin2015; @Kaytez2015; @Massana2015], or a combination of the two[@DeFelice2013].
 
 There are also a number of AI methods used in electricity demand forecasting. 
 These include:
@@ -72,9 +87,16 @@ Time series and AI forecasting methods were compared against a naive benchmark m
 The regressors chosen were (i) hour of day, (ii) hot water demand, (iii) luminosity, and (iv) workday/not workday.
 The addition of the regressors increased accuracy drastically in the AI methods, and slightly in the time series methods.
 Overall, the time series methods had the highest accuracy, although with the addition of the external regressors to the AI method this advantage was slight.
-
 A comprehensive review of data-driven building energy consumption prediction studies[@Amasyali2018] shows SVMs consistantly outperforming ANNs in accuracy for demand forecasting, which is confirmed by another review in [@MatDaut2017]. 
-Comparative research in [@Gelazanskas2015] considers a number of time series analysis methods for forecasting volumetric residential hot water demand, with ARIMA models featuring as highly regarded for this purpose.
+
+Comparative research in [@Gelazanskas2015] considers a number of time series analysis methods for forecasting volumetric residential hot water demand, with ARIMA based models featuring as highly regarded for this purpose.
+These models were fitted to volumetric hot water data collected from 95 UK households. 
+Similarly to the research undertaken for this thesis, they also used the R programming language, and used simplistic models as benchmarks by which to compare others to (see Sections \@ref(naivemeth) and \@ref(snaivemeth)). 
+They explored a number of time series models for prediction, including exponential smoothing, ARIMA, seasonal decomposition by local polynomial regression (STL), and combinations of these.
+Predictions were made for 24 hours ahead, and models were compared against one another for accuracy.
+Their most accurate model, a combination of STL and ARIMA, achieved prediction accuracy more than 50% above their benchmark models.
+Forecasts were also constructed for aggregated demand data, that is, the demand of all the households added together.
+Accuracy of all models considered was greatly improved when aggregating data in this manner.
 
 Some demand forecasting models, particularly those using conventional forecasting methods, are reasonably easy to interpret. Once they have been fitted to the data, their parameters can be extracted to provide statistical insights into the behaviour behind the data.
 This is valuable for building 'physical' domestic hot water computer models, as their parameters can be used to construct more accurate simulations of hot water demand, a necessary component of these models[@Lomet2015].
@@ -102,7 +124,7 @@ While requiring more computer resources than the single-volume models, the two-v
 A schematic of a two-volume model is provided in Figure \@ref(fig:twoVolume)
 Finally, some hot water cylinder models use computational fluid dynamics (CFD) software to maintain very high amounts of physical accuracy, essentially allowing the determination of water temperature at any point within the cylinder[@Kong2016; @Yaici2013]. 
 
-```{r twoVolume, out.width='100%', fig.align='center', fig.cap="A schematic representing a two-volume physical model of a hot water cylinder"}
+```{r twoVolume, out.width='50%', fig.align='center', fig.cap="A schematic representing a two-volume physical model of a hot water cylinder"}
 knitr::include_graphics(paste0(pFolder, "schematic.pdf"))
 ```
 Within these models there must be the ability to simulate the demand of hot water.
@@ -110,9 +132,9 @@ The model in [@Heleno2015] simply schedules three 35L, 38° hot water events at 
 The model in [@JackDew2018] simulates domestic hot water usage by assuming up to three major use events (representing showers, bathing etc) that are random and normally distributed about fixed times of day, with additional minor usage events (representing hand washing etc) having equal probability of occurring between specified intervals at other times.
 For much of the hot water cylinder research previously mentioned however, the methodology around demand simulation is not elucidated. 
 
-Statistical insights gained from parameters within appropriate demand forecasting models have to potential to be incorporated into physical models to simulate demand. This would improve how accurately these physical models represent reality[@Lomet2015], in turn improving accuracy of results from smart control simulations.
+Statistical insights gained from parameters within appropriate demand forecasting models have the potential to be incorporated into physical models to simulate demand. This would improve how accurately these physical models represent reality[@Lomet2015], in turn improving accuracy of results from smart control simulations.
 The research conducted for this thesis does not use any physical models. 
-However, when the models that are used are compared to one another, suitability for incorporation into a physical model is considered.
+However, when the models that are used are compared to one another, suitability for incorporation into a physical model is considered (see Section \@ref(metrics)).
 
 ## Model selection
 
@@ -126,29 +148,23 @@ Predictions are made based only on data that would be available from any smart m
 For this reason, models that rely on the availability of external data were not utilised, although some regression was carried out using other appliances as the regressor variable.
 <!--As this work is concerned mainly with making predictions only half an hour into the future, time series methods that attempt to uncover longer-term trends in averages are also not relevant.-->
 
-## Contribution of this thesis to the literature {#contrib}
+## Relationship between this thesis and existing literature {#similarlit}
+
+In this section, we compare the aims of this thesis (see Section \@ref(aims)) to the existing literature.
 
 While there is some existing research that compares electricity demand forecasting models, comparisons generally only consider accuracy of predictions.
 When computational costs are mentioned, they are qualitative, and given little focus[@Amasyali2018]. 
 There is very little consideration within existing literature to utilising parameters from forecasting models in order to simulate demand within a physical model[@Lomet2015].
-
 While the researchers in [@Felice2011] use hot water demand as a regressor to improve prediction of total building electricity demand, no research was found that used the electricity demand of other appliances as a regressor to to improve prediction of hot water electricity demand.
 
 To the best of my knowledge, there is no existing literature that compares a range of models to forecast residential hot water electricity demand.
 Within the existing literature, the piece of research most similar to that conducted for this thesis is that of Gelažanskas and Gamage[@Gelazanskas2015]. 
-These researchers also compare a selection of forecasting methods to predict volumetric residential hot water demand.
-These were fitted to volumetric hot water data collected from 95 UK households. 
-Their research also used the R programming language, and used simplistic models as benchmarks by which to compare others to. 
-They explored a number of time series models for prediction, including exponential smoothing, ARIMA, seasonal decomposition by local polynomial regression (STL), and combinations of these.
-Predictions were made for 24 hours ahead, and models were compared against one another for accuracy.
-Forecasts were also constructed for aggregated demand data, that is, the demand of all the households added together.
-Accuracy of all models considered was greatly improved when aggregating data in this manner.
 While my thesis draws on the key findings within this research, it differs in a number of ways, which are shown in Table \@ref(tab:gelazanskasComparison).
 
 This chapter indicated that much groundwork has been done in existing literature as to which models would be good candidates for predicting residential hot water electricity demand.
 A selection of promising models were chosen for comparison based on their performance and/or prevalence in existing literature. These are described in more detail in the methodology chapter that follows.
 
-```{r gelazanskasComparison}
+```{r gelazanskasComparison, echo=FALSE}
 df1 <- data.frame(Characteristics = c("Data resolution", "Data type", "Forecast length", "Forecast methods", "Comparative metrics"),
                   This_thesis = c("Half hour", "Electricity demand", "Half hour", "Time series, causal, AI", "Various"), 
                   Gelazanskas = c("1 hour", "Volumetric demand", "24 hours", "Time series", "Accuracy"))

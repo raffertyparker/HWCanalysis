@@ -23,7 +23,7 @@ load(paste0(dFolder, "pc_rm"))
 DThead <- readRDS(paste0(dFolder, "DThead.rds"))
 ```
 
-## Data background
+## Data description
 
 The data used for this thesis was collected from monitored submetered electrical power usage of 44 households in Hawkes Bay and Taranaki, New Zealand, at one minute intervals between 2014 and 2018 as part of the GREEN Grid project[@GREENGrid]. 
 The dataset is publicly available from the UK Data Service. Publications to date that have utilised the dataset include [@Ocampo2015], [@Suomalainen2017], [@Stephenson2018], [@JackKiti2018], and [@JackDew2018].
@@ -122,7 +122,7 @@ As much of this research is concerned with predictability and patterns within ou
 
 A time series $\{x_1, x_2, ..., x_n\}$, also abbreviated to $\{x_t\}$, is a collection of $n$ samples of data taken at discrete times $\{t = 1,2,...,n\}$ [@Cowpertwait2009].
 In this research, $\{x_t\}$ refers to the half-hour averaged hot water electricity demand. Similarly, the electricity demand of other appliances is denoted $\{y_t\}$.
-Models may be constructed by adjusting their internal parameters in order to best fit this data. This provides the ability to predict a future value based on historical data values. In this thesis, models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the _model_ of $\{x_t\}$. <!-- A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.-->
+Models may be constructed by adjusting their internal parameters in order to best fit this data (referred to as model 'fitting'). This provides the ability to predict a future value based on historical data values. In this thesis, models are denoted using the 'hat' notation, where $\{\hat x_t\}$ is the _model_ of $\{x_t\}$. <!-- A prediction at time $t$ of a value $k$ steps forward is denoted $\{\hat x_{t+k | t}\}$.-->
 
 There are a number of terms and concepts that assist in providing clear and succinct mathematical descriptions of time series analysis methods and models.
 The expected value, $\operatorname{E}$ is often encountered in time series methods. The expected value of a discrete random variable is the probability-weighted average of all its possible values. This is defined mathematically as follows.
@@ -218,7 +218,7 @@ where $k$ is the lag value, $\operatorname{E}$ is the expected value operator, a
 
 The results of the autocovariance function are interpreted by plotting $\zeta_k$ against the lag values. This was obtained using the `Acf` function[@R-forecast].
 
-### Seasonal and trend decomposition using Loess {#STLmeth}
+### Seasonal and trend decomposition {#STLmeth}
 
 Another method that may be used to explore any cyclical effects of time series data is by approximating the data as a function or combination of functions. 
 This facilitates the discovery of underlying patterns within the data. 
@@ -249,12 +249,10 @@ Fourier analysis is another method of approximating the data as a function in or
 Rather than fitting polynomial functions to local subsets of data, Fourier analysis represents the data in terms of a linear combination of sinosoids[@Bloomfield2000].
 
 When applied to a collection of $n$ observations, $\{x_1, x_2, \dots, x_n\}$ this linear combination of sinosoids may be described mathematically as
-
 \begin{equation}
   x_t = c + \sum_{k = 1}^{[n/2]}\{a_k\cos (\omega_k t) + b_k sin(\omega_k t)\},
    (\#eq:Fourier),
 \end{equation}
-
 where c is a constant, $\omega_k$ are the frequencies, and $a_k, b_k$ are the amplitudes[@Weron2006]. 
 These parameters are adjusted in order to best fit the equation to the underlying data.
 Dominant frequencies are those which correspond (i.e., have the same value of $k$) to the sinosoids with the highest amplitudes[@Brockwell1991]. 
@@ -279,7 +277,6 @@ An example is provided in Figure \@ref(fig:sineDemonstration).
 
 
 Fourier analysis attempts to replicate the data as a linear combination of sine curves and similar periodic functions, optimising the parameters $R$, $f$ and $\phi$ in order to minimise the square of the residuals. Once the optimised composite function is fitted to the data, values for amplitude, frequencies and phases may be extracted. The dominant frequencies are those which correspond to the sinosoids with the highest amplitudes[@Brockwell1991].
-
 -->
 
 As some time-series models (such as seasonal ARIMA) require cycle frequency to be manually input, automated frequency extraction has the potential to be highly beneficial when creating household-specific prediction models.
@@ -302,22 +299,26 @@ In a similar fashion to the autocovariance function (Equation \@ref(eq:ACV)), th
 \begin{equation}
   \gamma_k(x,y) = \operatorname{E}\big[(x_{t+k} - \mu_x)(y_t - \mu_y)\big] ,
 \end{equation}
-where variable $x$ lags variable $y$ by lag $k$, and $\mu_x, \mu_y$ are the means of $x_t$ and $x_{t+k}$, and $y_t$ and $y_{t+k}$, respectively.[@Cowpertwait2009].
+where variable $x$ lags variable $y$ by lag $k$, and $\mu_x, \mu_y$ are the means of $\{x_t, x_{t+k}\}$, and $\{y_t, y_{t+k}\}$, respectively.[@Cowpertwait2009].
 
 Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. 
 Cross-covariances were constructed using the `Ccf`[@R-forecast] function.
-When creating models that incorporate regression of lagging values of other electricity demand (refer to Sections \@ref(SLRmeth), \@ref(ARIMAXmeth), \@ref(STLARIMXmeth) and \@ref(SVMmeth)), cross-covariances allow us to select appropriate lag times.
+When creating models that incorporate regression of lagging values of other electricity demand (refer to Sections \@ref(SLRmeth), \@ref(ARIMAXmeth), \@ref(STLARIMAXmeth) and \@ref(SVMmeth)), cross-covariances allow us to select appropriate lag times.
 
 ## Introduction to selected models {#IntroToModels}
 
 This section outlines a broad introduction to the various models selected for use in this analysis.
 These models were selected based on their performance in similar applications, with consideration given to the aims of this thesis outlined in Section \@ref(Aims).
+Due to the range of metrics by which models are compared by (see \@ref(metrics)), some relatively simplistic models were included for comparison.
+While these simple models may not perform as well as more complex ones in terms of accuracy, they have the potential to perform higher in the other comparative metrics.
 Models are presented roughly in order of their complexity. 
 
 Note that white noise terms, $\{w_t\}$ are included within model descriptions.
 This term represents the residual of the model, as discussed in Section \@ref(TSoverview).
-As white noise time series values are inherently unpredictable with an expected value of zero, these terms are always equal to zero when models are used for demand forecasting.
-If the same model was used for demand simulations however, the white noise term would instead be artificially generated[@Lomet2015].
+Previous values of these white noise residuals are used to predict future values of the dependant variable in moving average models.
+As described in Section \@ref(TSoverview), white noise time series values are inherently unpredictable with an expected value of zero.
+Thus, when a model is used for forecasting, predictions of future values of these terms are always equal to zero.
+If the same model was used for demand simulations, non-zero white noise terms can be artificially generated to provide realistic fluctuations of hot water demand about the values predicted by the model[@Lomet2015].
 
 ### Naive model {#naivemeth}
 
@@ -340,7 +341,7 @@ Due to their simplicity and ease of computation random walk models are sometimes
 The naive models used in this research were created using the `naive` function[@R-forecast].
 Further details regarding this model can be found in [@Cowpertwait2009]. 
 
-### Seasonal naive model
+### Seasonal naive model {#snaivemeth}
 
 In a similar manner to the naive model, the seasonal naive model estimates the next value in a series from a single prior observation.
 However, the seasonal naive model makes the assumption that for periodic data, the most likely value of the the next timestep is that of the same time one period prior, i.e.
@@ -354,7 +355,7 @@ where s is the length of one period.
 Seasonal naive models were created using the `snaive` function[@R-forecast].
 Further details regarding this model can be found in [@Cowpertwait2009]. 
 
-### Simple linear regression {SLRmeth}
+### Simple linear regression {#SLRmeth}
 
 Linear modelling is a common forecasting method prized for its simplicity in interpretation and computation.
 A special case of a linear model is the simple linear regression, which fits a straight line through data in order to minimise the RSS. 
@@ -375,7 +376,7 @@ Further details regarding simple linear regression can be found in [@Cowpertwait
 
 ### Differencing {#diff}
 
-Differencing a time series $\{x_t\}$ is a simple method of removing trends in order to make time series data stationary (see Section \@ref(Stationarymeth)). This is often used in combination with other methods which become more more accurate when applied to stationary data.
+Differencing a time series $\{x_t\}$ is a simple method of removing trends in order to make time series data stationary (see Section \@ref(Statmeth)). This is often used in combination with other methods which become more more accurate when applied to stationary data.
 Differencing is defined using the backshift operator as
 
 \begin{equation}
@@ -387,13 +388,11 @@ A time series $\{x_t\}$ is referred to as _integrated_ of order $d$ if the $d$th
 Integrated time series' become relevant when considering the ARIMA model in Section \@ref(ARIMAmethodology), as this is the component within the ARIMA model that the `I' refers to.
 An example of first order integrated time series data is demonstrated in Figure \@ref(fig:integratedExample), whereby total household electricity data becomes stationary after it is integrated.
 
-
-```{r integratedExample, fig.cap="Total electricity demand data before and after first-order differencing"}
+```{r integratedExample, echo=FALSE, fig.cap="Total electricity demand data before and after first-order differencing"}
 knitr::include_graphics(paste0(pFolder, "differencingExample.pdf"))
 ```
 
-
-### Autoregression
+### Autoregression {#ARmeth}
 
 An autoregression model of order $p$, referred to as $AR(p)$, can be represented as
 \begin{equation}
@@ -430,6 +429,7 @@ If $\operatorname{E}[x_t] = 0$, which may be artificially induced by prior proce
 
 \begin{equation}
   \hat x_t = (1 + \beta_1 \textbf{B} + \beta_2 \textbf{B}^2 + ... + \beta_q \textbf{B}^q)w_t = \phi_q\textbf{B}w_t ,
+  (\#eq:MA2)
 \end{equation}
 
 where $\textbf{B}$ is the backshift operator (see Equation \@ref(eq:BSO)), and $\phi_q$ is a polynomial of order $q$.
@@ -467,7 +467,9 @@ The process of selecting optimal values for $p,d,q$ can be automated through min
   (\#eq:AIC)
 \end{equation}
 
-The R function `auto.arima`[@R-forecast] was used to create ARIMA models. This function automatically select the parameters $p,d,q$ which minimise the AIC specific to the particular data being modelled. This is done iteratively according to the algorithm outlined in [@RobJ.Hyndman2008]. Inputs for maximum values of $p$ and $q$ are necessary in order to bound processing time. 
+The R function `auto.arima`[@R-forecast] was used to create ARIMA models. This function automatically select the parameters $p,d,q$ which minimise the AIC specific to the particular data being modelled. This is done iteratively according to the algorithm outlined in [@RobJ.Hyndman2008]. 
+Inputs for maximum values of $p, d, q$ are necessary in order to bound processing time. 
+These maximum values were (respectively) fixed at 5, 2 and 5 for all ARIMA-based modelling conducted within this research.
 Further details regarding ARIMA models can be found in [@Cowpertwait2009]. 
 
 ### Seasonal ARIMA {#SARIMAmeth}
@@ -494,7 +496,7 @@ One way in which this may be interpreted is as a simple linear regression model 
 This combines Equations \@ref(eq:simpleLinearRegression) and \@ref(eq:ARMA) in the form
 
 \begin{equation}
-  \hat x_t = \gamma_1y_{t-1} + \gamma_2y_{t-2} + ... + \gamma_ky_{t-k} + \alpha_1 x_{t-1} + \alpha_2 x_{t-2} + ... + \alpha_p x_{t-p} + \beta_1 w_{t-1} + \beta_2 w_{t-2} + ... + \beta_q w_{t-q} + w_t .
+  \hat x_t = \gamma_0 + \sum_{i = 1}^k \gamma_i y_{t-i} + \sum_{i = 1}^p \alpha_i x_{t-i} + \sum_{i = 1}^q \beta_i w_{t-i} + w_t .
   (\#eq:ARIMAX)
 \end{equation}
 
@@ -513,20 +515,20 @@ ARIMAX models were created using the `auto.arima` function[@R-forecast].
 ### STL with ARIMAX {#STLARIMAXmeth}
 
 The predictive power of seasonal decomposition and external regressors may be combined with an ARIMA model, to get a model we refer to as STL + ARIMAX.
-This method decomposes the data into seasonal, trend and remainder components, (refer to Section \@ref(STLmeth)), and then fits an ARIMAX model (Equation \@ref(eq:ARIMAX)) to the remainder component using lagged values of other appliance electricity demand as external regressors (refer to Section \@ref(ARIMAX)). This is then added back to the seasonal and trend components to complete the model.
+This method decomposes the data into seasonal, trend and remainder components, (refer to Section \@ref(STLmeth)), and then fits an ARIMAX model (Equation \@ref(eq:ARIMAX)) to the remainder component using lagged values of other appliance electricity demand as external regressors (refer to Section \@ref(ARIMAXmeth)). This is then added back to the seasonal and trend components to complete the model.
 STL + ARIMAX models were created using the `stlm` function[@R-forecast].
 No existing literature was discovered that uses an STL + ARIMAX model for electricity demand forecasting.
 
 ### Support vector machines {#SVMmeth}
 
 Support vector machines are an AI method commonly used for forecasting electricity demand.
-This process allows data that may highly non-linear to be a linearly classified, by mapping it in a higher dimensional space[@Smola1999].
+This process allows data that may highly non-linear to be a linearly classified by mapping it in a higher dimensional space[@Smola1999].
 To facilitate intuition of this process, an artificial example of this is provided in Figure \@ref(fig:kernelTrick).
 Figure \@ref(fig:kernelTrick) shows how, by transforming data from a two dimensional space into a three dimensional space using an appropiate function, the data may be linearly separated, in this case by a plane. 
 
 (ref:kernel) Example demonstrating the underlying classifying mechanism of a SVM, whereby data with two different classifications (signified by colour) are mapped into a higher dimension to permit a linear separation[@Shiyu]
 
-```{r kernelTrick, out.width='100%', fig.cap='(ref:kernel)'}
+```{r kernelTrick, echo=FALSE, out.width='100%', fig.cap='(ref:kernel)'}
 knitr::include_graphics(paste0(pFolder, "kernelTrick.png"))
 ```
 
@@ -546,7 +548,7 @@ First, we denote the maximum margin hyperplane as $\Gamma$, which is defined mat
   (\#eq:GammaOrig)
 \end{equation}
 
-where $h$ is the hour of day, $x$ and $y$ again denote hot water electricity and the electricity demand of other appliances respectively, and $\gamma$ refer to unknown weights that must be determined through the learning algorithm.
+where $h$ is the (half) hour of day, provided to take seasonality into consideration, $x$ and $y$ again denote hot water electricity and the electricity demand of other appliances respectively, and $\gamma$ refer to unknown weights that must be determined through the learning algorithm.
 Now $\Gamma$ is fitted iteratively in the following manner. 
 
 For simplification, we denote $\textbf{z}_t$ to be the vector comprised of our data variables, $\textbf{z}_t := \{h_t, x_{t-1}, \dots x_{t-k}, y_{t-1}, \dots y_{t-k} \}$.
@@ -616,7 +618,7 @@ As, by definition, the naive models had no chance of becoming overfit, they were
 
 There are a number of different considerations that must be made when comparing models for the process of electricity demand forecasting. This section outlines those considered relevant to the aims of this thesis.
 
-### Accuracy
+### Accuracy {#accuracymeth}
 
 Perhaps the most important consideration in forecasting is the accuracy of the model in predicting values from the set of validation data.
 While there are a number of ways that model accuracy could be defined, a common method in existing literature is that of the 'root mean square error' (RMSE)[@Amasyali2018; @Kaytez2015; @Weron2014; @MatDaut2017;, @Dervilis2018; @Zhang2016; @Wang2018; @Gelazanskas2015; @Wei2015; @Ahmad2014].
@@ -630,10 +632,12 @@ Expressed mathematically, the RMSE of predicted values $\hat x_t$, where actual 
 
 For each model considered within this research, the average RMSE of predictions is taken over all households to provide the overall model RMSE.
 
-As demand response is most crucial during daily peak periods, additional analysis is carried out to ascertain the accuracy during grid peaks (defined as 7am to 9am, and 5pm to 8pm[@TranspowerNZ2015]). This was obtained by calculating the RMSE for all predictions that occurred during peak periods (denoted $RMSE_{peak}$). To assist comparisons, this is then used to calculate a percentage error increase (PEI) between the average RMSE and the average RMSE during peak times. The PEI is given by:
+As demand response is most crucial during daily peak periods, additional analysis is carried out to ascertain the accuracy during grid peaks (defined as 
+@TranspowerNZ2015]). This was obtained by calculating the RMSE for all predictions that occurred during peak periods (denoted $RMSE_{peak}$). To assist comparisons, this is then used to calculate a percentage error increase (PEI) between the average RMSE and the average RMSE during peak times. The PEI is given by:
 
 \begin{equation}
   \operatorname{PEI} = \frac{RMSE_{peak} - RMSE}{RMSE} .
+  (\#eq:PEI)
 \end{equation}
 
 ### Physical fidelity
@@ -663,7 +667,8 @@ For a model to score highly in this metric, it should be composed of succinct eq
 
 ### Computational speed
 
-In order to make the real-time predictions necessary to effectively participate in demand response markets, models for thousands, or even hundreds of thousands of households need to be updated regularly, with reasonable speed. 
+In order to make the predictions necessary to effectively participate in smart control for demand response, models for hundreds of thousands of households need to be fitted.
+While models only need to be fitted once in order to provide predictions, changes in household occupancy and demand patterns means that these models would need to be updated on a regular basis.
 In addition, when researching hot water demand patterns for demand simulations there is value in being able to explore data patterns without waiting a long time for models to be constructed.
 For these reason, consideration is given to the computational speed of each model.
 This is defined as the amount of time taken to fit the model, with all models fitted to all households sequentially using the same machine.
