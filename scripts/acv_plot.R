@@ -1,6 +1,6 @@
 # This creates the acv plots
-# Could probably be updated to use half-hour averaged data 
-
+# Load presaved data to save time:
+# load(paste0(dFolder, "acvDT.Rda"))
 ###############################################
 
 if (!exists("pFolder")){
@@ -14,7 +14,7 @@ if (!exists("DT")){
 }
 
 library(ggplot2)
-theme_set(theme_minimal())
+theme_set(theme_minimal(base_size = 14))
 # house <- "rf_06"
 for (house in unique(DT$linkID)){
   q <- forecast::Acf(DT$HWelec[DT$linkID == house], lag.max = 60*24*10, # 10 days
@@ -31,15 +31,24 @@ for (house in unique(DT$linkID)){
 }
 
 acvDT <- data.table::data.table(acvDT)
-acvDT$lag <- as.numeric(acvDT$lag)
+acvDT$lag <- as.numeric(acvDT$lag)/(60*24)
 
 save(acvDT, file = paste0(dFolder, "acvDT.Rda"))
 
+p <- ggplot(acvDT[lag>(1/48)], aes(x=lag, y=value))+
+  geom_line() + 
+  facet_wrap(~household, ncol = 3, scales = "free_y") +
+  scale_x_continuous(breaks = seq(1:10))# +
+#  coord_cartesian(xlim = c(0,10))
+p + labs(x = "Lag (days)", y = "Autocovariance")
+ggsave(filename = paste0(pFolder, "acfAllHouses.pdf"), width = 210, height = 260, units = "mm")
+ggsave(filename = paste0(pFolder, "acfAllHouses.png"), width = 210, height = 260, units = "mm")
+
 # lag > 60 selected to remove acv = 1 effect at lag = 0 and corresponding effect on plot
-ggplot(acvDT[lag > 60], aes(lag,value,colour=household)) +
+ggplot(acvDT[lag > (1/48)], aes(lag,value,colour=household)) +
        geom_line() + 
   labs(x = "Lag (minutes)", y = "Autocovariance", 
        colour = "") +
   theme(legend.position="top") +
   guides(colour=guide_legend(nrow=3,byrow=TRUE))
-ggsave(paste0(pFolder, "acfAllHouses.pdf"))
+ggsave(paste0(pFolder, "acfAllHousesColour.pdf"))
