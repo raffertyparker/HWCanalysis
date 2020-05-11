@@ -17,7 +17,7 @@ If you feel it necessary to include an appendix, it goes here.
 library(kableExtra)
 load(file=paste0(dFolder, "freq_DF.Rda"))
 freq_DF %>%
-  knitr::kable(col.names = c("Household", "Dominance", "Frequency (hours)"),
+  knitr::kable(col.names = c("Household", "Dominance", "Period (hours)"),
                digits = 2,
                caption = "Three dominant cycle periods for each household, as determined using frequency analysis",
                longtable = TRUE)
