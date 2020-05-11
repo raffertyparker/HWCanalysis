@@ -78,7 +78,7 @@ Price variations within these markets occur according to supply and demand. Pric
 These prices fluctuate wildly, with the Benmore node BEN2201 having spot market prices ranging from \$0.02/MWh to \$894.38/MWh during 2017 for example.
 Electricity retailers purchase electricity from the generators on this spot market, and on-sell it to consumers. 
 Transpower, the systems operator, takes care of dispatching electricity from generators to grid nodes.
-Local network companies (also known as electricity distribution businesses) are in charge of transmitting electricity from the grid nodes to individual households, and charge retailers a fixed charge per kWh of electricity delivered for the service[@Stephenson2018].
+Local network companies (also known as electricity distribution businesses or 'EDBs') are in charge of transmitting electricity from the grid nodes to individual households, and charge retailers a fixed charge per kWh of electricity delivered for the service[@Stephenson2018].
 While some larger commercial and industrial electricity consumers are exposed to spot market pricing and may adjust their consumption accordingly, residential electricity consumers are usually charged a fixed price per kWh, with the price variability being 'bundled in' by the retailer.
 Historically, residential customers were unable to be exposed to these variations in electricity price, as older analog electricity meters only read total consumption of electricity over the billing period.
 However, in New Zealand there has been significant efforts by electricity retailers and distribution businesses to deploy smart-meters to residential electricity consumers. 
@@ -87,7 +87,9 @@ This provides the capability for residential electricity consumers to be charged
 As of 2017, smart meters were installed in 62% of New Zealand households[@Stephenson2018].
 
 Peak (or 'congestion') period demand charges are another market-based mechanism for adjusting demand. 
-Large electricity users are often provided a discounted kWh price of electricity, while being charged high penalties for any electricity consumed during times where there is very high local network demand (known as 'congestion periods')[@Orion2017]. Once again, this provides market value to the ability to shift electricity demand in time. These demand charges can make up a significant portion of the electricity bill of a large consumer, and are a primary source of revenue for the systems operator[@Nair2008]. Currently, residential consumers are not directly exposed to these charges. Instead, the charges are 'bundled in' as a flat rate per kWh lines charge in the electricity bill. 
+Large electricity users are often provided a discounted kWh price of electricity, while being charged high penalties for any electricity consumed during times where there is very high local network demand (known as 'congestion periods')[@Orion2017].
+These charges are calculated by local network companies, and charged to retails, who in turn pass the charges on to their customers, the electricity consumer.
+Once again, this provides market value to the ability to shift electricity demand in time. These demand charges can make up a significant portion of the electricity bill of a large consumer, and are a primary source of revenue for the systems operator[@Nair2008]. Currently, residential consumers are not directly exposed to these charges. Instead, the charges are 'bundled in' as a flat rate per kWh lines charge in the electricity bill. 
 
 There have been proposals[@NewZealandElectricityCommission2009] that a market-based tactic to assist demand response efforts would be to encourage residential consumers to move to a real-time pricing plan that uses smart meters to send price signals in order to disincentivise peak-time or otherwise high-cost electricity usage. 
 Electricity company Flick in New Zealand is already providing this, offering customers with compatible smart-meters the spot-market electricity price (with additional base costs). An app that displays the current spot price is provided to customers, with the intention being that consumers attempt to reduce demand during times of comparatively high prices.
@@ -105,7 +107,7 @@ There is a way this may be obtained using technology already deployed in a major
 Many household already have smart meters that record hot water electricity demand separately to other electricity demand, in order to conduct ripple control services.
 This provides the physical capability to temporally shift hot water electricity demand by suppressing the element though the ripple control signal.
 
-### Smart control
+## Smart control of hot water cylinders {#SCIntro}
 
 The ability for an appliance to have its electricity demand times shifted on a daily scale with limited impact to the end user is referred to as 'flexibility'. Devices such as washing machines and dishwashers exhibit this property, along with battery storage systems in the form of electric cars and bicycles, and some thermostatically controlled appliances such as the focus of this thesis, electric hot water cylinders. 
 Flexible devices are obvious candidates for autonomous control objectives, as they have significant potential to temporally shift their demand for electricity with minimal impact to the end user (referred to as 'impacts on service').
@@ -120,23 +122,18 @@ This two-way information communication is proposed to encourage the integration 
 The process of autonomously scheduling appliances for efficiency benefits is referred to as 'smart control'
 Due to the high flexibility of residential appliances such as hot water cylinders, smart control technology could potentially enable them to provide significant demand shifting[@Dhulst2015].
 
-### Hot water electricity demand
-
 In New Zealand, it is estimated that residential electricity usage contributes around half of peak demand[@ElectricityCommission2007] and residential hot water use is around 30% of residential energy used[@Pollard2002]. 
 In New Zealand, electric hot water cylinders (HWCs) are very common, with 91% of households having electricity as an energy source for water heating[@Pollard2002].
 A study by the Household Energy End Use Project (HEEP) showed that hot water usage makes up to 36% of residential peak demand[@Pollard2002], with other research suggesting it may be up to 50%[@Jack]. 
 Smart control of residential hot water cylinders is thus particularly promising for demand response, as it is both flexible, and a key contributor to network demand peaks[@Stephenson2017].
 
-## Increasing energy efficiency {#enEfficiencyIntro}
-
 In addition to assisting demand response objectives, personalised control of hot water cylinders can improve their efficiency by only heating as much water as is required by the household. 
 Any object that is hotter than its surroundings will suffer from heat loss, with the amount of heat lost being proportional to the difference in temperature between the body and the surroundings. 
 Thus, as hot water loses heat energy to the environment faster than cooler water, storing hot water in excess of what is required is inefficient. 
-
 Smart control simulations have demonstrated energy savings of up to 12% in hot water systems that only heated according to what was predicted to be required[@Kepplinger2015]. These savings could be increased up to 17% with perfectly accurate predictions[@Denis2019].
 The ability to store only as much hot water as will be required by the household (with the remainder of the tank being left as cooler water) therefore has the potential to reduce total hot water electricity consumption. 
 
-## Predicting electricity demand
+## Predicting electricity demand {#predictingDemandIntro}
 
 There are many different techniques whereby key aspects of the processing, analysis and extrapolation can be carried out algorithmically by a computer.
 Different techniques use different algorithms to carry out the forecasting processes, some of which use more computational resources than others.
