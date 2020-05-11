@@ -66,7 +66,7 @@ The effect of removing these larger holes can be seen by comparing Figures \@ref
 Smaller holes in data were dealt with by inserting zero values of electricity power where necessary. Zero values were selected as opposed to using averages or other methods to reflect the 'on/off' nature of the HWC element at 1 minute timescales. This technique facilitates further analysis at this level of granularity if required.
 
 While analysis at 1 minute timescales may be beneficial in a future where metering and transmitting infrastructure is capable of facilitating control at this detail, this research attempts to develop methods that could be implemented using existing smart meters.
-Smart meters in New Zealand currently store and transmit data that has been averaged over half hour periods, thus we further process our data to imitate this by averaging electricity power over each half hour time step.
+Smart meters in New Zealand currently store and transmit data that has been averaged over half hour periods. Before developing forecasting models we further process our data to imitate this by averaging electricity power over each half hour time step.
 This has the effect of 'smoothing' our data, which may be seen in Figure \@ref(fig:elementPlot). 
 
 ```{r elementPlot, out.width='100%', fig.cap="Comparison of hot water electricity data at 1 minute resolution with the same data at 30 minute resolution"}
@@ -286,7 +286,7 @@ Rather than using a 'one size fits all' seasonality, or manually determining the
 Within this research, dominant cycle frequencies (seasonal periods) within our data are extracted by Fourier analysis using the function `periodogram` from the `TSA` package.
 These were intended to be used as inputs for a seasonal ARIMA model (refer to Sections \@ref(SARIMAmeth) and \@ref(SARIMAres)), however this model was eventually discarded as its computational time was prohibitively large.
 
-## Correllation with other appliance electricity demand
+## Correllation with other appliance electricity demand {#CCVmeth}
 
 ```{r bothElecPlot, echo=FALSE, out.width='100%', fig.cap="Electricity demand of hot water and other appliances over one day"}
 knitr::include_graphics(paste0(pFolder, "bothElecPlot.pdf"))
@@ -298,10 +298,11 @@ In a similar fashion to the autocovariance function (Equation \@ref(eq:ACV)), th
 
 \begin{equation}
   \gamma_k(x,y) = \operatorname{E}\big[(x_{t+k} - \mu_x)(y_t - \mu_y)\big] ,
+  (\#eq:ccv)
 \end{equation}
 where variable $x$ lags variable $y$ by lag $k$, and $\mu_x, \mu_y$ are the means of $\{x_t, x_{t+k}\}$, and $\{y_t, y_{t+k}\}$, respectively.[@Cowpertwait2009].
 
-Plotting the cross-covarience (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. 
+Plotting the cross-covariance (known as a _cross correlogram_) allows visual inspection of the relation between the two variables at different time lags. 
 Cross-covariances were constructed using the `Ccf`[@R-forecast] function.
 When creating models that incorporate regression of lagging values of other electricity demand (refer to Sections \@ref(SLRmeth), \@ref(ARIMAXmeth), \@ref(STLARIMAXmeth) and \@ref(SVMmeth)), cross-covariances allow us to select appropriate lag times.
 

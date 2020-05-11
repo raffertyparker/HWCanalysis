@@ -22,15 +22,16 @@ Table \@ref(tab:summary1) shows the mean values of hot water electricity demand 
 The mean value of hot water demand over all households (mean of means) is `r signif(mean(meansDT$HWelec), 3)`W.
 
 The variation in hot water electricity demand can also be seen in the box and whisker plot shown in Figure \@ref(fig:demandBoxplot). 
-Within this figure, the left and right side of the boxes correspond to the first and third quartiles respectively. The bold line corresponds to the second quartile. The right hand side 'whiskers' extend to 1.5 $\times$ IQR from the third quartile (where IQR is the inter-quartile range, or distance between the first and third quartiles). The mean is included in red. Data beyond the end of the whiskers are considered "outlying" points and are plotted individually[@R-ggplot2].
 Due to the large number of zero values within the data, the inter-quartile range within each household is highly restricted with respect to the total range.
 Points to the right hand side of each whisker (which are numerous enough to appear as a bold line) would normally be considered outliers by this analysis method.
-However, these are exactly the values the models constructed in this thesis are aiming to predict.
+However, it is important that the models constructed in this thesis are able to predict these values, as they indicate times where the element is reheating the water after a usage event.
 This plot also gives an indication as to the maximium power output for each household.
 Assuming there was at least one instance during the year where the element was on for a full half hour, the far right hand side point of each household should correspond with its maximum power output.
 Examination of Figure \@ref(fig:demandBoxplot) indicates that most households have an approximate maximum power output of either 2kW or 3kW.
 
-```{r demandBoxplot, echo=FALSE, out.width='100%', fig.cap='Box and whisker plot of hot water electricity demand for selected households'}
+(ref:boxplot)Box and whisker plot of hot water electricity demand for selected households. Left and right side of the boxes correspond to the first and third quartiles respectively. The bold line corresponds to the second quartile. The right hand side 'whiskers' extend to 1.5 $\times$ IQR from the third quartile (where IQR is the inter-quartile range, or distance between the first and third quartiles). The mean is included in red. Data beyond the end of the whiskers are considered "outlying" points and are plotted individually[@R-ggplot2].
+
+```{r demandBoxplot, echo=FALSE, out.width='100%', fig.cap='(ref:boxplot)'}
 knitr::include_graphics(paste0(pFolder, "averages/boxplot.png"))
 ```
 
@@ -47,23 +48,16 @@ knitr::include_graphics(paste0(pFolder, "acfAllHouses.pdf"))
 ```
 
 Figure \@ref(fig:autocovariance) shows the autocovariance (Equation \@ref(eq:ACV)) of our selected households. The peaks at specific lag times show that the households in our sample display strong seasonality, with all households displaying significant peaks in demand occurring on daily intervals, and some households displaying smaller peaks at 12 hour intervals. Some households also display a weekly cycle, which can be seen by the relative increase at the seventh day lag. 
-Note that Figure \@ref(fig:autocovariance) excludes the first 30 minutes of lag. This is due to two reasons.
-Firstly, the autocovariance at lag zero always equals 1, and including 1 on the y axis reduced readabiity of the plots.
-The second reason concerns using the autocorrelation results to make predictions.
-Future values of hot water demand may be predicted from current values of hot water demand using a regression relationship between previous demand and current.
-This is referred to as autoregression (see Section \@ref(ARmeth)).
-When forecasting a value for the next half hour, we must use autocorrelation lags of at least half hour for these predictions.
-While the autoregression performed within our ARIMA models automatically takes this into consideration, the SVM model (see Section \@ref(SVMmeth)) required manual specification of lagged values.
-Based on the results in this section, the SVM model used the previous two values of hot water demand as inputs (see Section \@ref(SVMres)), as this appeared sufficient to capture the autoregressive relationship for most households.
 
 ## Fourier analysis {#Fourierresults}
 
 Using Fourier analysis methods introduced in Section \@ref(Fouriermeth), the three most significant frequencies (corresponding to three individual seasonalities) were determined from the data.
-Most households had large Fourier components at either daily or 12 hourly frequencies, which align with the autocovariance findings.
-Weekly frequencies were not in the top three most significant for any households.
+Most households had large Fourier frequencies at approximately daily or 12 hourly periods, which align with the autocovariance findings. 
+The three most significant frequencies did not include a weekly period for any households.
 This was contrary to expectations based on existing literature[@Gelazanskas2015] and visual inspection of the autocovariance in Figure \@ref(fig:autocovariance). 
 For two households, very long frequencies (49 weeks and 132 weeks) were returned as the most significant. 
 Four other households also showed frequencies of greater than one year as the third most significant.
+
 <!--
 It is unlikely that adding frequencies of this length would greatly improve the accuracy of a forecasting model, and could lead to very lengthy computation times.
 For this reason, caution must be taken when using frequencies obtained by this method in models.
@@ -73,29 +67,30 @@ For a list of the three most significant frequencies for selected households as 
 ## Stationarity {#statres}
 
 A stationary time series does not have expected values or variances that change when applied to different sequential subsets of the data (refer to Section \@ref(Statmeth)).
-As ARMA models (see Section \@ref(ARIMAmethodology)) are more accurate on stationary data, data is tested for stationarity and differencing is performed (see Section \@ref(diff)) if data is non-stationary.
+As ARMA models (see Section \@ref(ARIMAmethodology)) are more accurate for stationary time series', hot water electricity data was tested for stationarity and differencing was performed (see Section \@ref(diff)) if data was non-stationary.
 Due to non-zero trends in the data (refer to Figure \@ref(fig:STLPlot) for an example), all but one household in the dataset (`rf_40`) were determined to be non-stationary.
 Thus, when constructing ARIMA models (Section \@ref(ARIMAmethodology)), all households except `rf_40` required first-order differencing.
+This means that for most households, rather than fitting an ARMA model to the original demand data, it was instead fitted to the change in demand between time steps.
 This can be seen in Table \@ref(tab:ARIMAparameters) in the Appendix.
 Linear regression models with ARIMA errors (see Sections \@ref(ARIMAXmeth) and \@ref(STLARIMAXmeth)) are slightly less likely to require differencing than the standard ARIMA model.
-All this implies is that the errors of the linear regression model are more likely to be stationary than the original data.
+This implies that the errors of the linear regression model are more likely to be stationary than the original data.
 This can be seen in Tables \@ref(tab:ARIMAXparameters) and \@ref(tab:STLARIMAXparameters) in the Appendix.
 
 ## Cross-covariance {#CCVres}
 
-Cross-covariance is our method of determining how much hot water electricity demand is correlated with other electricity demand at different time lags.
+Cross-covariance is our method of determining how much hot water electricity demand is correlated with other electricity demand at different time lags (see Section \@ref(CCVmeth)).
 If reasonable cross-correllation is found between hot water electricity demand and lagging values of other appliance electricity demand, this relation may be used to predict future values of hot water electricity demand based on current values of other electricity demand.
 
-Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use at around the same time steps. 
+Figure \@ref(fig:crossCovariance) shows that our hot water electricity use is positively correlated with other electricity use over small time lags. 
 Many households have their maximum cross-covariances occuring at lag zero, however a lag zero correlation can not be used for future predictions.
-For half-hour ahead predictions, correlations are necessary with lags of at least half an hour.
-Some households appear to have their maximum correlation at half hour lags, and all others still show correlation at this time.
+For half-hour ahead predictions, correlations with lags of at least half an hour are necessasry.
+Some households appear to have their maximum correlation at half hour lags, and all others still show positive correlation for this lag.
 
 ```{r crossCovariance, echo=FALSE, out.width='100%', fig.cap="Cross correlogram of selected households"}
 knitr::include_graphics(paste0(pFolder, "ccfAllHouses.pdf"))
 ```
 
-To further explore the optimal time lags for using other electricity demand as a regressor (see Sections \@ref(SLRmeth), \@ref(ARIMAXmeth), \@ref(STLARIMAXmeth) and \@ref(SVMmeth))), values were obtained of the time lag greater than zero at which cross-correlation is highest.
+To further explore the optimal time lags for using other electricity demand as a regressor (see Sections \@ref(SLRmeth), \@ref(ARIMAXmeth), \@ref(STLARIMAXmeth) and \@ref(SVMmeth))), values of the time lag greater than zero at which cross-correlation is highest were obtained.
 These were then plotted as a histogram in Figure \@ref(fig:ccvMaxLagPlot).
 This figure indicates that for ten households, hot water electricity is correlated with non hot water electricity within lags of half an hour, and an additional five household have their maximum value between an hour and half an hour. 
 Six households have maximum cross correlation values at lags of greater than one hour.
@@ -109,9 +104,9 @@ From these results, we may infer that a regression model which incorporates the 
 ## Implications for model building
 
 This chapter presented results from some key methods used to understand patterns within time series data.
-Sections \@ref(ACVresults) and \@ref(Fourierresults) showed that hot water electricity demand displays seasonal behaviour on daily timescales.
-This suggests that increased accuracy would be attained by forecasting models which can take this seasonality into account.
+Sections \@ref(ACVresults) and \@ref(Fourierresults) showed that hot water electricity demand displays daily seasonality.
+This suggests that increased accuracy would be attained by forecasting models which can take seasonality into account.
 Section \@ref(CCVres) showed that hot water electricity demand correlates with previous values of other appliances' electricity demand.
-For most households, the previous two lagged values of other electricity demand should be sufficient to capture this correlation for use in forecasting models.
+The maximum correlation between hot water electricity demand and lagged other electricity demand occurs within the first two lags for most households. Thus, when incorporating other appliance demand into forecasting models, we use the previous two lags to best capture this correlation. 
 
-The following chapter displays the results obtained from models that incorporate these components of the data, while striving to perform well in other metrics outlined in Section \@ref(metrics).
+The following chapter displays the results obtained from models that incorporate these components of the data.
