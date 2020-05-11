@@ -1,6 +1,4 @@
 # This creates the acv plots
-# Load presaved data to save time:
-# load(paste0(dFolder, "acvDT.Rda"))
 ###############################################
 
 if (!exists("pFolder")){
@@ -9,6 +7,10 @@ if (!exists("pFolder")){
 if (!exists("dFolder")){
   dFolder <- "~/HWCanalysis/data/" 
 }
+
+# Load presaved data to save time:
+# load(paste0(dFolder, "acvDT.Rda"))
+
 if (!exists("DT")){
   load(paste0(dFolder, "DT.Rda"))
 }
@@ -35,16 +37,18 @@ acvDT$lag <- as.numeric(acvDT$lag)/(60*24)
 
 save(acvDT, file = paste0(dFolder, "acvDT.Rda"))
 
-p <- ggplot(acvDT[lag>(1/48)], aes(x=lag, y=value))+
+p <- ggplot(acvDT, aes(x=lag, y=value))+
   geom_line() + 
-  facet_wrap(~household, ncol = 3, scales = "free_y") +
+  facet_wrap(~household, ncol = 3) +
+  scale_y_continuous(limits = c(-0.1,0.3)) +
   scale_x_continuous(breaks = seq(1:10))# +
 #  coord_cartesian(xlim = c(0,10))
 p + labs(x = "Lag (days)", y = "Autocovariance")
 ggsave(filename = paste0(pFolder, "acfAllHouses.pdf"), width = 210, height = 260, units = "mm")
 ggsave(filename = paste0(pFolder, "acfAllHouses.png"), width = 210, height = 260, units = "mm")
 
-# lag > 60 selected to remove acv = 1 effect at lag = 0 and corresponding effect on plot
+# lag > 1/48 selected to remove acv = 1 effect at lag = 0 and corresponding effect on plot
+# can be gotten around by specifying y_lims as in the previous figure
 ggplot(acvDT[lag > (1/48)], aes(lag,value,colour=household)) +
        geom_line() + 
   labs(x = "Lag (minutes)", y = "Autocovariance", 
