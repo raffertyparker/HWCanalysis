@@ -3,15 +3,8 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Preliminary Content {-}
+# Acknowledgements {-}
 
-## Acknowledgements {-}
-
-I want to thank a few people.
-
-## Preface {-}
-
-This is an example of a thesis setup to use the reed thesis document class
-(for LaTeX) and the R bookdown package, in general.
+  I would like to acknowledge my family, in particular my wife Amee, and parents Katie and Nathan, for their unwavering support throughout my academic journey. I would also like to thank my supervisor, Associate Professor Michael Jack, for providing indispensable guidance while trusting in my ability to forge my own path through this research topic. This thesis would not have been possible without financial support from The University of Otago Physics Department and the Dick and Mary Earl Scholarship in Technology, for which I am sincerely grateful.
 
 `r if(!knitr:::is_latex_output()) '## Abstract {-}'`

@@ -1,6 +1,6 @@
-# Plots 4 houses
-# Needs model in the environment to be named according to household (rf_XX)
-# Quite a 'manual' process to change parameters but it will do for now
+####################################################
+# Plots performance of 4 houses over 4 separate days
+####################################################
 
 if (!exists("dFolder")){
   dFolder <- "~/HWCanalysis/data/" 
@@ -23,17 +23,22 @@ Big_Theme = theme(
 
 theme_set(theme_minimal(base_size = 14))
 
-#modelName <- "STLARIMA" # For manual creation 
-models <- c("naive", "seasonalNaive", "ARIMA", "ARIMAX", "SARIMA", "simpleLinear", "STLARIMA", "STLARIMAX")
+# modelName <- "STLARIMA" # For manual creation/exploration
+# Note: SVM created separately due to model format differences
+models <- c("naive", "seasonalNaive", "ARIMA", "ARIMAX", 
+            "simpleLinear", "STLARIMA", "STLARIMAX")
 fourHouses <- c("rf_06", "rf_13", "rf_22", "rf_40") 
 
 for (modelName in models){
   for (house in fourHouses){ # Load appropriate models
-    ifelse(file.exists(paste0(dFolder, "models/", modelName, "/", house, "_model.rds")),
+    ifelse(file.exists(paste0(dFolder, "models/", modelName, 
+                              "/", house, "_model.rds")),
            assign(paste0(house, "_model"), 
-                  readRDS(paste0(dFolder, "models/", modelName, "/", house, "_model.rds"))),
+                  readRDS(paste0(dFolder, "models/", modelName, 
+                                 "/", house, "_model.rds"))),
            assign(paste0(house, "_model"), 
-                  readRDS(paste0(dFolder, "models/", modelName, "/", house, "_validated_model.rds")))
+                  readRDS(paste0(dFolder, "models/", modelName, 
+                                 "/", house, "_validated_model.rds")))
            )
   }
   
@@ -45,15 +50,20 @@ for (modelName in models){
     }
            names(pMdl) <- c("dateTime_nz", "Actual")
     ifelse("fitted.values" %in% names(get(paste0(house, "_model"))), 
-           pMdl$Predicted <- as.numeric(get(paste0(house, "_model"))$fitted.values),
-           pMdl$Predicted <- as.numeric(get(paste0(house, "_model"))$fitted))
+           pMdl$Predicted <- as.numeric(get(
+             paste0(house, "_model"))$fitted.values),
+           pMdl$Predicted <- as.numeric(get(
+             paste0(house, "_model"))$fitted))
       pMdl$linkID <- house
-    startTime <- lubridate::as_datetime(paste(as.character( # startTime is midnight on first day of next month
-      rollback(pMdl$dateTime_nz[1] + dweeks(5), roll_to_first = TRUE, preserve_hms = FALSE)), "00:00:00"), 
+      # startTime is midnight on first day of next month
+    startTime <- lubridate::as_datetime(paste(as.character( 
+      rollback(pMdl$dateTime_nz[1] + dweeks(5), roll_to_first = TRUE, 
+               preserve_hms = FALSE)), "00:00:00"), 
       tz = 'Pacific/Auckland')
     pMdl <- data.table(pMdl)
     pMdl <- pMdl[!is.na(pMdl$Predicted)] 
-    pMdl <- pMdl[pMdl$dateTime_nz %within% interval(startTime, startTime + days(1)), ]
+    pMdl <- pMdl[pMdl$dateTime_nz %within% 
+                   interval(startTime, startTime + days(1)), ]
     
     ifelse(house == fourHouses[1], 
            plotDT <- pMdl,

@@ -1,4 +1,7 @@
-# This script analysis the residuals to determine distributions and autocorrellation
+#################################################
+# This script analyses the residuals to determine
+# distributions and autocorrellation
+#################################################
 
 if (!exists("dFolder")){
   dFolder <- "~/HWCanalysis/data/" 
@@ -7,14 +10,20 @@ if (!exists("pFolder")){
   pFolder <- "~/HWCanalysis/plots/" 
 }
 
+# For quick loading + manusl plot creation
+# (no data processing needed) 
+#avResDF <- readRDS(avResDF, file = paste0(dFolder,"models/", model, 
+#                                           "/dailyResiduals.rds"))
+
 library(data.table)
 library(ggplot2)
 library(lubridate)
 library(dplyr)
 library(gridExtra)
-#library(forecast)
+library(forecast)
+library(ggpubr)
 
-theme_set(theme_minimal(base_size = 14))
+theme_set(theme_minimal())
 
 load(paste0(dFolder, "houses.Rda"))
 for (house in houses){
@@ -33,12 +42,12 @@ pmPeakStart <- 17
 pmPeakEnd <- 20
 # Functions ----
 peaksAlpha <- 0.08
-peaksCol <- "#0072B2" # http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette
+peaksCol <- "#0072B2" 
 addPeaks <- function(p){
   # takes a plot, assumes x is hms, adds peak period annotations
   # assumes you've set yMin & yMax already
-  # breaks with facet_grid, scales = "free" so you have to build seperate plots if you want to do that
-  # there is a complex solution (https://stackoverflow.com/questions/27898651/get-scales-range-of-facets-scales-free) but...
+  # breaks with facet_grid, scales = "free" so you have to build 
+  # separate plots if you want to do that
   p <- p + annotate("rect", xmin = amPeakStart, # set earlier
                     xmax = amPeakEnd, # set earlier
                     ymin = yMin, ymax = yMax, 
@@ -52,8 +61,6 @@ addPeaks <- function(p){
 
 # ------------------------------------------
 
-
-
 models <- c("naive","seasonalNaive","simpleLinear", 
             "ARIMA", "ARIMAX","STLARIMA", "STLARIMAX", "SVM")
 #house <- "rf_06"
@@ -63,16 +70,19 @@ models <- c("naive","seasonalNaive","simpleLinear",
 
 for (model in models){
   for (house in houses){
-    mdl <- readRDS(paste0(dFolder, "models/", model, "/", house, "_validated_model.rds"))
+    mdl <- readRDS(paste0(dFolder, "models/", model, "/", 
+                          house, "_validated_model.rds"))
    # pdf(file=paste0(pFolder, model, "/", house, "_residual_acv.pdf"))
    # tst <- ggtsdisplay(mdl$residuals, lag.max = 48*7*2)
-    p <- forecast::ggAcf(mdl$residuals, lag.max = 48*7*2, main = house)
-    theme(plot.title = element_text(size = 40, face = "bold"))
+    p <- forecast::ggAcf(mdl$residuals, lag.max = 48*7, main = house)
+   # theme(plot.title = element_text(size = 14, face = "bold"))
     p$labels$y <- NULL
     p$labels$x <- NULL
     p$labels$xend <- NULL
+    
     assign(house, p)
-    #  save.image(file = paste0(pFolder, model, "/", house, "_residual_acv.png"))
+   # save.image(file = paste0(pFolder, model, "/", 
+   #                          house, "_residual_acv.png"))
    # dev.off()
     w <- as.data.table(mdl$x)
     if(ncol(w) == 1){
@@ -87,17 +97,25 @@ for (model in models){
     ifelse(house == houses[1], 
            avResDF <- e, 
            avResDF <- left_join(avResDF, e))
-    saveRDS(avResDF, file = paste0(dFolder,"models/", model, "/dailyResiduals.rds"))
+    saveRDS(avResDF, file = paste0(dFolder,"models/", model, 
+                                   "/dailyResiduals.rds"))
     ifelse(house == houses[1], 
            plotString <- "plot1",
-           plotString <- append(plotString, paste0("plot", as.character(which(house == houses)))))
+           plotString <- append(plotString, 
+                                paste0("plot", 
+                                       as.character(
+                                         which(house == houses)))))
   }
 
   allHouses <- grid.arrange(rf_06,rf_08,rf_13,rf_14,rf_22,rf_25,
                             rf_29,rf_30,rf_31,rf_32,rf_33,rf_34,
                             rf_35,rf_36,rf_37,rf_38,rf_39,rf_40,
-                            rf_42,rf_44,rf_45, ncol = 3)
-  ggsave(allHouses, width = 8.3, height = 11.7, 
+                            rf_42,rf_44,rf_45, ncol = 3) 
+  
+  allHouses <- annotate_figure(allHouses, left = "Autocovariance", 
+                               bottom = "Lag (half hours)")
+  
+  ggsave(allHouses,  width = 8.3, height = 11.7,
          filename = paste0(pFolder, model, "/allResiduals.pdf"))
   
   }
@@ -108,14 +126,17 @@ for (model in models){
 
 for (model in models){
   for (house in houses){
-    mdl <- readRDS(paste0(dFolder, "models/", model, "/", house, "_validated_model.rds"))
-    pdf(file=paste0(pFolder, model, "/", house, "_residual_acv.pdf"))
+    mdl <- readRDS(paste0(dFolder, "models/", model, "/", 
+                          house, "_validated_model.rds"))
+    pdf(file=paste0(pFolder, model, "/", 
+                    house, "_residual_acv.pdf"))
     q <- forecast::Acf(mdl$residuals, lag.max = 48*7*2, # 2 weeks
                        type = "correlation",
                        na.action = na.pass, 
                        main = "")
-    #  save.image(file = paste0(pFolder, model, "/", house, "_residual_acv.png"))
-    dev.off()
+    # save.image(file = paste0(pFolder, model, "/", 
+    #                         house, "_residual_acv.png"))
+    # dev.off()
     w <- as.data.table(mdl$x)
     if(ncol(w) == 1){
       w$index <- mdl$hHour
@@ -129,7 +150,8 @@ for (model in models){
     ifelse(house == houses[1], 
            avResDF <- e, 
            avResDF <- left_join(avResDF, e))
-    saveRDS(avResDF, file = paste0(dFolder,"models/", model, "/dailyResiduals.rds"))
+    saveRDS(avResDF, file = paste0(dFolder,"models/", 
+                                   model, "/dailyResiduals.rds"))
   }
 
   plotResDF <- melt(avResDF, id = "dHour")
@@ -138,19 +160,24 @@ for (model in models){
   yMax <- max(plotResDF$value, na.rm = TRUE)
 
   
-  p <- ggplot(plotResDF, aes(x = dHour, y = value, colour = variable)) +
-    geom_line() 
-  p <- p + labs(x = "Hour", y = "Residual", 
-         colour = "Household")
+  p <- ggplot(plotResDF, aes(x = dHour, y = value)) +
+    geom_line() +
+    scale_x_continuous(breaks = seq(0, 24, 4)) +
+    facet_wrap(.~variable, ncol = 3)
+  p <- p + labs(x = "Hour of day", y = "Residual")
   p <- addPeaks(p)
   
-  ggsave(paste0(pFolder, model, "/allHousesResidual.pdf"))
-  ggsave(paste0(pFolder, model, "/allHousesResidual.png"))
+  ggsave(paste0(pFolder, model, "/allHousesResidual.pdf"), 
+         width = 210, height = 260, units = "mm")
+  ggsave(paste0(pFolder, model, "/allHousesResidual.png"), 
+         width = 210, height = 260, units = "mm")
   
-  
-  p <- ggplot(plotResDF, aes(x = dHour, y = value, group = variable)) +
+
+  p <- ggplot(plotResDF, aes(x = dHour, 
+                             y = value, 
+                             group = variable)) +
     geom_boxplot() 
-  p <- p + labs(x = "Hour", y = "Residual")
+  p <- p + labs(x = "Hour of day", y = "Residual")
   p <- addPeaks(p)
   ggsave(paste0(pFolder, model, "/allHousesResidualBoxplot.pdf"))
   ggsave(paste0(pFolder, model, "/allHousesResidualBoxplot.png"))

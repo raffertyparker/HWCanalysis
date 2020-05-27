@@ -1,5 +1,6 @@
-# This creates the acv plots
-###############################################
+#####################################################
+# This creates the acv plots for preliminary analysis
+#####################################################
 
 if (!exists("pFolder")){
   pFolder <- "~/HWCanalysis/plots/"
@@ -41,14 +42,15 @@ p <- ggplot(acvDT, aes(x=lag, y=value))+
   geom_line() + 
   facet_wrap(~household, ncol = 3) +
   scale_y_continuous(limits = c(-0.1,0.3)) +
-  scale_x_continuous(breaks = seq(1:10))# +
-#  coord_cartesian(xlim = c(0,10))
+  scale_x_continuous(breaks = seq(1:10))
 p + labs(x = "Lag (days)", y = "Autocovariance")
 ggsave(filename = paste0(pFolder, "acfAllHouses.pdf"), width = 210, height = 260, units = "mm")
 ggsave(filename = paste0(pFolder, "acfAllHouses.png"), width = 210, height = 260, units = "mm")
 
-# lag > 1/48 selected to remove acv = 1 effect at lag = 0 and corresponding effect on plot
+# lag > 1/48 selected to remove acv = 1 effect at lag = 0 
+# and corresponding effect on plot
 # can be gotten around by specifying y_lims as in the previous figure
+
 ggplot(acvDT[lag > (1/48)], aes(lag,value,colour=household)) +
        geom_line() + 
   labs(x = "Lag (minutes)", y = "Autocovariance", 

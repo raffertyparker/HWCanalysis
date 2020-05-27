@@ -3,15 +3,16 @@ author: 'Rafferty J. W. Parker'
 date: 'April 2020'
 institution: 'The University of Otago'
 division: 'Science'
-advisor: 'Dr. Michael W. Jack'
+advisor: 'Associate Professor Michael Jack'
 #altadvisor: 'Your Other Advisor'
-#department: 'Physics'
+department: 'Physics'
 degree: 'Master of Science'
-title: 'A comparative study of electricity demand forecasting models for residential hot water at the individual household level'
+title: 'A Comparative Study of Electricity Demand Forecasting Models for Residential Hot Water at the Individual Household Level'
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 output: 
   thesisdown::thesis_pdf: default
+#  keep_tex: yes
 #  thesisdown::thesis_gitbook: default
 #  thesisdown::thesis_word: default
 #  thesisdown::thesis_epub: default
@@ -22,12 +23,12 @@ abstract: |
 # If you'd rather include the preliminary content in files instead of inline
 # like below, use a command like that for the abstract above.  Note that a tab is 
 # needed on the line after the `|`.
-acknowledgements: |
-  I want to thank a few people.
+#acknowledgements: |
+#
 #dedication: |
 #  You can have a dedication here if you wish. 
-preface: |
-  This is where the preface goes
+#preface: |
+#  This is where the preface goes
 # Specify the location of the bibliography below
 bibliography: bib/thesis.bib
 # Download your specific csl file and refer to it in the line below.

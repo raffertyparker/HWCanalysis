@@ -1,4 +1,8 @@
+############################################################
 # This creates a linear regression plot for a selected house
+# used for preliminary analysis of covariance relationship
+############################################################
+
 if (!exists("dFolder")){
   dFolder <- "~/HWCanalysis/data/" 
 }

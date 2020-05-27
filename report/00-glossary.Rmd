@@ -1,0 +1,49 @@
+# Glossary {-}
+
+AIC:
+:  Akaike Information Criterion
+
+ANN:
+:  Artificial neural network
+
+Backshift operator:
+:  Shifts value to a previous one in the series, see Equation \@ref(eq:BSO) 
+
+CPD:
+: Congestion period demand
+
+DHW:
+:  Domestic hot water
+
+EDB:
+:  Electricity distribution business
+
+
+Deferrable load: 
+:  Appliances that may have their electricity demand shifted in time with little impact to the end user
+
+HWC:
+: Hot water cylinder
+
+
+PEI:
+:  Percentage error increase during peak periods, see Equation \@ref(eq:PEI)
+
+Residual:
+:  Error in the model prediction, $\hat x_t - x_t$
+
+Resolution:
+:  Interval between measurements in a time series
+
+RMSE:
+:  Accuracy metric, "root mean squared error", see Equation \@ref(eq:RMSE)
+
+RSS:
+:  Residual sum of squares, see Equation \@ref(eq:RSS)
+
+SVM:
+:  Support vector machine
+
+White noise:
+:  A set of independent and identically distributed variables with an expected value of zero
+

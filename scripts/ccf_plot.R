@@ -51,6 +51,10 @@ ggplot(maxCor, aes(x = lag,fill=household)) +
   labs(x = "Lag (minutes)", y = "Count", fill = "")
 ggsave(paste0(pFolder, "maxXcorAllHouses.pdf"))
 
+patternbar(data = maxCor, 
+           x = lag, 
+           group = variable)
+
 
 ccvDT$lag <- ccvDT$lag/60
 # This could do with being edited to feed variables into a function

@@ -1,24 +1,21 @@
 ################## TO DO ##################
 
 General:
-Answer the question: how much extra could be obtained for DR using this system?
 Fix title page 
 - include logo etc
 - no need to 'approve for division'
-- no preface necessasry
+- no preface necessary
 Fix plots so it prints ok
 Include nomenclature at beginning (after list of tables?)
-Make sure every chapter has an intro and summary
-- where are we up to? 
-- where are we going next?
 
-Intro: 
-Mention other countries eg SA 
+Intro:
+Elaborate on why the metrics were chosen
 
 Lit review:
 Expand on demand forecasting
 How good are the existing models and what are they used for?
 With existing research in mind, why is mine worthwhile?
+MJ not sure about point of last two paragraphs in Sec 2.1
 
 Methodology:
 Create illustrative examples to justify increase of model complexity
@@ -26,29 +23,18 @@ Introduce residual analysis
 Make a flow chart of data processing sequence
 Draw family tree/landscape of models, indicate if they have been used for elec data and which I have decided to use
 Elaborate on the process of sorting through existing work to choose the models I have chosen
+Fig 3.5: Elec demand of hw and other app over one day - change colour to b/w with dashed lines
 
 Results:
-Get to the bottom of the SARIMA failure
 Make sure boxplot caption is displayed
-Include residual analysis
--Plot ACV of model residuals to check that seasonality is being accounted for
--Join individual plots with grid.arrange
 
 Discussion:
-Estimate potential benefits to NZ
--Use article that ascertains how many cylinders nec for X MW
--Use this to make estimate of value for each DR market
+Address energy efficiency and fidelity of HWC simulations
 Tie different models to literature
-Discuss aggregation
 include plots/averages/twodayXX.png to show why seasonalnaive no good
-Provide overview of the how the results of this research can be incorporated into a SC system
-
-Appendix:
-Include code (data processing and modelling)
-Include combined ACV plots
+bring back to 'so what'
 
 Possible (low priority):
-Remove references to causal modelling. Just call them regression models
 Combine the metrics "interpretability" and "physical fidelity" into one metric called "suitability for demand simulations" or similar
 Look at variance etc of dfSummary
 modelling.R would be better separated into individual functions that are called on as opposed to one huge page worth
