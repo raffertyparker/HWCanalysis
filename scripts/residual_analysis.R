@@ -64,7 +64,7 @@ addPeaks <- function(p){
 models <- c("naive","seasonalNaive","simpleLinear", 
             "ARIMA", "ARIMAX","STLARIMA", "STLARIMAX", "SVM")
 #house <- "rf_06"
-#model <- "STLARIMAX"
+#model <- "seasonalNaive"
 ###################################################################
 # Combined ACV plots
 

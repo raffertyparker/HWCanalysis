@@ -1,11 +1,19 @@
 # This is where we define paths to appropriate folders
 
-# path to scripts folder
-sFolder <- "~/HWCanalysis/scripts/"
+# Determine which computer is being used
+sysname <- Sys.info()[[1]]
+login <- Sys.info()[[6]]
+user <- Sys.info()[[7]]
 
-# path to data folder
-dFolder <- "~/HWCanalysis/data/" 
-
-# path to plot folder
-pFolder <- "/home/parra358/HWCanalysis/plots/"  # (laTeX did not like '~' notation: if knitting fails change this accordingly)
-#pFolder <- "~/HWCanalysis/plots/" 
+if (sysname == "Windows" & login == 'ParkerR') { # Windows machine
+  # path to scripts folder
+  sFolder <- "C:/Users/ParkerR/HWCanalysis/scripts/"
+  # path to data folder
+  dFolder <- "C:/Users/ParkerR/HWCanalysis/data/" 
+  # path to plot folder
+  pFolder <- "C:/Users/ParkerR/HWCanalysis/plots/"
+} else { # Linux machine
+  sFolder <- "~/HWCanalysis/scripts/"
+  dFolder <- "~/HWCanalysis/data/"
+  pFolder <- "/home/parra358/HWCanalysis/plots/" # (laTeX did not like '~' notation)
+}

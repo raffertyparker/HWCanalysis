@@ -31,7 +31,8 @@ maxCor <- maxCor[, c(2,1,3)]
 ```{r ccvMaxLagTable, echo=FALSE}
 maxCor %>%
   knitr::kable(col.names =  c("Household", "Lag", "Cross covariance"),
-        caption = "Lag time and correlation value at point of maximum crosscovariance")
+        caption = "Lag time and correlation value at point of maximum crosscovariance",
+        longtable = TRUE)
 ```
 
 ## Modelling parameters

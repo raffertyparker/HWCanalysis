@@ -12,7 +12,7 @@ knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 output: 
   thesisdown::thesis_pdf: default
-#  keep_tex: yes
+  keep_tex: yes
 #  thesisdown::thesis_gitbook: default
 #  thesisdown::thesis_word: default
 #  thesisdown::thesis_epub: default
@@ -38,6 +38,9 @@ lof: true
 # If you prefer blank lines between paragraphs, un-silence lines  40-41 (this requires package tikz)
 #header-includes:
 #- \usepackage{tikz}
+
+# remove red border around links
+
 ---
 
 <!--

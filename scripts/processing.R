@@ -30,11 +30,13 @@ library(ggplot2)
 
 # Set path to where we are keeping data
 if (!exists("dFolder")){
-  dFolder <- "~/HWCanalysis/data/" 
+  filepathsPath <- dirname(getwd())
+  #filepathsPath <- getwd()
+  source(paste0(filepathsPath, "/filepaths.R"))
 }
-if (!exists("pFolder")){
-  pFolder <- "~/HWCanalysis/plots/" 
-}
+# if (!exists("pFolder")){
+#   pFolder <- "~/HWCanalysis/plots/" 
+# }
 
 theme_set(theme_minimal())
 
@@ -323,6 +325,14 @@ meansDT <- DT_hh %>%
   summarise_each(funs = mean)
 
 save(meansDT, file = paste0(dFolder, "meansDT.Rda"))
+
+# This creates a table of median power values of each house
+medianDT <- DT_hh %>%
+  group_by(linkID) %>%
+  select(c(HWelec, nonHWelec)) %>%
+  summarise_each(funs = median)
+
+write_csv(medianDT, paste0(dFolder, "medianDT.csv"))
 
 # This saves the hh data head for quick loading from the report
 DThead <- as.data.table(head(DT_hh))
