@@ -1,13 +1,14 @@
 # Discussion {#Discussion}
 
-The aim of this research was to use existing individual household electricity demand data to develop a method of predicting household level hot water electricity demand that is sufficiently accurate, physically meaningful, interpretable, and quick to compute.
-The ultimate purpose of this prediction method is to assist smart control objectives. In particular, demand predicting models may be used to improve demand response capacity, energy efficiency, and fidelity of hot water cylinder simulations.
+The aim of this research was to compare methods of predicting household level hot water electricity demand using existing individual household electricity demand data.
+The ultimate purpose of household level hot water electricity demand prediction is to assist smart control objectives. 
+In particular, demand predicting models may be used to improve demand response capacity, energy efficiency, and fidelity of hot water cylinder simulations.
 This chapter provides commentary on results presented in Chapter \@ref(results), in particular their performance against the metrics presented in Section \@ref(metrics). Implications on the broader objectives introduced in Chapter \@ref(Intro) are also presented, with a brief overview of how smart control with demand predictions may be incorporated into New Zealand's electricity grid.
 
 ## Interpretations
 
 In general, the most accurate model considered was SVMs (described in Section \@ref(SVMmeth), results presented in Section \@ref(SVMres)). 
-This wasn't surprising, as the suitability of SVMs for electricity demand forecasting was already noted in existing literature[@Kaytez2015; @Massana2015], and was a large reason why they were selected as the comparative AI method.
+This wasn't surprising, as the suitability of SVMs for electricity demand forecasting was already noted in existing literature [@Kaytez2015; @Massana2015], and was a large reason why they were selected as the comparative AI method.
 However, during peak times of day the SVM was outperformed in accuracy by models that incorporate STL decomposition.
 SVMs would therefore be recommended in a situation where accuracy of prediction during non-peak periods is the highest consideration.
 The SVM model also closely resembles the physical process, providing the most realistic 'looking' predictions of all (non-naive) models considered.
@@ -17,12 +18,12 @@ While `r round(DFsummary$fittingTime[DFsummary$model == "SVM"], 0)`s doesn't see
 In addition, this model is has very low interpretability, and therefore would not be of much use in gaining deeper insights into behavioural patterns around domestic hot water use.
 
 The inclusion of lagged values of other appliance electricity demand as a regressor to improve predictions of hot water electricity demand appears to be unique to this thesis, and may be considered an integral result.
-While linear regression of lagged values of other appliances was a relatively ineffective predictive model on its own (refer to Section \@ref(SLRres)), it provided an accuracy boost to models that were already relatively accurate, such as the STL + ARIMA model (described in Section \@ref(STLARIMAmeth), results presented in Section \@ref(STLARIMAres)) which was highly regarded in Ref. [@Gelazanskas2015].
+While linear regression of lagged values of other appliances was a relatively ineffective forecasting model on its own (refer to Section \@ref(SLRres)), it provided an accuracy boost to models that were already relatively accurate, such as the STL + ARIMA model (described in Section \@ref(STLARIMAmeth), results presented in Section \@ref(STLARIMAres)) which was highly regarded in [@Gelazanskas2015].
 The STL + ARIMAX (described in Section \@ref(STLARIMAXmeth), results presented in Section \@ref(STLARIMAXres)) built upon the STL + ARIMA model by adding lagged values of other appliance electricity demand as an external regressor. 
 This addition provided it with accuracy almost rivalling SVMs, and surpassing SVMs during peak periods. 
 In terms of additional accuracy improvements over the STL + ARIMA model, the external regressor improves RMSE by `r round(DFsummary$RMSE[DFsummary$model == "STLARIMA"] - DFsummary$RMSE[DFsummary$model == "STLARIMAX"], 1)`W on average, and by `r round(DFsummary$peakRMSE[DFsummary$model == "STLARIMA"] - DFsummary$peakRMSE[DFsummary$model == "STLARIMAX"], 1)`W during grid peaks.
 While the STL + ARIMAX had the slowest average computational speed of the conventional models, it was still vastly quicker than that of the SVM.
-The STL + ARIMAX model has many parameters, and their interpretation would require decent familiarity with the model. 
+The STL + ARIMAX model has many parameters, and their interpretation would require high familiarity with the model. 
 This model would provide insights into underlying behavioural properties if properly interpreted, however simpler models would be better suited for this purpose.
 Where the STL + ARIMAX model really falls short is in its physical fidelity.
 Many values are predicted that are impossible for the element to achieve, and the model has a notably different shape to the underlying data.
@@ -36,7 +37,7 @@ While the physical fidelity of ARIMA based models decrease with increasing model
 ## Recommendations
 
 While an 'all-purpose' model that scores highly in all metrics was not discovered, our results provide guidelines to choosing a suitable model for residential hot water electricity demand. 
-The STL + ARIMAX model provided comparatively accurate predictions during peak periods, while remaining reasonably fast to compute, and thus would be the recommended model for most predictive purposes.
+The STL + ARIMAX model provided comparatively accurate predictions during peak periods, while remaining reasonably fast to compute, and thus would be the recommended model for most forecasting purposes.
 To the best of our knowledge this model has not been used within existing literature for electricity demand forecasting.
 The SVM provides slightly more accurate predictions outside of peak periods at the cost of significantly slower model fitting.
 When determining statistical properties of data for simulating demand or other research purposes, it would likely be best to utilise parameters from STL and ARIMA models separately, along with results from our preliminary data analysis in Chapter \@ref(prelimDA). 
@@ -46,7 +47,7 @@ When determining statistical properties of data for simulating demand or other r
 Smart control of hot water cylinders has the ability to facilitate a number of benefits within an electricity network.
 By better matching demand to meet supply, we may reduce or defer grid infrastructure expenditure.
 By heating the tank when electricity spot prices are comparatively low, arbitrage profits are realisable.
-An aggregate of hot water cylinders under smart control may bid to sell their sheddable demand in instantaneous response markets, or be remunerated for shedding load during congestion periods. Finally, energy efficiency of the cylinder itself can be increased.
+An aggregate of hot water cylinders under smart control may bid to sell their interruptible load in instantaneous response markets, or be remunerated for shedding load during congestion periods. Finally, energy efficiency of the cylinder itself can be increased.
 
 Distribution of electricity in New Zealand can be thought of as a stream, running from generators at the top, through the systems operator, then EDBs, retailers, and finally the end consumer. To borrow an economics term, we refer to these separate entities as grid 'actors'.
 Technically, through the use of a separately metered hot water cylinder on a smart meter, any one of these actors could perform smart control.
@@ -63,7 +64,7 @@ Electricity distribution businesses (EDBs), retailers and residential consumers 
 A controller positioned within the residential household could provide energy efficiency gains and, if the household was exposed to spot pricing, electricity price arbitrage. However, one cylinder element could not offer enough demand shifting capacity to participate in IR markets, and residential consumers are not currently offered the ability to directly benefit from load reduction during congestion periods.
 Through controlling an aggregation of hot water cylinders, retailers have the ability to participate in all three markets, spot, IR, and CPD, however they would not directly benefit from better matching demand to supply, or increasing energy efficiency of the cylinder.
 
-Finally, we consider the EDBs. EDBs are not exposed to spot market prices, and cannot benefit from spot price arbitrage. However, if they were controlling an aggregate of hot water cylinders, they would have the ability to directly profit from all other smart control benefits. Bids for sheddable load may be submitted into IR markets.
+Finally, we consider the EDBs. EDBs are not exposed to spot market prices, and cannot benefit from spot price arbitrage. However, if they were controlling an aggregate of hot water cylinders, they would have the ability to directly profit from all other smart control benefits. Bids for interruptible load may be submitted into IR markets.
 Reducing CPD and increasing the energy efficiency of thousands of hot water cylinders within their network are considered direct benefits as at EDB level they would reduce and/or defer capital expenditure within the network.
 
 Table \@ref(tab:actorsBenefitsT) provides an overview of the benefits of smart control, and who may realise each of them.
@@ -72,7 +73,7 @@ Table \@ref(tab:actorsBenefitsT) provides an overview of the benefits of smart c
 library(dplyr)
 df1 <- tibble::tibble(Benefits = c("Grid efficiency", "Spot price arbitrage", 
                            "IR markets", "CPD response", "Energy efficiency"),
-                  Generators = c("False", "Depends", "False", "False", "False"), 
+                  Generators = c("False", "Uncertain", "False", "False", "False"), 
                   Systems_operator = c("True", "False", "False", "False", "False"),
                   EDBs = c("True", "False", "True","True","True"),
                   Retailers = c("False", "True","True","True","False"),
@@ -94,16 +95,18 @@ pander(df1, keep.line.breaks = TRUE,
 # kable_styling() 
 ```
 
+In addition to realising the most benefits, EDBs have advantages when physically establishing a smart control system. As most EDBs have already been controlling hot water cylinders through ripple control, they may have existing infrastructure they can repurpose for smart control.
+
 ## Applying demand forecasting to smart control {#implimentation}
 
 This section provides a brief overview of how this research may be incorporated into a smart control system using technologies currently in existence in New Zealand.
-In the context of aggregating sheddable demand to monetise demand shifting potential, the entity who performs the data aggregation and control is referred to as the 'aggregator'.
+In the context of aggregating interruptible load to monetise demand shifting potential, the entity who performs the data aggregation and control is referred to as the 'aggregator'.
 We thus use this terminology for the remainder of the discussion.
 First, it must be noted that to maximise demand-shifting capabilities while minimising negative impacts on service, predictions of the electricity demand of the hot water cylinder is not sufficient. What is necessary is an accurate prediction of whether there will be sufficient hot water in the tank to cover demand.
 A simple physical model would have the ability of estimating and forecasting the volume of hot water in each tank, using assumptions about the tank size and water temperature along with measured and forecasted hot water electricity demand.
 It is for this reason that much emphasis has been given to the ability of prediction models to be incorporated into physical models.
 
-The smart control system envisaged in this thesis is demonstrated schematically in Figure \@ref(fig:controlSystem).
+The smart control system envisaged in this thesis is shown schematically in Fig. \@ref(fig:controlSystem).
 For the system we propose, the smart meter from each household in the system would send the aggregator household level demand data, both from the separately metered hot water cylinder, and from other appliances. 
 A forecasting model (such as the STL + ARIMAX developed in this thesis) would be used in order to predict future hot water electricity demand. This would be sent to a simple physical model, that estimates the volume of hot water in the cylinder based on historical electricity demand, and predicts what the future volume would be if electricity to the element was suppressed over the next half hour.
 If the future predicted hot water volume under this half-hour element suppression approaches zero, the HWC is left alone to operate without control.
@@ -120,15 +123,15 @@ knitr::include_graphics(paste0(pFolder, "control_system.pdf"))
 ## Financial value
 
 Under current New Zealand electricity market structures, a rough estimate can be made of overall income/savings available from this system.
-Drawing on prior research of the economic potential of heating domestic hot water cylinders only during prescribed times of day[@Dortans2018], annual savings around \$40 per household per year are gained from spot price arbitrage, and an additional \$75 per household per year in reduced congestion period (CPD) charges.
-Prior research undertaken as part of a PGDipSci dissertation[@Parker2019] indicated that the economic potential for hot water cylinders participating in New Zealand's fast instantaneous response market is approximately \$9 annually per household. This only assumes participation half of the time in alternating 15 minute periods.
+Drawing on prior research of the economic potential of heating domestic hot water cylinders only during prescribed times of day [@Dortans2018], annual savings around \$40 per household per year are gained from spot price arbitrage, and an additional \$75 per household per year in reduced congestion period (CPD) charges.
+Prior research undertaken as part of a PGDipSci dissertation [@Parker2019] indicated that the economic potential for hot water cylinders participating in New Zealand's fast instantaneous response market is approximately \$9 annually per household. This only assumes participation half of the time in alternating 15 minute periods.
 Taking the estimate of \$40 from spot price arbitrage, \$75 from CPD reduction, and \$9 from the FIR market, we get an annual value of approximately \$124 for each household. 
 As far as we are aware, no research has been done regarding the economic potential of hot water cylinders participating in New Zealand's sustained instantaneous reserves markets, so we exclude this from the analysis. 
-This analysis also does not include cost savings due to increased energy efficiency, which we may expect to be approximately 12% based on existing literature[@Kepplinger2015; @Denis2019].
-Additional value could also be obtained for households with solar PV by incorporating solar data in the control algorithm to maximise solar self consumption.
+This analysis also does not include cost savings due to increased energy efficiency, which we may expect to be approximately 12% based on existing literature [@Kepplinger2015; @Denis2019].
+Additional value could also be obtained for households with solar PV by incorporating solar data in the control algorithm to maximise solar self-consumption.
 
 This research was conducted under the assumption that a more economically efficient electricity grid suppresses the price of electricity, which in turn accelerates electrification of high-carbon industries.
-While not explicitly discussed in this research, reductions in carbon dioxide could be achieved more directly by smart control which optimises use of renewable energy sources. Data relating to availability of renewable sources can be included as "other relevant control data" in the control system outlined in Figure \@ref(fig:controlSystem).
+While not explicitly discussed in this research, reductions in carbon dioxide could be achieved more directly by smart control which optimises use of renewable energy sources. Data relating to availability of renewable sources can be included as "other relevant control data" in the control system outlined in Fig. \@ref(fig:controlSystem).
 
 <!--
 ```{r HWPower, out.width='100%', fig.cap="Average hot water electricity demand and standard deviation for 24 households"}
